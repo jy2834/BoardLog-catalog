@@ -1,0 +1,2 @@
+-- Production admin membership is added out-of-band after the real Auth user exists.
+-- Do not commit an admin email, UUID, password, access token, or service-role key.

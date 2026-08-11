@@ -1,0 +1,14 @@
+{
+  "name": "boardlog-public-catalog",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Reviewed public catalog and moderation backend for BoardLog",
+  "scripts": {
+    "supabase": "supabase",
+    "db:status": "supabase migration list --linked --agent no",
+    "db:test:linked": "supabase db query --linked --file supabase/tests/public_catalog_rls.test.sql --output-format json --agent no"
+  },
+  "devDependencies": {
+    "supabase": "2.113.0"
+  }
+}

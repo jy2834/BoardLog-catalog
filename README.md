@@ -37,3 +37,39 @@ python3 scripts/validate_catalog.py \
 저장소의 검증 코드와 스키마는 MIT License입니다. 제3자 게임명, 상표, 설명, 메타데이터와 커버 이미지는 각각의 권리자·원출처 조건을 따르며 MIT License로 재허가되지 않습니다. 공개 이미지는 관리자 검수와 출처 확인을 통과한 항목만 추가합니다.
 
 일반 사용자의 제출은 곧바로 공개되지 않습니다. Supabase의 비공개 검수 대기열과 관리자 승인을 거친 뒤 별도 exporter가 이 저장소를 갱신합니다.
+
+## Supabase 검수 서버
+
+무료 Supabase 프로젝트 `BoardLog-catalog`에 검수 대기열이 구성되어 있습니다.
+
+- 리전: Seoul (`ap-northeast-2`)
+- 프로젝트 대시보드: <https://supabase.com/dashboard/project/xlinubftvqaxpwrtowvk>
+- 제출 원본과 이미지는 비공개이며 승인된 공개 필드만 `approved_catalog_games`에서 조회됩니다.
+- 이미지는 비공개 `submission-images` 버킷에 저장하며 JPEG/WebP, 파일당 2 MiB로 제한합니다.
+- 사용자는 24시간당 최대 3건을 제출할 수 있습니다.
+- 서버 상태는 `NORMAL`, `IMAGE_LIMITED`, `SUBMISSION_CLOSED`, `MAINTENANCE`로 구분합니다.
+
+현재 DB 마이그레이션과 RLS 검증은 원격 프로젝트에 적용되었습니다. 익명 로그인 원격 활성화는 보안 경계 변경 승인을 받은 뒤 `config push`로 반영해야 합니다. Edge Function, Android 제출 UI, 관리자 exporter는 다음 구현 단계입니다.
+
+### 개발 환경 재현
+
+Node.js와 npm만 설치한 뒤 저장소 루트에서 실행합니다. Supabase CLI 버전은 `package-lock.json`으로 고정되어 있으며 전역 설치가 필요하지 않습니다.
+
+```bash
+npm ci
+npx supabase login
+npx supabase link --project-ref xlinubftvqaxpwrtowvk
+npx supabase migration list --linked --agent no
+npx supabase db push --linked --agent no
+npm run db:test:linked
+```
+
+마지막 명령은 Docker 없이 Management API를 통해 원격 DB에서 16개 pgTAP 검증을 실행합니다. 하나라도 실패하면 SQL 예외로 명령 자체가 실패합니다. Docker가 준비된 환경에서는 `npx supabase test db --linked supabase/tests/public_catalog_rls.test.sql --agent no`도 사용할 수 있습니다.
+
+익명 로그인을 포함한 `supabase/config.toml`을 원격에 반영하는 명령은 다음과 같습니다. 이 명령은 인증 보안 경계를 변경하므로 운영자가 변경 내용을 검토하고 명시적으로 승인한 경우에만 실행합니다.
+
+```bash
+npx supabase config push --project-ref xlinubftvqaxpwrtowvk --agent no
+```
+
+DB 비밀번호, access token, anon/service-role 키, 관리자 UUID·이메일은 Git에 저장하지 않습니다. 운영 관리자는 실제 Auth 계정을 만든 뒤 `admin_users`에 별도로 등록합니다.
