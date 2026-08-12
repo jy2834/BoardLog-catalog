@@ -51,7 +51,7 @@ python3 scripts/validate_catalog.py \
 - 사용자는 24시간당 최대 3건을 제출할 수 있습니다.
 - 서버 상태는 `NORMAL`, `IMAGE_LIMITED`, `SUBMISSION_CLOSED`, `MAINTENANCE`로 구분합니다.
 
-기존 `202608120001`~`202608120005` DB 마이그레이션과 RLS 검증은 원격 프로젝트에 적용되었습니다. 제출자 Realtime 상태 조회를 위한 `202608120006` 후속 마이그레이션은 소스 검증만 끝났으며 원격 적용 전 운영 승인이 필요합니다. 익명 로그인 원격 활성화도 보안 경계 변경 승인을 받은 뒤 `config push`로 반영해야 합니다. Edge Function 코드는 로컬 검증이 끝났고 원격 배포 승인을 기다리며, Android 제출 UI와 관리자 exporter는 다음 구현 단계입니다.
+`202608120001`~`202608120006` DB 마이그레이션이 원격 프로젝트에 적용되었습니다. 제출자 Realtime은 원본 제출 테이블이 아니라 소유자별 불투명 변경 신호만 사용합니다. 익명 로그인과 `submit-game` Edge Function, Turnstile 운영 위젯이 활성화되어 있고 Android 제출·본인 상태 조회 UI도 연결되어 있습니다. 관리자 exporter와 검수 웹 화면은 다음 구현 단계입니다.
 
 ### 제출 Edge Function
 
@@ -65,19 +65,18 @@ npm run test:functions:deno
 npm run check:functions
 ```
 
-`catalog/captcha.html`은 GitHub Pages에서 Turnstile 토큰만 Android의 `BoardLogTurnstile` 브리지로 돌려주는 최소 페이지입니다. 실제 배포 전 다음 두 값이 필요합니다.
+`catalog/captcha.html`은 GitHub Pages에서 Turnstile 토큰만 Android의 `BoardLogTurnstile` 브리지로 돌려주는 최소 페이지입니다. 운영 위젯은 `jy2834.github.io` 호스트로 제한되어 있습니다.
 
-1. `captcha.html`의 `BOARDLOG_TURNSTILE_SITE_KEY`를 Cloudflare에서 발급한 공개 site key로 교체
-2. 같은 위젯의 비공개 secret을 `npx supabase secrets set TURNSTILE_SECRET_KEY=...`로 등록
+1. 공개 site key만 `captcha.html`에 포함합니다.
+2. 비공개 secret은 Supabase의 `TURNSTILE_SECRET_KEY` 비밀 저장소에만 둡니다.
 
 Cloudflare의 테스트 키를 운영에 사용하지 않습니다. secret은 Git과 Android/Web 번들에 절대 넣지 않습니다.
 
-플랫폼 JWT 사전 검증은 CORS preflight와 일관된 JSON 오류를 위해 함수 단위로 끄고, 함수 안에서 bearer를 다시 검증하도록 설계되어 있습니다. 따라서 다음 원격 배포 명령은 이 보안 경계를 이해하고 명시적으로 승인한 뒤에만 실행합니다.
+플랫폼 JWT 사전 검증을 켠 상태로 두고, 함수 안에서도 `auth.getUser`로 bearer를 다시 확인합니다. Android는 공개 publishable key와 익명 사용자 JWT를 함께 보냅니다. 배포 명령은 다음과 같습니다.
 
 ```bash
 npx supabase functions deploy submit-game \
   --project-ref xlinubftvqaxpwrtowvk \
-  --no-verify-jwt \
   --use-api \
   --agent no
 ```
@@ -97,7 +96,7 @@ npm run db:test:linked
 
 마지막 명령은 Docker 없이 Management API를 통해 원격 DB에서 44개 pgTAP 검증을 실행합니다. 하나라도 실패하면 SQL 예외로 명령 자체가 실패합니다. Docker가 준비된 환경에서는 `npx supabase test db --linked supabase/tests/public_catalog_rls.test.sql --agent no`도 사용할 수 있습니다.
 
-익명 로그인을 포함한 `supabase/config.toml`을 원격에 반영하는 명령은 다음과 같습니다. 이 명령은 인증 보안 경계를 변경하므로 운영자가 변경 내용을 검토하고 명시적으로 승인한 경우에만 실행합니다.
+익명 로그인은 2026-08-12에 대시보드의 `Authentication → Sign In / Providers → Allow anonymous sign-ins` 항목만 활성화했습니다. 전체 로컬 설정을 덮어쓸 필요가 있을 때만 아래 명령을 사용하며, 실행 전 변경 내용을 검토합니다.
 
 ```bash
 npx supabase config push --project-ref xlinubftvqaxpwrtowvk --agent no
