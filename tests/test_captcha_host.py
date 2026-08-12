@@ -17,7 +17,11 @@ class CaptchaHostContractTest(unittest.TestCase):
     def test_loads_turnstile_from_cloudflare_with_an_explicit_action(self):
         self.assertIn("https://challenges.cloudflare.com/turnstile/v0/api.js", self.html)
         self.assertIn('action: "boardlog_submit"', self.js)
-        self.assertIn("BOARDLOG_TURNSTILE_SITE_KEY", self.html)
+        self.assertNotIn("BOARDLOG_TURNSTILE_SITE_KEY", self.html)
+        self.assertRegex(
+            self.html,
+            r'<meta name="boardlog-turnstile-site-key" content="[A-Za-z0-9_-]{20,}">',
+        )
 
     def test_only_sends_the_short_lived_challenge_result_to_android(self):
         self.assertIn("BoardLogTurnstile", self.js)

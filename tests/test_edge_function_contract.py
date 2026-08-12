@@ -5,6 +5,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 INDEX = ROOT / "supabase" / "functions" / "submit-game" / "index.ts"
 HANDLER = ROOT / "supabase" / "functions" / "submit-game" / "handler.ts"
+CONFIG = ROOT / "supabase" / "config.toml"
 
 
 class EdgeFunctionContractTest(unittest.TestCase):
@@ -12,6 +13,11 @@ class EdgeFunctionContractTest(unittest.TestCase):
     def setUpClass(cls):
         cls.index = INDEX.read_text(encoding="utf-8")
         cls.handler = HANDLER.read_text(encoding="utf-8")
+        cls.config = CONFIG.read_text(encoding="utf-8")
+
+    def test_platform_jwt_verification_remains_enabled(self):
+        function_config = self.config.split("[functions.submit-game]", 1)[1].split("\n[", 1)[0]
+        self.assertIn("verify_jwt = true", function_config)
 
     def test_authenticates_user_bearer_before_using_edge_only_rpc(self):
         self.assertIn("authClient.auth.getUser(token)", self.index)

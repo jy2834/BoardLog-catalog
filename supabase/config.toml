@@ -384,9 +384,9 @@ deno_version = 2
 
 [functions.submit-game]
 enabled = true
-# The function validates the bearer token itself so OPTIONS can remain usable
-# and every auth failure receives the same bounded JSON response.
-verify_jwt = false
+# The platform validates the caller JWT before the function repeats user
+# verification and applies the owner-scoped database contract.
+verify_jwt = true
 entrypoint = "./functions/submit-game/index.ts"
 
 # [edge_runtime.secrets]
