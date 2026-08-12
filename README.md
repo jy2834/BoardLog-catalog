@@ -49,7 +49,36 @@ python3 scripts/validate_catalog.py \
 - 사용자는 24시간당 최대 3건을 제출할 수 있습니다.
 - 서버 상태는 `NORMAL`, `IMAGE_LIMITED`, `SUBMISSION_CLOSED`, `MAINTENANCE`로 구분합니다.
 
-현재 DB 마이그레이션과 RLS 검증은 원격 프로젝트에 적용되었습니다. 익명 로그인 원격 활성화는 보안 경계 변경 승인을 받은 뒤 `config push`로 반영해야 합니다. Edge Function, Android 제출 UI, 관리자 exporter는 다음 구현 단계입니다.
+현재 DB 마이그레이션과 RLS 검증은 원격 프로젝트에 적용되었습니다. 익명 로그인 원격 활성화는 보안 경계 변경 승인을 받은 뒤 `config push`로 반영해야 합니다. Edge Function 코드는 로컬 검증이 끝났고 원격 배포 승인을 기다리며, Android 제출 UI와 관리자 exporter는 다음 구현 단계입니다.
+
+### 제출 Edge Function
+
+`submit-game`은 `payload`, `turnstileToken`, 선택적 `cover`만 받는 multipart API입니다. JSON은 32 KiB, 전체 요청은 약 2.1 MiB, JPEG/WebP 커버는 2 MiB로 제한하며 확장자가 아닌 실제 magic bytes를 확인합니다. 비공개 필드, 알 수 없는 multipart 필드, 중복 필드, 잘못된 수치·태그·URL은 DB에 닿기 전에 거부됩니다.
+
+함수는 bearer 토큰을 `auth.getUser`로 직접 검증하고, 사용자의 RLS 클라이언트로만 비공개 Storage/RPC를 호출합니다. 이미지 업로드 뒤 DB 저장이 실패하면 즉시 삭제를 시도하며, 남은 고아 파일은 사용량 정리 작업이 재확인합니다. 요청 내용·인증 헤더·Turnstile 토큰은 로그에 남기지 않습니다.
+
+```bash
+npm run test:functions
+npm run test:functions:deno
+npm run check:functions
+```
+
+`catalog/captcha.html`은 GitHub Pages에서 Turnstile 토큰만 Android의 `BoardLogTurnstile` 브리지로 돌려주는 최소 페이지입니다. 실제 배포 전 다음 두 값이 필요합니다.
+
+1. `captcha.html`의 `BOARDLOG_TURNSTILE_SITE_KEY`를 Cloudflare에서 발급한 공개 site key로 교체
+2. 같은 위젯의 비공개 secret을 `npx supabase secrets set TURNSTILE_SECRET_KEY=...`로 등록
+
+Cloudflare의 테스트 키를 운영에 사용하지 않습니다. secret은 Git과 Android/Web 번들에 절대 넣지 않습니다.
+
+플랫폼 JWT 사전 검증은 CORS preflight와 일관된 JSON 오류를 위해 함수 단위로 끄고, 함수 안에서 bearer를 다시 검증하도록 설계되어 있습니다. 따라서 다음 원격 배포 명령은 이 보안 경계를 이해하고 명시적으로 승인한 뒤에만 실행합니다.
+
+```bash
+npx supabase functions deploy submit-game \
+  --project-ref xlinubftvqaxpwrtowvk \
+  --no-verify-jwt \
+  --use-api \
+  --agent no
+```
 
 ### 개발 환경 재현
 
@@ -64,7 +93,7 @@ npx supabase db push --linked --agent no
 npm run db:test:linked
 ```
 
-마지막 명령은 Docker 없이 Management API를 통해 원격 DB에서 16개 pgTAP 검증을 실행합니다. 하나라도 실패하면 SQL 예외로 명령 자체가 실패합니다. Docker가 준비된 환경에서는 `npx supabase test db --linked supabase/tests/public_catalog_rls.test.sql --agent no`도 사용할 수 있습니다.
+마지막 명령은 Docker 없이 Management API를 통해 원격 DB에서 19개 pgTAP 검증을 실행합니다. 하나라도 실패하면 SQL 예외로 명령 자체가 실패합니다. Docker가 준비된 환경에서는 `npx supabase test db --linked supabase/tests/public_catalog_rls.test.sql --agent no`도 사용할 수 있습니다.
 
 익명 로그인을 포함한 `supabase/config.toml`을 원격에 반영하는 명령은 다음과 같습니다. 이 명령은 인증 보안 경계를 변경하므로 운영자가 변경 내용을 검토하고 명시적으로 승인한 경우에만 실행합니다.
 

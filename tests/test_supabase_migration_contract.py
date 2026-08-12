@@ -6,6 +6,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 MIGRATION = ROOT / "supabase" / "migrations" / "202608120001_public_catalog.sql"
 HARDENING_MIGRATION = ROOT / "supabase" / "migrations" / "202608120002_harden_public_catalog.sql"
+EDGE_RPC_MIGRATION = ROOT / "supabase" / "migrations" / "202608120003_edge_submission_rpc.sql"
+EDGE_ONLY_MIGRATION = ROOT / "supabase" / "migrations" / "202608120004_require_edge_for_submission.sql"
+STORAGE_LOCKDOWN_MIGRATION = ROOT / "supabase" / "migrations" / "202608120005_lock_submission_storage.sql"
 RLS_TEST = ROOT / "supabase" / "tests" / "public_catalog_rls.test.sql"
 
 
@@ -14,7 +17,13 @@ class SupabaseMigrationContractTest(unittest.TestCase):
     def setUpClass(cls):
         cls.sql = MIGRATION.read_text(encoding="utf-8")
         cls.hardening_sql = HARDENING_MIGRATION.read_text(encoding="utf-8")
-        cls.effective_sql = cls.sql + "\n" + cls.hardening_sql
+        cls.edge_rpc_sql = EDGE_RPC_MIGRATION.read_text(encoding="utf-8")
+        cls.edge_only_sql = EDGE_ONLY_MIGRATION.read_text(encoding="utf-8")
+        cls.storage_lockdown_sql = STORAGE_LOCKDOWN_MIGRATION.read_text(encoding="utf-8")
+        cls.effective_sql = (
+            cls.sql + "\n" + cls.hardening_sql + "\n" + cls.edge_rpc_sql
+            + "\n" + cls.edge_only_sql + "\n" + cls.storage_lockdown_sql
+        )
         cls.rls_test = RLS_TEST.read_text(encoding="utf-8")
 
     def test_defines_required_types_tables_views_and_rpc(self):
@@ -68,6 +77,16 @@ class SupabaseMigrationContractTest(unittest.TestCase):
         self.assertIn("(storage.foldername(name))[1] = auth.uid()::text", self.sql)
         self.assertNotIn("public = true", self.sql.lower())
 
+    def test_authenticated_clients_cannot_upload_directly_to_submission_storage(self):
+        self.assertIn('drop policy if exists "owners upload submission images"', self.storage_lockdown_sql)
+        self.assertIn('drop policy if exists "owners read submission images"', self.storage_lockdown_sql)
+        self.assertIn('drop policy if exists "owners delete submission images"', self.storage_lockdown_sql)
+        self.assertNotRegex(
+            self.storage_lockdown_sql,
+            r"for\s+insert\s+to\s+authenticated",
+        )
+        self.assertIn("public.is_catalog_admin()", self.storage_lockdown_sql)
+
     def test_public_and_owner_views_do_not_expose_private_columns(self):
         owner_view = self.sql.split("create or replace view public.my_game_submissions", 1)[1].split(";", 1)[0]
         owner_projection = owner_view.split("from public.game_submissions", 1)[0]
@@ -81,6 +100,9 @@ class SupabaseMigrationContractTest(unittest.TestCase):
     def test_pgtap_covers_cross_user_admin_and_public_visibility(self):
         for phrase in (
             "another user cannot read the pending submission",
+            "authenticated clients cannot bypass Turnstile with direct submission RPC",
+            "authenticated clients cannot upload submission images outside the edge",
+            "edge can submit a privacy-safe game for an authenticated owner",
             "owner can read the submitter-safe status view",
             "non-admin cannot review a submission",
             "admin can approve a submission",
@@ -120,6 +142,33 @@ class SupabaseMigrationContractTest(unittest.TestCase):
         self.assertIn("create temporary table tap_results", self.rls_test)
         self.assertIn("result like 'not ok %'", self.rls_test)
         self.assertIn("raise exception 'pgTAP failures", self.rls_test)
+
+    def test_edge_rpc_accepts_a_preallocated_id_without_weakening_owner_checks(self):
+        for token in (
+            "submit_game_with_id",
+            "p_submission_id uuid",
+            "auth.uid()",
+            "auth.uid()::text || '/%'",
+            "daily submission limit reached",
+            "invalid public game payload",
+        ):
+            with self.subTest(token=token):
+                self.assertIn(token, self.edge_rpc_sql)
+        self.assertIn("revoke all on function public.submit_game_with_id", self.edge_rpc_sql)
+        self.assertIn("grant execute on function public.submit_game_with_id", self.edge_rpc_sql)
+
+    def test_submission_creation_requires_the_edge_service_role(self):
+        for signature in (
+            "public.submit_game(jsonb, text)",
+            "public.submit_game_with_id(uuid, jsonb, text)",
+        ):
+            with self.subTest(signature=signature):
+                self.assertIn(f"revoke execute on function {signature} from authenticated", self.edge_only_sql)
+        self.assertIn("submit_game_from_edge", self.edge_only_sql)
+        self.assertIn("p_owner_user_id uuid", self.edge_only_sql)
+        self.assertIn("grant execute on function public.submit_game_from_edge", self.edge_only_sql)
+        self.assertIn("to service_role", self.edge_only_sql)
+        self.assertNotIn("to authenticated", self.edge_only_sql)
 
 
 if __name__ == "__main__":

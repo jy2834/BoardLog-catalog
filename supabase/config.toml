@@ -382,6 +382,13 @@ inspector_port = 8083
 # The Deno major version to use.
 deno_version = 2
 
+[functions.submit-game]
+enabled = true
+# The function validates the bearer token itself so OPTIONS can remain usable
+# and every auth failure receives the same bounded JSON response.
+verify_jwt = false
+entrypoint = "./functions/submit-game/index.ts"
+
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 

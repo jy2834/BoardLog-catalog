@@ -38,6 +38,8 @@ Supabase 변경이 있으면 추가로 실행한다.
 ```bash
 npm ci
 python3 -m unittest tests.test_supabase_migration_contract -v
+npm run test:functions:deno
+npm run check:functions
 npm run db:test:linked
 ```
 
@@ -48,4 +50,5 @@ npm run db:test:linked
 - schemaVersion 2, revision 1, 승인 게임 0개
 - Python validator와 GitHub Actions/Pages 배포가 구현됨
 - Supabase 검수 대기열, 비공개 이미지 버킷, RLS/RPC와 원격 DB 검증이 구현됨
-- 익명 로그인 원격 설정, Edge Function, Android 제출 UI, exporter, 사용량 감시는 아직 구현되지 않음
+- 제출 Edge Function과 Turnstile 호스트는 로컬 구현·검증됨(원격 배포와 실제 Turnstile 키는 운영 승인 대기)
+- 익명 로그인 원격 설정, Android 제출 UI, exporter, 사용량 감시는 아직 구현되지 않음

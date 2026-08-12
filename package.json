@@ -2,13 +2,22 @@
   "name": "boardlog-public-catalog",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "description": "Reviewed public catalog and moderation backend for BoardLog",
   "scripts": {
     "supabase": "supabase",
     "db:status": "supabase migration list --linked --agent no",
-    "db:test:linked": "supabase db query --linked --file supabase/tests/public_catalog_rls.test.sql --output-format json --agent no"
+    "db:test:linked": "supabase db query --linked --file supabase/tests/public_catalog_rls.test.sql --output-format json --agent no",
+    "test:functions": "node --test supabase/functions/**/*.test.ts",
+    "test:functions:deno": "deno test supabase/functions/submit-game/validation.test.ts supabase/functions/submit-game/handler.test.ts",
+    "check:functions": "deno check supabase/functions/submit-game/index.ts"
   },
   "devDependencies": {
+    "@types/node": "26.2.0",
+    "deno": "2.9.5",
     "supabase": "2.113.0"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.112.3"
   }
 }
