@@ -9,6 +9,7 @@ HARDENING_MIGRATION = ROOT / "supabase" / "migrations" / "202608120002_harden_pu
 EDGE_RPC_MIGRATION = ROOT / "supabase" / "migrations" / "202608120003_edge_submission_rpc.sql"
 EDGE_ONLY_MIGRATION = ROOT / "supabase" / "migrations" / "202608120004_require_edge_for_submission.sql"
 STORAGE_LOCKDOWN_MIGRATION = ROOT / "supabase" / "migrations" / "202608120005_lock_submission_storage.sql"
+OWNER_STATUS_MIGRATION = ROOT / "supabase" / "migrations" / "202608120006_owner_submission_status.sql"
 RLS_TEST = ROOT / "supabase" / "tests" / "public_catalog_rls.test.sql"
 
 
@@ -20,9 +21,15 @@ class SupabaseMigrationContractTest(unittest.TestCase):
         cls.edge_rpc_sql = EDGE_RPC_MIGRATION.read_text(encoding="utf-8")
         cls.edge_only_sql = EDGE_ONLY_MIGRATION.read_text(encoding="utf-8")
         cls.storage_lockdown_sql = STORAGE_LOCKDOWN_MIGRATION.read_text(encoding="utf-8")
+        cls.owner_status_sql = (
+            OWNER_STATUS_MIGRATION.read_text(encoding="utf-8")
+            if OWNER_STATUS_MIGRATION.exists()
+            else ""
+        )
         cls.effective_sql = (
             cls.sql + "\n" + cls.hardening_sql + "\n" + cls.edge_rpc_sql
             + "\n" + cls.edge_only_sql + "\n" + cls.storage_lockdown_sql
+            + "\n" + cls.owner_status_sql
         )
         cls.rls_test = RLS_TEST.read_text(encoding="utf-8")
 
@@ -45,16 +52,60 @@ class SupabaseMigrationContractTest(unittest.TestCase):
             with self.subTest(token=token):
                 self.assertIn(token, self.sql)
 
-    def test_enables_rls_and_never_grants_base_submission_table_to_users(self):
+    def test_enables_rls_without_a_table_wide_submission_select_grant(self):
         for table in ("game_submissions", "moderation_events", "admin_users", "service_status"):
             self.assertRegex(
                 self.sql,
                 rf"alter\s+table\s+public\.{table}\s+enable\s+row\s+level\s+security",
             )
         self.assertNotRegex(
-            self.sql,
+            self.effective_sql,
             r"grant\s+select\s+on\s+public\.game_submissions\s+to\s+(?:anon|authenticated)",
         )
+
+    def test_owner_realtime_select_is_row_and_column_scoped(self):
+        self.assertTrue(OWNER_STATUS_MIGRATION.exists(), "owner status follow-up migration is required")
+        self.assertRegex(
+            self.owner_status_sql,
+            r"create\s+policy\s+\"owners read own submission rows\"[\s\S]+?"
+            r"for\s+select\s+to\s+authenticated[\s\S]+?owner_user_id\s*=\s*auth\.uid\(\)",
+        )
+        self.assertRegex(
+            self.owner_status_sql,
+            r"grant\s+select\s*\(\s*id\s*,\s*public_game\s*,\s*image_object_path\s*,\s*status\s*,"
+            r"\s*submitter_message\s*,\s*created_at\s*,\s*updated_at\s*,\s*reviewed_at\s*\)"
+            r"\s+on\s+public\.game_submissions\s+to\s+authenticated",
+        )
+        for private_column in ("owner_user_id", "admin_note", "reviewer_user_id", "exported_at"):
+            with self.subTest(private_column=private_column):
+                self.assertNotRegex(
+                    self.owner_status_sql,
+                    rf"grant\s+select\s*\([^)]*\b{private_column}\b[^)]*\)"
+                    r"\s+on\s+public\.game_submissions\s+to\s+authenticated",
+                )
+        self.assertIn("alter publication supabase_realtime add table public.game_submissions", self.owner_status_sql)
+
+    def test_image_limited_update_accepts_only_the_exact_existing_non_null_path(self):
+        self.assertTrue(OWNER_STATUS_MIGRATION.exists(), "owner status follow-up migration is required")
+        self.assertIn("create or replace function public.update_submission", self.owner_status_sql)
+        self.assertRegex(
+            self.owner_status_sql,
+            r"p_image_path\s+is\s+not\s+null[\s\S]+?"
+            r"p_image_path\s+is\s+distinct\s+from\s+v_existing_image_path[\s\S]+?"
+            r"v_state\s*=\s*'IMAGE_LIMITED'",
+        )
+        self.assertIn(
+            "if p_image_path is not null\n"
+            "    and p_image_path is distinct from v_existing_image_path then",
+            self.owner_status_sql,
+        )
+        self.assertRegex(
+            self.owner_status_sql,
+            r"where\s+id\s*=\s*p_id\s+and\s+owner_user_id\s*=\s*v_owner"
+            r"\s+and\s+status\s*=\s*'PENDING'",
+        )
+        self.assertIn("v_state in ('SUBMISSION_CLOSED', 'MAINTENANCE')", self.owner_status_sql)
+        self.assertIn("message = 'submission updates are unavailable'", self.owner_status_sql)
 
     def test_submission_rpc_enforces_privacy_state_size_owner_prefix_and_rate_limit(self):
         for token in (
@@ -104,6 +155,19 @@ class SupabaseMigrationContractTest(unittest.TestCase):
             "authenticated clients cannot upload submission images outside the edge",
             "edge can submit a privacy-safe game for an authenticated owner",
             "owner can read the submitter-safe status view",
+            "owner can select Realtime-safe columns from the base row",
+            "another user cannot select a cross-owner base row",
+            "authenticated owners cannot select admin notes",
+            "owner base-row select cannot expose an admin note",
+            "owner can reuse the exact existing image path while image submissions are limited",
+            "image-limited metadata update preserves the existing image path",
+            "owner cannot replace an image path while image submissions are limited",
+            "another user cannot update a cross-owner submission",
+            "submission-closed state blocks owner updates",
+            "maintenance state blocks owner updates",
+            "owner cannot replace an image path during normal operation",
+            "submission rows are published for Realtime changes",
+            "admin retains access to the full moderation view",
             "non-admin cannot review a submission",
             "admin can approve a submission",
             "pending rows never enter the approved public view",

@@ -46,12 +46,12 @@ python3 scripts/validate_catalog.py \
 
 - 리전: Seoul (`ap-northeast-2`)
 - 프로젝트 대시보드: <https://supabase.com/dashboard/project/xlinubftvqaxpwrtowvk>
-- 제출 원본과 이미지는 비공개이며 승인된 공개 필드만 `approved_catalog_games`에서 조회됩니다.
+- 제출 원본과 이미지는 비공개이며 승인된 공개 필드만 `approved_catalog_games`에서 조회됩니다. 제출자는 RLS가 소유자로 제한한 공개 상태 필드만 Realtime으로 갱신받습니다.
 - 이미지는 비공개 `submission-images` 버킷에 저장하며 JPEG/WebP, 파일당 2 MiB로 제한합니다.
 - 사용자는 24시간당 최대 3건을 제출할 수 있습니다.
 - 서버 상태는 `NORMAL`, `IMAGE_LIMITED`, `SUBMISSION_CLOSED`, `MAINTENANCE`로 구분합니다.
 
-현재 DB 마이그레이션과 RLS 검증은 원격 프로젝트에 적용되었습니다. 익명 로그인 원격 활성화는 보안 경계 변경 승인을 받은 뒤 `config push`로 반영해야 합니다. Edge Function 코드는 로컬 검증이 끝났고 원격 배포 승인을 기다리며, Android 제출 UI와 관리자 exporter는 다음 구현 단계입니다.
+기존 `202608120001`~`202608120005` DB 마이그레이션과 RLS 검증은 원격 프로젝트에 적용되었습니다. 제출자 Realtime 상태 조회를 위한 `202608120006` 후속 마이그레이션은 소스 검증만 끝났으며 원격 적용 전 운영 승인이 필요합니다. 익명 로그인 원격 활성화도 보안 경계 변경 승인을 받은 뒤 `config push`로 반영해야 합니다. Edge Function 코드는 로컬 검증이 끝났고 원격 배포 승인을 기다리며, Android 제출 UI와 관리자 exporter는 다음 구현 단계입니다.
 
 ### 제출 Edge Function
 
@@ -95,7 +95,7 @@ npx supabase db push --linked --agent no
 npm run db:test:linked
 ```
 
-마지막 명령은 Docker 없이 Management API를 통해 원격 DB에서 19개 pgTAP 검증을 실행합니다. 하나라도 실패하면 SQL 예외로 명령 자체가 실패합니다. Docker가 준비된 환경에서는 `npx supabase test db --linked supabase/tests/public_catalog_rls.test.sql --agent no`도 사용할 수 있습니다.
+마지막 명령은 Docker 없이 Management API를 통해 원격 DB에서 34개 pgTAP 검증을 실행합니다. 하나라도 실패하면 SQL 예외로 명령 자체가 실패합니다. Docker가 준비된 환경에서는 `npx supabase test db --linked supabase/tests/public_catalog_rls.test.sql --agent no`도 사용할 수 있습니다.
 
 익명 로그인을 포함한 `supabase/config.toml`을 원격에 반영하는 명령은 다음과 같습니다. 이 명령은 인증 보안 경계를 변경하므로 운영자가 변경 내용을 검토하고 명시적으로 승인한 경우에만 실행합니다.
 

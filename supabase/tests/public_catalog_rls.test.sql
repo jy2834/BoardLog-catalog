@@ -1,7 +1,7 @@
 begin;
 
 create extension if not exists pgtap with schema extensions;
-select plan(19);
+select plan(34);
 create temporary table tap_results (result text not null);
 grant insert, select on tap_results to anon, authenticated, service_role;
 
@@ -11,6 +11,7 @@ insert into tap_results select has_table('public', 'admin_users', 'admin_users e
 insert into tap_results select has_table('public', 'service_status', 'service_status exists');
 insert into tap_results select has_function('public', 'submit_game', array['jsonb', 'text'], 'submit_game exists');
 insert into tap_results select has_function('public', 'submit_game_from_edge', array['uuid', 'uuid', 'jsonb', 'text'], 'submit_game_from_edge exists');
+insert into tap_results select has_function('public', 'update_submission', array['uuid', 'jsonb', 'text'], 'update_submission exists');
 insert into tap_results select has_function('public', 'review_submission', array['uuid', 'submission_status', 'jsonb', 'text'], 'review_submission exists');
 insert into tap_results select is(
   (
@@ -23,6 +24,17 @@ insert into tap_results select is(
   ),
   0,
   'authenticated clients cannot upload submission images outside the edge'
+);
+insert into tap_results select is(
+  (
+    select count(*)::integer
+    from pg_publication_tables
+    where pubname = 'supabase_realtime'
+      and schemaname = 'public'
+      and tablename = 'game_submissions'
+  ),
+  1,
+  'submission rows are published for Realtime changes'
 );
 
 insert into auth.users (id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at)
@@ -44,7 +56,7 @@ insert into tap_results select lives_ok(
     '11111111-1111-4111-8111-111111111111'::uuid,
     'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'::uuid,
     '{"name":"테스트 게임","englishName":"Test Game","aliases":[],"minPlayers":2,"maxPlayers":4,"minPlayMinutes":30,"maxPlayMinutes":60,"tags":["FAMILY"],"weight":2.0,"yearPublished":2026,"entryType":"BASE_GAME","sourceUrls":["https://example.com/game"]}'::jsonb,
-    null
+    '11111111-1111-4111-8111-111111111111/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa.webp'
   )$$,
   'edge can submit a privacy-safe game for an authenticated owner'
 );
@@ -53,6 +65,27 @@ reset role;
 set local role authenticated;
 select set_config('request.jwt.claims', '{"sub":"11111111-1111-4111-8111-111111111111","role":"authenticated"}', true);
 insert into tap_results select is((select count(*)::integer from public.my_game_submissions), 1, 'owner can read the submitter-safe status view');
+insert into tap_results select is(
+  (
+    select count(id)::integer
+    from public.game_submissions
+    where id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
+  ),
+  1,
+  'owner can select Realtime-safe columns from the base row'
+);
+insert into tap_results select ok(
+  not has_column_privilege('authenticated', 'public.game_submissions', 'admin_note', 'select'),
+  'authenticated owners cannot select admin notes'
+);
+insert into tap_results select throws_ok(
+  $$select admin_note
+    from public.game_submissions
+    where id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'$$,
+  '42501',
+  'permission denied for table game_submissions',
+  'owner base-row select cannot expose an admin note'
+);
 
 reset role;
 create temporary table test_submission_ids as
@@ -62,6 +95,15 @@ grant select on test_submission_ids to authenticated;
 set local role authenticated;
 select set_config('request.jwt.claims', '{"sub":"22222222-2222-4222-8222-222222222222","role":"authenticated"}', true);
 insert into tap_results select is((select count(*)::integer from public.my_game_submissions), 0, 'another user cannot read the pending submission');
+insert into tap_results select is(
+  (
+    select count(id)::integer
+    from public.game_submissions
+    where id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
+  ),
+  0,
+  'another user cannot select a cross-owner base row'
+);
 insert into tap_results select is((select count(*)::integer from public.approved_catalog_games), 0, 'pending rows never enter the approved public view');
 
 insert into tap_results select throws_ok(
@@ -75,10 +117,112 @@ insert into tap_results select throws_ok(
   'admin access required',
   'non-admin cannot review a submission'
 );
+insert into tap_results select throws_ok(
+  $$select public.update_submission(
+    'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'::uuid,
+    '{"name":"교차 수정","englishName":"Cross-owner Update","aliases":[],"minPlayers":2,"maxPlayers":4,"minPlayMinutes":30,"maxPlayMinutes":60,"tags":["FAMILY"],"weight":2.0,"yearPublished":2026,"entryType":"BASE_GAME","sourceUrls":["https://example.com/game"]}'::jsonb,
+    null
+  )$$,
+  '42501',
+  'pending owned submission not found',
+  'another user cannot update a cross-owner submission'
+);
+
+reset role;
+update public.service_status set service_state = 'IMAGE_LIMITED' where singleton;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"11111111-1111-4111-8111-111111111111","role":"authenticated"}', true);
+
+insert into tap_results select lives_ok(
+  $$select public.update_submission(
+    'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'::uuid,
+    '{"name":"수정된 게임","englishName":"Updated Game","aliases":[],"minPlayers":2,"maxPlayers":4,"minPlayMinutes":30,"maxPlayMinutes":60,"tags":["FAMILY"],"weight":2.0,"yearPublished":2026,"entryType":"BASE_GAME","sourceUrls":["https://example.com/game"]}'::jsonb,
+    '11111111-1111-4111-8111-111111111111/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa.webp'
+  )$$,
+  'owner can reuse the exact existing image path while image submissions are limited'
+);
+insert into tap_results select is(
+  (
+    select public_game->>'name'
+    from public.game_submissions
+    where id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
+  ),
+  '수정된 게임',
+  'image-limited metadata update is persisted'
+);
+insert into tap_results select is(
+  (
+    select image_object_path
+    from public.game_submissions
+    where id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
+  ),
+  '11111111-1111-4111-8111-111111111111/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa.webp',
+  'image-limited metadata update preserves the existing image path'
+);
+insert into tap_results select throws_ok(
+  $$select public.update_submission(
+    'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'::uuid,
+    '{"name":"교체 시도","englishName":"Replacement Attempt","aliases":[],"minPlayers":2,"maxPlayers":4,"minPlayMinutes":30,"maxPlayMinutes":60,"tags":["FAMILY"],"weight":2.0,"yearPublished":2026,"entryType":"BASE_GAME","sourceUrls":["https://example.com/game"]}'::jsonb,
+    '11111111-1111-4111-8111-111111111111/bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb.webp'
+  )$$,
+  '55000',
+  'image submissions are unavailable',
+  'owner cannot replace an image path while image submissions are limited'
+);
+
+reset role;
+update public.service_status set service_state = 'SUBMISSION_CLOSED' where singleton;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"11111111-1111-4111-8111-111111111111","role":"authenticated"}', true);
+insert into tap_results select throws_ok(
+  $$select public.update_submission(
+    'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'::uuid,
+    '{"name":"닫힘","englishName":"Closed","aliases":[],"minPlayers":2,"maxPlayers":4,"minPlayMinutes":30,"maxPlayMinutes":60,"tags":["FAMILY"],"weight":2.0,"yearPublished":2026,"entryType":"BASE_GAME","sourceUrls":["https://example.com/game"]}'::jsonb,
+    null
+  )$$,
+  '55000',
+  'submission updates are unavailable',
+  'submission-closed state blocks owner updates'
+);
+
+reset role;
+update public.service_status set service_state = 'MAINTENANCE' where singleton;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"11111111-1111-4111-8111-111111111111","role":"authenticated"}', true);
+insert into tap_results select throws_ok(
+  $$select public.update_submission(
+    'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'::uuid,
+    '{"name":"점검","englishName":"Maintenance","aliases":[],"minPlayers":2,"maxPlayers":4,"minPlayMinutes":30,"maxPlayMinutes":60,"tags":["FAMILY"],"weight":2.0,"yearPublished":2026,"entryType":"BASE_GAME","sourceUrls":["https://example.com/game"]}'::jsonb,
+    null
+  )$$,
+  '55000',
+  'submission updates are unavailable',
+  'maintenance state blocks owner updates'
+);
+
+reset role;
+update public.service_status set service_state = 'NORMAL' where singleton;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"11111111-1111-4111-8111-111111111111","role":"authenticated"}', true);
+insert into tap_results select throws_ok(
+  $$select public.update_submission(
+    'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'::uuid,
+    '{"name":"일반 교체 시도","englishName":"Normal Replacement Attempt","aliases":[],"minPlayers":2,"maxPlayers":4,"minPlayMinutes":30,"maxPlayMinutes":60,"tags":["FAMILY"],"weight":2.0,"yearPublished":2026,"entryType":"BASE_GAME","sourceUrls":["https://example.com/game"]}'::jsonb,
+    '11111111-1111-4111-8111-111111111111/bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb.webp'
+  )$$,
+  '22023',
+  'invalid image path',
+  'owner cannot replace an image path during normal operation'
+);
 
 reset role;
 select set_config('request.jwt.claims', '{"sub":"33333333-3333-4333-8333-333333333333","role":"authenticated"}', true);
 set local role authenticated;
+insert into tap_results select is(
+  (select count(*)::integer from public.admin_game_submissions),
+  1,
+  'admin retains access to the full moderation view'
+);
 
 insert into tap_results select lives_ok(
   $$select public.review_submission(
@@ -113,5 +257,5 @@ begin
   end if;
 end;
 $$;
-select 'ok - all 19 pgTAP assertions passed' as result;
+select 'ok - all 34 pgTAP assertions passed' as result;
 rollback;
