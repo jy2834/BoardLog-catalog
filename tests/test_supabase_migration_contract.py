@@ -1,5 +1,6 @@
 import re
 import unittest
+import re
 from pathlib import Path
 
 
@@ -10,6 +11,7 @@ EDGE_RPC_MIGRATION = ROOT / "supabase" / "migrations" / "202608120003_edge_submi
 EDGE_ONLY_MIGRATION = ROOT / "supabase" / "migrations" / "202608120004_require_edge_for_submission.sql"
 STORAGE_LOCKDOWN_MIGRATION = ROOT / "supabase" / "migrations" / "202608120005_lock_submission_storage.sql"
 OWNER_STATUS_MIGRATION = ROOT / "supabase" / "migrations" / "202608120006_owner_submission_status.sql"
+ADMIN_CONSOLE_MIGRATION = ROOT / "supabase" / "migrations" / "202608130007_admin_console_reads.sql"
 RLS_TEST = ROOT / "supabase" / "tests" / "public_catalog_rls.test.sql"
 
 
@@ -26,10 +28,16 @@ class SupabaseMigrationContractTest(unittest.TestCase):
             if OWNER_STATUS_MIGRATION.exists()
             else ""
         )
+        cls.admin_console_sql = (
+            ADMIN_CONSOLE_MIGRATION.read_text(encoding="utf-8")
+            if ADMIN_CONSOLE_MIGRATION.exists()
+            else ""
+        )
         cls.effective_sql = (
             cls.sql + "\n" + cls.hardening_sql + "\n" + cls.edge_rpc_sql
             + "\n" + cls.edge_only_sql + "\n" + cls.storage_lockdown_sql
             + "\n" + cls.owner_status_sql
+            + "\n" + cls.admin_console_sql
         )
         cls.rls_test = RLS_TEST.read_text(encoding="utf-8")
 
@@ -219,6 +227,52 @@ class SupabaseMigrationContractTest(unittest.TestCase):
             with self.subTest(phrase=phrase):
                 self.assertIn(phrase, self.rls_test)
 
+    def test_admin_console_reads_are_admin_scoped_and_privacy_bounded(self):
+        self.assertTrue(
+            ADMIN_CONSOLE_MIGRATION.exists(),
+            "admin console read contract migration is required",
+        )
+        self.assertIn("create or replace view public.admin_service_status", self.admin_console_sql)
+        self.assertIn("create or replace view public.admin_moderation_events", self.admin_console_sql)
+        self.assertIn("where public.is_catalog_admin()", self.admin_console_sql)
+        self.assertIn("usage_level", self.admin_console_sql)
+        usage_view, remainder = self.admin_console_sql.split(
+            "create or replace view public.admin_moderation_events",
+            1,
+        )
+        audit_view = remainder.split("revoke all on public.admin_service_status", 1)[0]
+        self.assertNotIn("owner_user_id", usage_view + audit_view)
+        self.assertNotIn("actor_user_id", usage_view + audit_view)
+        self.assertIn(
+            "grant select on public.admin_service_status to authenticated",
+            self.admin_console_sql,
+        )
+        self.assertIn(
+            "grant select on public.admin_moderation_events to authenticated",
+            self.admin_console_sql,
+        )
+        for phrase in (
+            "non-admin cannot read admin usage status",
+            "non-admin cannot read moderation audit events",
+            "admin can read usage level for quota banners",
+            "admin can read privacy-bounded moderation audit events",
+        ):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, self.rls_test)
+
+    def test_review_contract_requires_submitter_visible_rejection_reason(self):
+        self.assertRegex(
+            self.admin_console_sql,
+            r"create\s+or\s+replace\s+function\s+public\.review_submission[\s\S]+?"
+            r"p_decision\s*=\s*'REJECTED'[\s\S]+?rejection reason required",
+        )
+        self.assertIn("admin cannot reject without a submitter-visible reason", self.rls_test)
+        self.assertRegex(
+            self.admin_console_sql,
+            r"p_public_game->>'targetKey'\)\s*!~\s*'\^\[a-z0-9\]",
+        )
+        self.assertIn("admin cannot merge to a malformed stable key", self.rls_test)
+
     def test_follow_up_migration_keeps_remote_and_fresh_installs_equivalent(self):
         for function_name in (
             "is_valid_submission_payload",
@@ -249,6 +303,13 @@ class SupabaseMigrationContractTest(unittest.TestCase):
         self.assertIn("create temporary table tap_results", self.rls_test)
         self.assertIn("result like 'not ok %'", self.rls_test)
         self.assertIn("raise exception 'pgTAP failures", self.rls_test)
+
+    def test_pgtap_plan_and_summary_match_the_assertion_count(self):
+        planned = int(re.search(r"select plan\((\d+)\)", self.rls_test).group(1))
+        summary = int(re.search(r"ok - all (\d+) pgTAP assertions passed", self.rls_test).group(1))
+        inserted_results = len(re.findall(r"insert into tap_results select ", self.rls_test))
+        self.assertEqual(planned, inserted_results - 1, "finish() is stored but is not a planned assertion")
+        self.assertEqual(planned, summary)
 
     def test_edge_rpc_accepts_a_preallocated_id_without_weakening_owner_checks(self):
         for token in (

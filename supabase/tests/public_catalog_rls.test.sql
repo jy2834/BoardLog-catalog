@@ -1,7 +1,7 @@
 begin;
 
 create extension if not exists pgtap with schema extensions;
-select plan(44);
+select plan(52);
 create temporary table tap_results (result text not null);
 grant insert, select on tap_results to anon, authenticated, service_role;
 
@@ -10,6 +10,8 @@ insert into tap_results select has_table('public', 'game_submission_status_signa
 insert into tap_results select has_table('public', 'moderation_events', 'moderation_events exists');
 insert into tap_results select has_table('public', 'admin_users', 'admin_users exists');
 insert into tap_results select has_table('public', 'service_status', 'service_status exists');
+insert into tap_results select has_view('public', 'admin_service_status', 'admin usage status view exists');
+insert into tap_results select has_view('public', 'admin_moderation_events', 'admin moderation audit view exists');
 insert into tap_results select has_function('public', 'submit_game', array['jsonb', 'text'], 'submit_game exists');
 insert into tap_results select has_function('public', 'submit_game_from_edge', array['uuid', 'uuid', 'jsonb', 'text'], 'submit_game_from_edge exists');
 insert into tap_results select has_function('public', 'update_submission', array['uuid', 'jsonb', 'text'], 'update_submission exists');
@@ -179,6 +181,8 @@ insert into tap_results select is(
   'another user cannot read a cross-owner status signal'
 );
 insert into tap_results select is((select count(*)::integer from public.approved_catalog_games), 0, 'pending rows never enter the approved public view');
+insert into tap_results select is((select count(*)::integer from public.admin_service_status), 0, 'non-admin cannot read admin usage status');
+insert into tap_results select is((select count(*)::integer from public.admin_moderation_events), 0, 'non-admin cannot read moderation audit events');
 
 insert into tap_results select throws_ok(
   $$select public.review_submission(
@@ -297,6 +301,39 @@ insert into tap_results select is(
   1,
   'admin retains access to the full moderation view'
 );
+insert into tap_results select is(
+  (select count(*)::integer from public.admin_service_status),
+  1,
+  'admin can read usage level for quota banners'
+);
+insert into tap_results select ok(
+  (select count(*) from public.admin_moderation_events) > 0,
+  'admin can read privacy-bounded moderation audit events'
+);
+
+insert into tap_results select throws_ok(
+  $$select public.review_submission(
+    (select id from test_submission_ids limit 1),
+    'REJECTED'::public.submission_status,
+    '{}'::jsonb,
+    '   '
+  )$$,
+  '22023',
+  'rejection reason required',
+  'admin cannot reject without a submitter-visible reason'
+);
+
+insert into tap_results select throws_ok(
+  $$select public.review_submission(
+    (select id from test_submission_ids limit 1),
+    'MERGED'::public.submission_status,
+    '{"targetKey":"Bad Target"}'::jsonb,
+    'duplicate'
+  )$$,
+  '22023',
+  'invalid merge patch',
+  'admin cannot merge to a malformed stable key'
+);
 
 insert into tap_results select lives_ok(
   $$select public.review_submission(
@@ -331,5 +368,5 @@ begin
   end if;
 end;
 $$;
-select 'ok - all 44 pgTAP assertions passed' as result;
+select 'ok - all 52 pgTAP assertions passed' as result;
 rollback;
