@@ -9,6 +9,8 @@ BoardLog 사용자가 제출하고 관리자가 검수한 보드게임만 배포
 
 `catalog/catalog.json`은 `schemaVersion`, 단조 증가하는 `revision`, UTC `generatedAt`, 정렬된 `games`를 갖습니다. 초기 revision은 승인 게임이 없는 빈 목록입니다.
 
+일반 신규 게임은 안정적인 새 `key`로 추가합니다. 기존 내장/공개 항목을 검수된 정보로 교체해야 할 때만 선택적 `updateTargetKey`에 대상의 안정적인 key를 기록합니다. Android는 대상 key가 존재하고 다른 게임의 BGG ID를 침범하지 않을 때만 해당 항목을 제자리 갱신합니다.
+
 ## 개인정보 경계
 
 공개 게임은 이름, 원제, 별칭, 인원수, 시간, 태그, 난이도 계산용 weight, 공개 별점, 검증된 정가와 출처만 포함할 수 있습니다. 다음 값은 validator가 거부합니다.

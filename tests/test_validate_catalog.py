@@ -109,6 +109,16 @@ class PublicCatalogValidationTest(unittest.TestCase):
         self.assertEqual([], self.errors_for(valid_catalog()))
         self.assertEqual([], self.errors_for(valid_catalog(valid_game())))
 
+    def test_accepts_stable_update_target_and_rejects_invalid_marker(self):
+        self.assertEqual(
+            [],
+            self.errors_for(valid_catalog(valid_game(updateTargetKey="azul"))),
+        )
+        for marker in (None, "Azul", "azul/other", 123):
+            with self.subTest(marker=marker):
+                errors = self.errors_for(valid_catalog(valid_game(updateTargetKey=marker)))
+                self.assertTrue(any("updateTargetKey" in error for error in errors))
+
     def test_rejects_invalid_envelope_types_and_unknown_fields(self):
         cases = [
             ({**valid_catalog(), "schemaVersion": "2"}, "schemaVersion"),

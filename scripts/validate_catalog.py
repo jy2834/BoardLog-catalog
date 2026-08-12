@@ -41,6 +41,7 @@ GAME_FIELDS = {
     "originSubmissionId",
     "publishedAt",
 }
+OPTIONAL_GAME_FIELDS = {"updateTargetKey"}
 PRICE_KINDS = {"DOMESTIC_LIST_PRICE", "USD_MSRP_CONVERTED", "UNAVAILABLE"}
 ENTRY_TYPES = {"BASE_GAME", "EXPANSION"}
 STABLE_KEY = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*\Z")
@@ -121,7 +122,7 @@ def _validate_game(
     if not isinstance(game, Mapping):
         return [f"{path}: must be an object"]
 
-    unknown = sorted(set(game) - GAME_FIELDS)
+    unknown = sorted(set(game) - GAME_FIELDS - OPTIONAL_GAME_FIELDS)
     for field in unknown:
         errors.append(f"{path}.{field}: unknown public catalog field")
     for private_path in _walk_private_fields(game, private_fields, path):
@@ -231,6 +232,10 @@ def _validate_game(
         errors.append(f"{path}.originSubmissionId: must be a UUID string")
     if not _is_utc_timestamp(game.get("publishedAt")):
         errors.append(f"{path}.publishedAt: must be an RFC 3339 UTC timestamp")
+    if "updateTargetKey" in game:
+        update_target = game.get("updateTargetKey")
+        if not isinstance(update_target, str) or not STABLE_KEY.fullmatch(update_target):
+            errors.append(f"{path}.updateTargetKey: must be a lowercase stable key when present")
     return errors
 
 

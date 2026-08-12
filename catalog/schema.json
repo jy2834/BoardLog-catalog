@@ -64,5 +64,6 @@
     "sourceUrls",
     "originSubmissionId",
     "publishedAt"
-  ]
+  ],
+  "optionalGameFields": ["updateTargetKey"]
 }
