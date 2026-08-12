@@ -74,6 +74,8 @@ Cloudflare의 테스트 키를 운영에 사용하지 않습니다. secret은 Gi
 
 플랫폼 JWT 사전 검증을 켠 상태로 두고, 함수 안에서도 `auth.getUser`로 bearer를 다시 확인합니다. Android는 공개 publishable key와 익명 사용자 JWT를 함께 보냅니다. 함수의 사용자·관리 클라이언트도 각각 `SUPABASE_PUBLISHABLE_KEYS`와 `SUPABASE_SECRET_KEYS`의 `default` 키를 사용하며 구형 `anon`·`service_role` 키를 읽지 않습니다. 배포 명령은 다음과 같습니다.
 
+2026-08-13 운영 보안 전환을 완료했습니다. Supabase의 구형 JWT 기반 `anon`·`service_role` API 키는 비활성화했고, 이전 Legacy HS256 서명 키도 폐기했습니다. 새 클라이언트 세션은 publishable key로 발급된 ES256 토큰만 사용해야 하며, 폐기된 키나 이전 토큰을 다시 활성화·복원하지 않습니다.
+
 ```bash
 npx supabase functions deploy submit-game \
   --project-ref xlinubftvqaxpwrtowvk \
