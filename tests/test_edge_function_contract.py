@@ -21,7 +21,10 @@ class EdgeFunctionContractTest(unittest.TestCase):
 
     def test_authenticates_user_bearer_before_using_edge_only_rpc(self):
         self.assertIn("authClient.auth.getUser(token)", self.index)
-        self.assertIn('Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")', self.index)
+        self.assertIn('defaultApiKey("SUPABASE_PUBLISHABLE_KEYS")', self.index)
+        self.assertIn('defaultApiKey("SUPABASE_SECRET_KEYS")', self.index)
+        self.assertNotIn("SUPABASE_ANON_KEY", self.index)
+        self.assertNotIn("SUPABASE_SERVICE_ROLE_KEY", self.index)
         self.assertIn('client.rpc("submit_game_from_edge"', self.index)
         self.assertIn("p_owner_user_id", self.index)
         self.assertNotIn('client.rpc("submit_game_with_id"', self.index)

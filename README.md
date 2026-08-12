@@ -72,7 +72,7 @@ npm run check:functions
 
 Cloudflare의 테스트 키를 운영에 사용하지 않습니다. secret은 Git과 Android/Web 번들에 절대 넣지 않습니다.
 
-플랫폼 JWT 사전 검증을 켠 상태로 두고, 함수 안에서도 `auth.getUser`로 bearer를 다시 확인합니다. Android는 공개 publishable key와 익명 사용자 JWT를 함께 보냅니다. 배포 명령은 다음과 같습니다.
+플랫폼 JWT 사전 검증을 켠 상태로 두고, 함수 안에서도 `auth.getUser`로 bearer를 다시 확인합니다. Android는 공개 publishable key와 익명 사용자 JWT를 함께 보냅니다. 함수의 사용자·관리 클라이언트도 각각 `SUPABASE_PUBLISHABLE_KEYS`와 `SUPABASE_SECRET_KEYS`의 `default` 키를 사용하며 구형 `anon`·`service_role` 키를 읽지 않습니다. 배포 명령은 다음과 같습니다.
 
 ```bash
 npx supabase functions deploy submit-game \

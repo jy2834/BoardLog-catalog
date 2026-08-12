@@ -3,12 +3,19 @@ import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2.1
 import { createSubmitGameHandler, type AuthContext, type ServiceState } from "./handler.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
-const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+const SUPABASE_PUBLISHABLE_KEY = defaultApiKey("SUPABASE_PUBLISHABLE_KEYS");
+const SUPABASE_SECRET_KEY = defaultApiKey("SUPABASE_SECRET_KEYS");
 const TURNSTILE_SECRET_KEY = Deno.env.get("TURNSTILE_SECRET_KEY") ?? "";
 
+function defaultApiKey(environmentName: string): string {
+  const encoded = Deno.env.get(environmentName) ?? "";
+  if (encoded === "") return "";
+  const keys = JSON.parse(encoded) as Record<string, unknown>;
+  return typeof keys.default === "string" ? keys.default : "";
+}
+
 function userClient(authorization: string): SupabaseClient {
-  return createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  return createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     auth: {
       autoRefreshToken: false,
       detectSessionInUrl: false,
@@ -19,7 +26,7 @@ function userClient(authorization: string): SupabaseClient {
 }
 
 function edgeClient(): SupabaseClient {
-  return createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+  return createClient(SUPABASE_URL, SUPABASE_SECRET_KEY, {
     auth: {
       autoRefreshToken: false,
       detectSessionInUrl: false,
@@ -29,7 +36,7 @@ function edgeClient(): SupabaseClient {
 }
 
 async function authenticate(authorization: string): Promise<AuthContext | null> {
-  if (SUPABASE_URL === "" || SUPABASE_ANON_KEY === "" || SUPABASE_SERVICE_ROLE_KEY === "") {
+  if (SUPABASE_URL === "" || SUPABASE_PUBLISHABLE_KEY === "" || SUPABASE_SECRET_KEY === "") {
     throw new Error("Supabase function environment is incomplete");
   }
   const token = authorization.replace(/^Bearer\s+/i, "");
