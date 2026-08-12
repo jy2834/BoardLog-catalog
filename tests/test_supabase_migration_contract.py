@@ -63,27 +63,64 @@ class SupabaseMigrationContractTest(unittest.TestCase):
             r"grant\s+select\s+on\s+public\.game_submissions\s+to\s+(?:anon|authenticated)",
         )
 
-    def test_owner_realtime_select_is_row_and_column_scoped(self):
+    def test_owner_realtime_uses_a_privacy_safe_invalidation_signal(self):
         self.assertTrue(OWNER_STATUS_MIGRATION.exists(), "owner status follow-up migration is required")
+        self.assertIn("create table public.game_submission_status_signals", self.owner_status_sql)
         self.assertRegex(
             self.owner_status_sql,
-            r"create\s+policy\s+\"owners read own submission rows\"[\s\S]+?"
-            r"for\s+select\s+to\s+authenticated[\s\S]+?owner_user_id\s*=\s*auth\.uid\(\)",
+            r"create\s+policy\s+\"owners read own submission status signal\"[\s\S]+?"
+            r"for\s+select\s+to\s+authenticated[\s\S]+?"
+            r"owns_game_submission_status_signal\(signal_key\)",
         )
         self.assertRegex(
             self.owner_status_sql,
-            r"grant\s+select\s*\(\s*id\s*,\s*public_game\s*,\s*image_object_path\s*,\s*status\s*,"
-            r"\s*submitter_message\s*,\s*created_at\s*,\s*updated_at\s*,\s*reviewed_at\s*\)"
-            r"\s+on\s+public\.game_submissions\s+to\s+authenticated",
+            r"create\s+or\s+replace\s+function\s+public\.owns_game_submission_status_signal"
+            r"[\s\S]+?owner_user_id\s*=\s*auth\.uid\(\)",
         )
-        for private_column in ("owner_user_id", "admin_note", "reviewer_user_id", "exported_at"):
-            with self.subTest(private_column=private_column):
-                self.assertNotRegex(
-                    self.owner_status_sql,
-                    rf"grant\s+select\s*\([^)]*\b{private_column}\b[^)]*\)"
-                    r"\s+on\s+public\.game_submissions\s+to\s+authenticated",
-                )
-        self.assertIn("alter publication supabase_realtime add table public.game_submissions", self.owner_status_sql)
+        self.assertRegex(
+            self.owner_status_sql,
+            r"grant\s+select\s*\(\s*signal_key\s*,\s*revision\s*,\s*updated_at\s*\)"
+            r"\s+on\s+public\.game_submission_status_signals\s+to\s+authenticated",
+        )
+        self.assertIn("drop policy if exists \"owners read own submission rows\"", self.owner_status_sql)
+        self.assertNotIn("grant select (\n  id,", self.owner_status_sql)
+        self.assertNotRegex(
+            self.owner_status_sql,
+            r"grant\s+select\s*\([^)]*\)\s+on\s+public\.game_submissions",
+        )
+        self.assertIn("alter publication supabase_realtime drop table public.game_submissions", self.owner_status_sql)
+        self.assertNotIn("add table public.game_submissions;", self.owner_status_sql)
+        self.assertIn(
+            "alter publication supabase_realtime add table public.game_submission_status_signals",
+            self.owner_status_sql,
+        )
+
+    def test_status_signal_delete_identity_cannot_expose_a_submission_or_owner(self):
+        self.assertIn("create table public.game_submission_status_signals", self.owner_status_sql)
+        table_sql = self.owner_status_sql.split(
+            "create table public.game_submission_status_signals", 1
+        )[1].split(";", 1)[0]
+        self.assertIn("signal_key uuid primary key default gen_random_uuid()", table_sql)
+        self.assertNotIn("submission_id", table_sql)
+        self.assertNotIn("owner_user_id", table_sql)
+        self.assertIn("create table public.game_submission_status_signal_owners", self.owner_status_sql)
+        self.assertIn("owner_user_id uuid primary key", self.owner_status_sql)
+        self.assertIn(
+            "revoke all on public.game_submission_status_signal_owners from anon, authenticated",
+            self.owner_status_sql,
+        )
+        self.assertIn(
+            "alter table public.game_submission_status_signals replica identity default",
+            self.owner_status_sql,
+        )
+        self.assertIn(
+            "after insert or update or delete on public.game_submissions",
+            self.owner_status_sql,
+        )
+        self.assertNotRegex(
+            self.owner_status_sql,
+            r"delete\s+from\s+public\.game_submission_status_signals",
+        )
 
     def test_image_limited_update_accepts_only_the_exact_existing_non_null_path(self):
         self.assertTrue(OWNER_STATUS_MIGRATION.exists(), "owner status follow-up migration is required")
@@ -155,10 +192,16 @@ class SupabaseMigrationContractTest(unittest.TestCase):
             "authenticated clients cannot upload submission images outside the edge",
             "edge can submit a privacy-safe game for an authenticated owner",
             "owner can read the submitter-safe status view",
-            "owner can select Realtime-safe columns from the base row",
-            "another user cannot select a cross-owner base row",
-            "authenticated owners cannot select admin notes",
-            "owner base-row select cannot expose an admin note",
+            "submission rows are not published for Realtime changes",
+            "authenticated clients cannot select base submission rows",
+            "owner can read one opaque status signal",
+            "another user cannot read a cross-owner status signal",
+            "status signal has no submission or owner identifier",
+            "status signal delete identity is only an opaque key",
+            "status signal uses default primary-key-only delete identity",
+            "authenticated clients cannot select private signal ownership mappings",
+            "private signal ownership mappings are not published",
+            "withdrawal updates the owner signal without publishing a submission delete",
             "owner can reuse the exact existing image path while image submissions are limited",
             "image-limited metadata update preserves the existing image path",
             "owner cannot replace an image path while image submissions are limited",
@@ -166,7 +209,7 @@ class SupabaseMigrationContractTest(unittest.TestCase):
             "submission-closed state blocks owner updates",
             "maintenance state blocks owner updates",
             "owner cannot replace an image path during normal operation",
-            "submission rows are published for Realtime changes",
+            "status signals are published for Realtime changes",
             "admin retains access to the full moderation view",
             "non-admin cannot review a submission",
             "admin can approve a submission",

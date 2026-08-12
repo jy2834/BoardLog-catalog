@@ -1,11 +1,12 @@
 begin;
 
 create extension if not exists pgtap with schema extensions;
-select plan(34);
+select plan(44);
 create temporary table tap_results (result text not null);
 grant insert, select on tap_results to anon, authenticated, service_role;
 
 insert into tap_results select has_table('public', 'game_submissions', 'game_submissions exists');
+insert into tap_results select has_table('public', 'game_submission_status_signals', 'owner status signal table exists');
 insert into tap_results select has_table('public', 'moderation_events', 'moderation_events exists');
 insert into tap_results select has_table('public', 'admin_users', 'admin_users exists');
 insert into tap_results select has_table('public', 'service_status', 'service_status exists');
@@ -33,8 +34,71 @@ insert into tap_results select is(
       and schemaname = 'public'
       and tablename = 'game_submissions'
   ),
+  0,
+  'submission rows are not published for Realtime changes'
+);
+insert into tap_results select is(
+  (
+    select count(*)::integer
+    from pg_publication_tables
+    where pubname = 'supabase_realtime'
+      and schemaname = 'public'
+      and tablename = 'game_submission_status_signals'
+  ),
   1,
-  'submission rows are published for Realtime changes'
+  'status signals are published for Realtime changes'
+);
+insert into tap_results select ok(
+  not has_table_privilege('authenticated', 'public.game_submissions', 'select'),
+  'authenticated clients cannot select base submission rows'
+);
+insert into tap_results select ok(
+  not has_table_privilege('authenticated', 'public.game_submission_status_signal_owners', 'select'),
+  'authenticated clients cannot select private signal ownership mappings'
+);
+insert into tap_results select is(
+  (
+    select count(*)::integer
+    from pg_publication_tables
+    where pubname = 'supabase_realtime'
+      and schemaname = 'public'
+      and tablename = 'game_submission_status_signal_owners'
+  ),
+  0,
+  'private signal ownership mappings are not published'
+);
+insert into tap_results select is(
+  (
+    select string_agg(a.attname, ',' order by a.attnum)
+    from pg_index i
+    join pg_attribute a
+      on a.attrelid = i.indrelid
+     and a.attnum = any(i.indkey)
+    where i.indrelid = 'public.game_submission_status_signals'::regclass
+      and i.indisprimary
+  ),
+  'signal_key',
+  'status signal delete identity is only an opaque key'
+);
+insert into tap_results select is(
+  (
+    select count(*)::integer
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'game_submission_status_signals'
+      and column_name in ('submission_id', 'owner_user_id')
+  ),
+  0,
+  'status signal has no submission or owner identifier'
+);
+insert into tap_results select is(
+  (
+    select relreplident
+    from pg_class
+    where oid = 'public.game_submission_status_signals'::regclass
+  ),
+  'd'::"char",
+  'status signal uses default primary-key-only delete identity'
 );
 
 insert into auth.users (id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at)
@@ -60,31 +124,42 @@ insert into tap_results select lives_ok(
   )$$,
   'edge can submit a privacy-safe game for an authenticated owner'
 );
+insert into tap_results select lives_ok(
+  $$select public.submit_game_from_edge(
+    '11111111-1111-4111-8111-111111111111'::uuid,
+    'cccccccc-cccc-4ccc-8ccc-cccccccccccc'::uuid,
+    '{"name":"철회 게임","englishName":"Withdraw Game","aliases":[],"minPlayers":1,"maxPlayers":2,"minPlayMinutes":10,"maxPlayMinutes":20,"tags":["CARD"],"weight":1.0,"yearPublished":2026,"entryType":"BASE_GAME","sourceUrls":["https://example.com/withdraw"]}'::jsonb,
+    null
+  )$$,
+  'edge can create a submission used to test private withdrawal signaling'
+);
 
 reset role;
 set local role authenticated;
 select set_config('request.jwt.claims', '{"sub":"11111111-1111-4111-8111-111111111111","role":"authenticated"}', true);
-insert into tap_results select is((select count(*)::integer from public.my_game_submissions), 1, 'owner can read the submitter-safe status view');
+insert into tap_results select is((select count(*)::integer from public.my_game_submissions), 2, 'owner can read the submitter-safe status view');
 insert into tap_results select is(
   (
-    select count(id)::integer
-    from public.game_submissions
-    where id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
+    select count(signal_key)::integer
+    from public.game_submission_status_signals
   ),
   1,
-  'owner can select Realtime-safe columns from the base row'
-);
-insert into tap_results select ok(
-  not has_column_privilege('authenticated', 'public.game_submissions', 'admin_note', 'select'),
-  'authenticated owners cannot select admin notes'
+  'owner can read one opaque status signal'
 );
 insert into tap_results select throws_ok(
-  $$select admin_note
-    from public.game_submissions
-    where id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'$$,
+  $$select id from public.game_submissions$$,
   '42501',
   'permission denied for table game_submissions',
-  'owner base-row select cannot expose an admin note'
+  'owner cannot bypass the safe status view'
+);
+insert into tap_results select lives_ok(
+  $$select public.withdraw_submission('cccccccc-cccc-4ccc-8ccc-cccccccccccc'::uuid)$$,
+  'withdrawal updates the owner signal without publishing a submission delete'
+);
+insert into tap_results select is(
+  (select revision from public.game_submission_status_signals),
+  3::bigint,
+  'withdrawal advances the owner status signal'
 );
 
 reset role;
@@ -97,12 +172,11 @@ select set_config('request.jwt.claims', '{"sub":"22222222-2222-4222-8222-2222222
 insert into tap_results select is((select count(*)::integer from public.my_game_submissions), 0, 'another user cannot read the pending submission');
 insert into tap_results select is(
   (
-    select count(id)::integer
-    from public.game_submissions
-    where id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
+    select count(signal_key)::integer
+    from public.game_submission_status_signals
   ),
   0,
-  'another user cannot select a cross-owner base row'
+  'another user cannot read a cross-owner status signal'
 );
 insert into tap_results select is((select count(*)::integer from public.approved_catalog_games), 0, 'pending rows never enter the approved public view');
 
@@ -257,5 +331,5 @@ begin
   end if;
 end;
 $$;
-select 'ok - all 34 pgTAP assertions passed' as result;
+select 'ok - all 44 pgTAP assertions passed' as result;
 rollback;
