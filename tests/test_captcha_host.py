@@ -14,9 +14,11 @@ class CaptchaHostContractTest(unittest.TestCase):
         cls.js = JS.read_text(encoding="utf-8")
         cls.combined = cls.html + "\n" + cls.js
 
-    def test_loads_turnstile_from_cloudflare_with_an_explicit_action(self):
-        self.assertIn("https://challenges.cloudflare.com/turnstile/v0/api.js", self.html)
-        self.assertIn('action: "boardlog_submit"', self.js)
+    def test_loads_turnstile_from_cloudflare_without_an_explicit_render_race(self):
+        self.assertIn('class="cf-turnstile"', self.html)
+        self.assertIn('data-action="boardlog_submit"', self.html)
+        self.assertNotIn("render=explicit", self.html)
+        self.assertNotIn("turnstile.render", self.js)
         self.assertNotIn("BOARDLOG_TURNSTILE_SITE_KEY", self.html)
         self.assertRegex(
             self.html,
