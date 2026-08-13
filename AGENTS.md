@@ -52,6 +52,6 @@ npm run db:test:linked
 - Python validator와 GitHub Actions/Pages 배포가 구현됨
 - Supabase 검수 대기열, 비공개 이미지 버킷, RLS/RPC와 원격 DB 검증이 구현됨
 - 제출 Edge Function, Turnstile 운영 호스트와 익명 로그인은 원격 활성화됨
-- Android 제출·본인 상태 조회 UI, 승인 결과 exporter, 무료 한도 감시·임시 이미지 정리는 구현됨. `202608130007`~`202608130008` 원격 적용과 Actions secret 활성화는 운영 승인 대기
+- Android 제출·본인 상태 조회 UI, 승인 결과 exporter, 무료 한도 감시·임시 이미지 정리는 구현됨. `202608120001`~`202608130009` 원격 적용과 pgTAP 64개 검증 완료. Actions secret 활성화와 첫 수동 실행만 남음
 - 클라이언트와 Edge Function은 새 `sb_publishable_` / `sb_secret_` API 키 경로만 사용하고 구형 `anon` / `service_role` 키에 새 의존성을 만들지 않음
 - 2026-08-13 운영 프로젝트에서 구형 JWT 기반 `anon` / `service_role` API 키를 비활성화하고 이전 Legacy HS256 서명 키를 폐기함. 이후에는 새 publishable/secret API 키와 ES256 사용자 토큰만 사용함

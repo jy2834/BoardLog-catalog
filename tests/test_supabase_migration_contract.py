@@ -13,6 +13,7 @@ STORAGE_LOCKDOWN_MIGRATION = ROOT / "supabase" / "migrations" / "202608120005_lo
 OWNER_STATUS_MIGRATION = ROOT / "supabase" / "migrations" / "202608120006_owner_submission_status.sql"
 ADMIN_CONSOLE_MIGRATION = ROOT / "supabase" / "migrations" / "202608130007_admin_console_reads.sql"
 USAGE_MONITOR_MIGRATION = ROOT / "supabase" / "migrations" / "202608130008_free_usage_monitor.sql"
+USAGE_ACL_MIGRATION = ROOT / "supabase" / "migrations" / "202608130009_lock_usage_monitor_acl.sql"
 RLS_TEST = ROOT / "supabase" / "tests" / "public_catalog_rls.test.sql"
 
 
@@ -39,12 +40,18 @@ class SupabaseMigrationContractTest(unittest.TestCase):
             if USAGE_MONITOR_MIGRATION.exists()
             else ""
         )
+        cls.usage_acl_sql = (
+            USAGE_ACL_MIGRATION.read_text(encoding="utf-8")
+            if USAGE_ACL_MIGRATION.exists()
+            else ""
+        )
         cls.effective_sql = (
             cls.sql + "\n" + cls.hardening_sql + "\n" + cls.edge_rpc_sql
             + "\n" + cls.edge_only_sql + "\n" + cls.storage_lockdown_sql
             + "\n" + cls.owner_status_sql
             + "\n" + cls.admin_console_sql
             + "\n" + cls.usage_monitor_sql
+            + "\n" + cls.usage_acl_sql
         )
         cls.rls_test = RLS_TEST.read_text(encoding="utf-8")
 
@@ -230,6 +237,47 @@ class SupabaseMigrationContractTest(unittest.TestCase):
             r"not\s+exists\s*\([\s\S]+?game_submissions[\s\S]+?image_object_path\s*=\s*o\.name",
         )
 
+    def test_usage_monitor_follow_up_removes_explicit_mobile_function_grants(self):
+        self.assertTrue(USAGE_ACL_MIGRATION.exists(), "usage monitor ACL follow-up is required")
+        normalized_acl = re.sub(r"\s+", " ", self.usage_acl_sql).strip()
+        normalized_acl = normalized_acl.replace("( ", "(").replace(" )", ")")
+        for signature in (
+            "catalog_usage_snapshot()",
+            "apply_catalog_usage_status(public.usage_level, public.service_state, timestamptz, jsonb)",
+            "catalog_prunable_images(timestamptz, timestamptz, integer)",
+            "acknowledge_pruned_submission_images(text[])",
+        ):
+            with self.subTest(signature=signature):
+                self.assertIn(
+                    f"revoke all on function public.{signature} from public, anon, authenticated;",
+                    normalized_acl,
+                )
+                self.assertIn(
+                    f"grant execute on function public.{signature} to service_role;",
+                    normalized_acl,
+                )
+
+    def test_remote_pgtap_never_directly_deletes_storage_objects(self):
+        self.assertNotRegex(
+            self.rls_test,
+            r"delete\s+from\s+storage\.objects",
+            "Supabase Storage objects must be deleted through the Storage API",
+        )
+
+    def test_remote_pgtap_resets_secret_role_before_reading_private_rows(self):
+        self.assertRegex(
+            self.rls_test,
+            r"secret cleanup can acknowledge deleted image paths'\s*\n\);\s*"
+            r"reset role;\s*insert into tap_results select is\(",
+        )
+
+    def test_owner_update_results_are_read_through_the_safe_view(self):
+        owner_update_section = self.rls_test.split(
+            "owner can reuse the exact existing image path", 1
+        )[1].split("owner cannot replace an image path", 1)[0]
+        self.assertNotIn("from public.game_submissions", owner_update_section)
+        self.assertGreaterEqual(owner_update_section.count("from public.my_game_submissions"), 2)
+
     def test_storage_bucket_is_private_and_owner_scoped(self):
         self.assertRegex(
             self.sql,
@@ -287,7 +335,7 @@ class SupabaseMigrationContractTest(unittest.TestCase):
             "non-admin cannot review a submission",
             "admin can approve a submission",
             "pending rows never enter the approved public view",
-            "approved rows enter the approved public view",
+            "approved test row enters the approved public view",
         ):
             with self.subTest(phrase=phrase):
                 self.assertIn(phrase, self.rls_test)

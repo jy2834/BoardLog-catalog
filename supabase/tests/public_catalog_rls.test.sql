@@ -241,21 +241,30 @@ insert into tap_results select throws_ok(
   'cleanup cannot clear a reference before storage confirms deletion'
 );
 reset role;
-delete from storage.objects
-where bucket_id = 'submission-images'
-  and name = '11111111-1111-4111-8111-111111111111/dddddddd-dddd-4ddd-8ddd-dddddddddddd.webp';
+insert into public.game_submissions (
+  id, owner_user_id, public_game, image_object_path, status, reviewed_at, updated_at
+) values (
+  'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',
+  '11111111-1111-4111-8111-111111111111',
+  '{"name":"삭제 확인 완료","englishName":"Deletion Confirmed","aliases":[],"minPlayers":1,"maxPlayers":1,"minPlayMinutes":10,"maxPlayMinutes":10,"tags":["CARD"],"weight":1.0,"yearPublished":2026,"entryType":"BASE_GAME","sourceUrls":["https://example.com/deleted"]}'::jsonb,
+  '11111111-1111-4111-8111-111111111111/eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee.webp',
+  'REJECTED',
+  now() - interval '31 days',
+  now() - interval '31 days'
+);
 set local role service_role;
 insert into tap_results select lives_ok(
   $$select public.acknowledge_pruned_submission_images(array[
-    '11111111-1111-4111-8111-111111111111/dddddddd-dddd-4ddd-8ddd-dddddddddddd.webp'
+    '11111111-1111-4111-8111-111111111111/eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee.webp'
   ])$$,
   'secret cleanup can acknowledge deleted image paths'
 );
+reset role;
 insert into tap_results select is(
   (
     select image_object_path
     from public.game_submissions
-    where id = 'dddddddd-dddd-4ddd-8ddd-dddddddddddd'
+    where id = 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee'
   ),
   null,
   'cleanup acknowledgement clears only the rejected image reference'
@@ -263,7 +272,7 @@ insert into tap_results select is(
 
 reset role;
 create temporary table test_submission_ids as
-select id from public.game_submissions order by created_at limit 1;
+select 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'::uuid as id;
 grant select on test_submission_ids to authenticated;
 
 set local role authenticated;
@@ -319,7 +328,7 @@ insert into tap_results select lives_ok(
 insert into tap_results select is(
   (
     select public_game->>'name'
-    from public.game_submissions
+    from public.my_game_submissions
     where id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
   ),
   '수정된 게임',
@@ -328,7 +337,7 @@ insert into tap_results select is(
 insert into tap_results select is(
   (
     select image_object_path
-    from public.game_submissions
+    from public.my_game_submissions
     where id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
   ),
   '11111111-1111-4111-8111-111111111111/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa.webp',
@@ -394,7 +403,11 @@ reset role;
 select set_config('request.jwt.claims', '{"sub":"33333333-3333-4333-8333-333333333333","role":"authenticated"}', true);
 set local role authenticated;
 insert into tap_results select is(
-  (select count(*)::integer from public.admin_game_submissions),
+  (
+    select count(*)::integer
+    from public.admin_game_submissions
+    where id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
+  ),
   1,
   'admin retains access to the full moderation view'
 );
@@ -442,13 +455,38 @@ insert into tap_results select lives_ok(
   'admin can approve a submission'
 );
 
-insert into tap_results select is((select count(*)::integer from public.approved_catalog_games), 1, 'approved rows enter the approved public view');
+insert into tap_results select is(
+  (
+    select count(*)::integer
+    from public.approved_catalog_games
+    where origin_submission_id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
+  ),
+  1,
+  'approved test row enters the approved public view'
+);
 reset role;
-insert into tap_results select is((select count(*)::integer from public.moderation_events where action = 'APPROVED'), 1, 'approval creates an audit event');
+insert into tap_results select is(
+  (
+    select count(*)::integer
+    from public.moderation_events
+    where submission_id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
+      and action = 'APPROVED'
+  ),
+  1,
+  'approval creates an audit event for the test row'
+);
 
 set local role anon;
 select set_config('request.jwt.claims', '{"role":"anon"}', true);
-insert into tap_results select is((select count(*)::integer from public.approved_catalog_games), 1, 'anon can read only approved catalog rows');
+insert into tap_results select is(
+  (
+    select count(*)::integer
+    from public.approved_catalog_games
+    where origin_submission_id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
+  ),
+  1,
+  'anon can read the approved test row'
+);
 insert into tap_results select is((select count(service_state)::integer from public.service_status), 1, 'anon can read public service status columns');
 
 reset role;

@@ -55,7 +55,7 @@ python3 scripts/validate_catalog.py \
 - 사용자는 24시간당 최대 3건을 제출할 수 있습니다.
 - 서버 상태는 `NORMAL`, `IMAGE_LIMITED`, `SUBMISSION_CLOSED`, `MAINTENANCE`로 구분합니다.
 
-`202608120001`~`202608120006` DB 마이그레이션이 원격 프로젝트에 적용되었습니다. 제출자 Realtime은 원본 제출 테이블이 아니라 소유자별 불투명 변경 신호만 사용합니다. 익명 로그인과 `submit-game` Edge Function, Turnstile 운영 위젯이 활성화되어 있고 Android 제출·본인 상태 조회 UI도 연결되어 있습니다. 관리자 검수 화면, exporter, 무료 한도 감시 코드는 준비됐으며, `202608130007`~`202608130008` 마이그레이션과 GitHub Actions secret은 운영 승인 후 활성화합니다.
+`202608120001`~`202608130009` DB 마이그레이션이 원격 프로젝트에 적용되었고 원격 pgTAP 64개가 통과했습니다. 제출자 Realtime은 원본 제출 테이블이 아니라 소유자별 불투명 변경 신호만 사용합니다. 익명 로그인과 `submit-game` Edge Function, Turnstile 운영 위젯이 활성화되어 있고 Android 제출·본인 상태 조회 UI도 연결되어 있습니다. 관리자 검수 화면, exporter, 무료 한도 감시 코드와 DB 계약은 준비됐으며 GitHub Actions secret 등록과 첫 수동 실행만 남았습니다.
 
 ### 제출 Edge Function
 

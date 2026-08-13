@@ -59,7 +59,7 @@ BoardLog 공용 카탈로그는 자동 결제 전환이나 유료 플랜 업그�
 
 ## 활성화 전 체크리스트
 
-- `202608130007_admin_console_reads.sql`과 `202608130008_free_usage_monitor.sql`을 원격에 적용하고 pgTAP을 통과시킨다.
+- `202608130007_admin_console_reads.sql`~`202608130009_lock_usage_monitor_acl.sql`은 원격 적용 및 pgTAP 64개 검증 완료.
 - GitHub Actions에 `SUPABASE_URL`, 새 형식 `SUPABASE_SECRET_KEY`(`sb_secret_…`)만 등록한다.
 - 구형 `anon`/`service_role` JWT, PAT, DB 비밀번호를 workflow secret으로 재사용하지 않는다.
 - `workflow_dispatch`로 1회 실행해 상태 갱신, 무후보 정리, 비밀값 비노출을 확인한다.
