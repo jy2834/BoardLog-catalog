@@ -1,7 +1,7 @@
 begin;
 
 create extension if not exists pgtap with schema extensions;
-select plan(52);
+select plan(64);
 create temporary table tap_results (result text not null);
 grant insert, select on tap_results to anon, authenticated, service_role;
 
@@ -16,6 +16,10 @@ insert into tap_results select has_function('public', 'submit_game', array['json
 insert into tap_results select has_function('public', 'submit_game_from_edge', array['uuid', 'uuid', 'jsonb', 'text'], 'submit_game_from_edge exists');
 insert into tap_results select has_function('public', 'update_submission', array['uuid', 'jsonb', 'text'], 'update_submission exists');
 insert into tap_results select has_function('public', 'review_submission', array['uuid', 'submission_status', 'jsonb', 'text'], 'review_submission exists');
+insert into tap_results select has_function('public', 'catalog_usage_snapshot', array[]::text[], 'usage snapshot function exists');
+insert into tap_results select has_function('public', 'apply_catalog_usage_status', array['usage_level', 'service_state', 'timestamp with time zone', 'jsonb'], 'usage status function exists');
+insert into tap_results select has_function('public', 'catalog_prunable_images', array['timestamp with time zone', 'timestamp with time zone', 'integer'], 'image prune candidate function exists');
+insert into tap_results select has_function('public', 'acknowledge_pruned_submission_images', array['text[]'], 'image prune acknowledgement function exists');
 insert into tap_results select is(
   (
     select count(*)::integer
@@ -115,7 +119,38 @@ insert into tap_results select ok(
   not has_function_privilege('authenticated', 'public.submit_game(jsonb,text)', 'execute'),
   'authenticated clients cannot bypass Turnstile with direct submission RPC'
 );
+insert into tap_results select ok(
+  not has_function_privilege('authenticated', 'public.catalog_usage_snapshot()', 'execute'),
+  'authenticated clients cannot read private project usage metrics'
+);
 
+set local role service_role;
+insert into tap_results select ok(
+  (public.catalog_usage_snapshot()->>'databaseBytes')::bigint > 0
+    and (public.catalog_usage_snapshot()->>'storageBytes')::bigint >= 0,
+  'edge secret role can read bounded database and storage usage metrics'
+);
+reset role;
+update public.service_status
+set service_state = 'MAINTENANCE', operator_message = 'planned', last_verified_at = '2026-08-13T00:00:00Z'
+where singleton;
+set local role service_role;
+insert into tap_results select lives_ok(
+  $$select public.apply_catalog_usage_status(
+    'CRITICAL_95'::public.usage_level,
+    'IMAGE_LIMITED'::public.service_state,
+    '2026-08-13T00:01:00Z'::timestamptz,
+    '{"databaseBytes":{"value":475000000,"limit":500000000,"ratio":0.95}}'::jsonb
+  )$$,
+  'usage monitor can apply a verified status report'
+);
+insert into tap_results select is(
+  (select service_state::text || ':' || operator_message from public.service_status where singleton),
+  'MAINTENANCE:planned',
+  'usage monitor preserves operator maintenance and message'
+);
+reset role;
+update public.service_status set service_state = 'NORMAL', operator_message = null where singleton;
 set local role service_role;
 insert into tap_results select lives_ok(
   $$select public.submit_game_from_edge(
@@ -165,8 +200,79 @@ insert into tap_results select is(
 );
 
 reset role;
+insert into public.game_submissions (
+  id, owner_user_id, public_game, image_object_path, status, reviewed_at, updated_at
+) values (
+  'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+  '11111111-1111-4111-8111-111111111111',
+  '{"name":"거절 이미지","englishName":"Rejected Image","aliases":[],"minPlayers":1,"maxPlayers":1,"minPlayMinutes":10,"maxPlayMinutes":10,"tags":["CARD"],"weight":1.0,"yearPublished":2026,"entryType":"BASE_GAME","sourceUrls":["https://example.com/rejected"]}'::jsonb,
+  '11111111-1111-4111-8111-111111111111/dddddddd-dddd-4ddd-8ddd-dddddddddddd.webp',
+  'REJECTED',
+  now() - interval '31 days',
+  now() - interval '31 days'
+);
+insert into storage.objects (bucket_id, name, metadata, created_at, updated_at)
+values (
+  'submission-images',
+  '11111111-1111-4111-8111-111111111111/dddddddd-dddd-4ddd-8ddd-dddddddddddd.webp',
+  '{"size":123}'::jsonb,
+  now() - interval '31 days',
+  now() - interval '31 days'
+);
+set local role service_role;
+insert into tap_results select is(
+  (
+    select count(*)::integer
+    from public.catalog_prunable_images(
+      now() - interval '30 days', now() - interval '1 day', 100
+    )
+    where "objectPath" = '11111111-1111-4111-8111-111111111111/dddddddd-dddd-4ddd-8ddd-dddddddddddd.webp'
+      and reason = 'REJECTED_OLD'
+  ),
+  1,
+  'old rejected cover is selected for bounded cleanup'
+);
+insert into tap_results select throws_ok(
+  $$select public.acknowledge_pruned_submission_images(array[
+    '11111111-1111-4111-8111-111111111111/dddddddd-dddd-4ddd-8ddd-dddddddddddd.webp'
+  ])$$,
+  '55000',
+  'pruned image deletion is not verified',
+  'cleanup cannot clear a reference before storage confirms deletion'
+);
+reset role;
+insert into public.game_submissions (
+  id, owner_user_id, public_game, image_object_path, status, reviewed_at, updated_at
+) values (
+  'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',
+  '11111111-1111-4111-8111-111111111111',
+  '{"name":"삭제 확인 완료","englishName":"Deletion Confirmed","aliases":[],"minPlayers":1,"maxPlayers":1,"minPlayMinutes":10,"maxPlayMinutes":10,"tags":["CARD"],"weight":1.0,"yearPublished":2026,"entryType":"BASE_GAME","sourceUrls":["https://example.com/deleted"]}'::jsonb,
+  '11111111-1111-4111-8111-111111111111/eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee.webp',
+  'REJECTED',
+  now() - interval '31 days',
+  now() - interval '31 days'
+);
+set local role service_role;
+insert into tap_results select lives_ok(
+  $$select public.acknowledge_pruned_submission_images(array[
+    '11111111-1111-4111-8111-111111111111/eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee.webp'
+  ])$$,
+  'secret cleanup can acknowledge deleted image paths'
+);
+reset role;
+insert into tap_results select is(
+  (
+    select image_object_path
+    from public.game_submissions
+    where id = 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee'
+  ),
+  null,
+  'cleanup acknowledgement clears only the rejected image reference'
+);
+
+reset role;
 create temporary table test_submission_ids as
-select id from public.game_submissions order by created_at limit 1;
+select 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'::uuid as id;
 grant select on test_submission_ids to authenticated;
 
 set local role authenticated;
@@ -222,7 +328,7 @@ insert into tap_results select lives_ok(
 insert into tap_results select is(
   (
     select public_game->>'name'
-    from public.game_submissions
+    from public.my_game_submissions
     where id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
   ),
   '수정된 게임',
@@ -231,7 +337,7 @@ insert into tap_results select is(
 insert into tap_results select is(
   (
     select image_object_path
-    from public.game_submissions
+    from public.my_game_submissions
     where id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
   ),
   '11111111-1111-4111-8111-111111111111/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa.webp',
@@ -297,7 +403,11 @@ reset role;
 select set_config('request.jwt.claims', '{"sub":"33333333-3333-4333-8333-333333333333","role":"authenticated"}', true);
 set local role authenticated;
 insert into tap_results select is(
-  (select count(*)::integer from public.admin_game_submissions),
+  (
+    select count(*)::integer
+    from public.admin_game_submissions
+    where id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
+  ),
   1,
   'admin retains access to the full moderation view'
 );
@@ -345,13 +455,38 @@ insert into tap_results select lives_ok(
   'admin can approve a submission'
 );
 
-insert into tap_results select is((select count(*)::integer from public.approved_catalog_games), 1, 'approved rows enter the approved public view');
+insert into tap_results select is(
+  (
+    select count(*)::integer
+    from public.approved_catalog_games
+    where origin_submission_id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
+  ),
+  1,
+  'approved test row enters the approved public view'
+);
 reset role;
-insert into tap_results select is((select count(*)::integer from public.moderation_events where action = 'APPROVED'), 1, 'approval creates an audit event');
+insert into tap_results select is(
+  (
+    select count(*)::integer
+    from public.moderation_events
+    where submission_id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
+      and action = 'APPROVED'
+  ),
+  1,
+  'approval creates an audit event for the test row'
+);
 
 set local role anon;
 select set_config('request.jwt.claims', '{"role":"anon"}', true);
-insert into tap_results select is((select count(*)::integer from public.approved_catalog_games), 1, 'anon can read only approved catalog rows');
+insert into tap_results select is(
+  (
+    select count(*)::integer
+    from public.approved_catalog_games
+    where origin_submission_id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
+  ),
+  1,
+  'anon can read the approved test row'
+);
 insert into tap_results select is((select count(service_state)::integer from public.service_status), 1, 'anon can read public service status columns');
 
 reset role;
@@ -368,5 +503,5 @@ begin
   end if;
 end;
 $$;
-select 'ok - all 52 pgTAP assertions passed' as result;
+select 'ok - all 64 pgTAP assertions passed' as result;
 rollback;

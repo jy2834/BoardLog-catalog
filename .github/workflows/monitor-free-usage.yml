@@ -1,0 +1,82 @@
+name: Monitor Supabase free usage
+
+on:
+  schedule:
+    - cron: '17 18 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: free-usage-monitor
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify monitor and cleanup contracts
+        run: >-
+          python3 -m unittest
+          tests.test_monitor_free_usage
+          tests.test_prune_temporary_images
+          tests.test_usage_workflow
+          tests.test_supabase_migration_contract
+          -v
+      - name: Measure verified usage
+        id: usage
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+        run: python3 scripts/monitor_free_usage.py
+      - name: Prune bounded temporary images
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+        run: python3 scripts/prune_temporary_images.py --limit 100
+      - name: Open or update a private-metrics-free warning issue
+        if: >-
+          always() && (
+            steps.usage.outputs.usage_level == 'WARNING_90' ||
+            steps.usage.outputs.usage_level == 'CRITICAL_95' ||
+            steps.usage.outputs.usage_level == 'EXHAUSTED_100'
+          )
+        env:
+          GH_TOKEN: ${{ github.token }}
+          USAGE_LEVEL: ${{ steps.usage.outputs.usage_level }}
+          SERVICE_STATE: ${{ steps.usage.outputs.service_state }}
+          LIMITING_METRIC: ${{ steps.usage.outputs.limiting_metric }}
+        run: |
+          case "$USAGE_LEVEL" in
+            WARNING_90|CRITICAL_95|EXHAUSTED_100) ;;
+            *) echo "Unexpected issue threshold" >&2; exit 1 ;;
+          esac
+          gh label create free-tier-usage --color B60205 --description "Supabase free usage warning" --force
+          body="BoardLog catalog usage reached ${USAGE_LEVEL}. Safeguard state: ${SERVICE_STATE}. Limiting verified metric: ${LIMITING_METRIC}. Check the private Supabase dashboard and docs/free-tier-runbook.md; no automatic paid upgrade is allowed."
+          issue="$(gh issue list --state open --label free-tier-usage --limit 1 --json number --jq '.[0].number')"
+          if [ -n "$issue" ]; then
+            gh issue edit "$issue" --title "Supabase free usage: ${USAGE_LEVEL}" --body "$body"
+          else
+            gh issue create --title "Supabase free usage: ${USAGE_LEVEL}" --body "$body" --label free-tier-usage
+          fi
+      - name: Close a recovered usage warning
+        if: >-
+          always() && (
+            steps.usage.outputs.usage_level == 'NORMAL' ||
+            steps.usage.outputs.usage_level == 'NOTICE_80'
+          )
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          issue="$(gh issue list --state open --label free-tier-usage --limit 1 --json number --jq '.[0].number')"
+          if [ -n "$issue" ]; then
+            gh issue close "$issue" --comment "Verified database and storage usage recovered below the 90% warning threshold."
+          fi

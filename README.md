@@ -38,7 +38,11 @@ python3 scripts/validate_catalog.py \
 
 저장소의 검증 코드와 스키마는 MIT License입니다. 제3자 게임명, 상표, 설명, 메타데이터와 커버 이미지는 각각의 권리자·원출처 조건을 따르며 MIT License로 재허가되지 않습니다. 공개 이미지는 관리자 검수와 출처 확인을 통과한 항목만 추가합니다.
 
-일반 사용자의 제출은 곧바로 공개되지 않습니다. Supabase의 비공개 검수 대기열과 관리자 승인을 거친 뒤 별도 exporter가 이 저장소를 갱신합니다.
+일반 사용자의 제출은 곧바로 공개되지 않습니다. Supabase의 비공개 검수 대기열과 관리자 승인을 거친 뒤 `export-approved.yml`이 최대 25건씩 공개 JSON과 커버를 갱신합니다. 승인 행의 임시 커버는 입력 2 MiB 제한을 다시 확인하고 EXIF를 제거한 최대 1,200px WebP로 변환합니다. 전체 스키마 검증과 Git push 후 같은 작업에서 GitHub Pages 배포까지 성공해야 서버의 `exported_at`을 기록합니다. 검증·변환·push·Pages·서버 확인 중 실패하면 승인 행과 임시 이미지를 남겨 다음 15분 실행에서 안전하게 재시도합니다. 서버 확인 이후 임시 Storage 삭제만 실패한 경우 공개 결과는 유지하며, 남은 고아 파일은 사용량 정리 작업에서 다시 확인합니다.
+
+워크플로 활성화에는 GitHub Actions secret `SUPABASE_URL`과 새 형식의 `SUPABASE_SECRET_KEY`(`sb_secret_…`)가 필요합니다. 구형 `service_role` JWT는 사용하지 않으며, secret은 워크플로 로그·Android·웹 번들·Git에 넣지 않습니다. 수동 실행에서는 특정 승인 UUID 하나 또는 다음 미내보내기 묶음을 선택할 수 있습니다.
+
+무료 한도 감시는 하루 한 번 DB와 Storage의 실제 사용량을 측정합니다. 80/90/95/100% 단계에 따라 공지·이슈·이미지 제한·제출 중지를 적용하며, 운영자의 `MAINTENANCE` 상태와 안내문은 덮어쓰지 않습니다. 거절 후 30일이 지난 이미지와 24시간 이상 참조되지 않은 고아 이미지는 삭제 확인 뒤 정리합니다. 수동 지표 확인과 장애 대응은 [`docs/free-tier-runbook.md`](docs/free-tier-runbook.md)를 따릅니다.
 
 ## Supabase 검수 서버
 
@@ -51,7 +55,7 @@ python3 scripts/validate_catalog.py \
 - 사용자는 24시간당 최대 3건을 제출할 수 있습니다.
 - 서버 상태는 `NORMAL`, `IMAGE_LIMITED`, `SUBMISSION_CLOSED`, `MAINTENANCE`로 구분합니다.
 
-`202608120001`~`202608120006` DB 마이그레이션이 원격 프로젝트에 적용되었습니다. 제출자 Realtime은 원본 제출 테이블이 아니라 소유자별 불투명 변경 신호만 사용합니다. 익명 로그인과 `submit-game` Edge Function, Turnstile 운영 위젯이 활성화되어 있고 Android 제출·본인 상태 조회 UI도 연결되어 있습니다. 관리자 exporter와 검수 웹 화면은 다음 구현 단계입니다.
+`202608120001`~`202608130009` DB 마이그레이션이 원격 프로젝트에 적용되었고 원격 pgTAP 64개가 통과했습니다. 제출자 Realtime은 원본 제출 테이블이 아니라 소유자별 불투명 변경 신호만 사용합니다. 익명 로그인과 `submit-game` Edge Function, Turnstile 운영 위젯이 활성화되어 있고 Android 제출·본인 상태 조회 UI도 연결되어 있습니다. 관리자 검수 화면, exporter, 무료 한도 감시 코드와 DB 계약은 준비됐으며 GitHub Actions secret 등록과 첫 수동 실행만 남았습니다.
 
 ### 제출 Edge Function
 
@@ -96,7 +100,7 @@ npx supabase db push --linked --agent no
 npm run db:test:linked
 ```
 
-마지막 명령은 Docker 없이 Management API를 통해 원격 DB에서 44개 pgTAP 검증을 실행합니다. 하나라도 실패하면 SQL 예외로 명령 자체가 실패합니다. Docker가 준비된 환경에서는 `npx supabase test db --linked supabase/tests/public_catalog_rls.test.sql --agent no`도 사용할 수 있습니다.
+마지막 명령은 Docker 없이 Management API를 통해 원격 DB에서 64개 pgTAP 검증을 실행합니다. 하나라도 실패하면 SQL 예외로 명령 자체가 실패합니다. Docker가 준비된 환경에서는 `npx supabase test db --linked supabase/tests/public_catalog_rls.test.sql --agent no`도 사용할 수 있습니다.
 
 익명 로그인은 2026-08-12에 대시보드의 `Authentication → Sign In / Providers → Allow anonymous sign-ins` 항목만 활성화했습니다. 전체 로컬 설정을 덮어쓸 필요가 있을 때만 아래 명령을 사용하며, 실행 전 변경 내용을 검토합니다.
 
