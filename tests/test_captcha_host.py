@@ -16,6 +16,7 @@ class CaptchaHostContractTest(unittest.TestCase):
 
     def test_loads_turnstile_from_cloudflare_without_an_explicit_render_race(self):
         self.assertIn('class="cf-turnstile"', self.html)
+        self.assertNotIn('id="turnstile"', self.html)
         self.assertIn('data-action="boardlog_submit"', self.html)
         self.assertNotIn("render=explicit", self.html)
         self.assertNotIn("turnstile.render", self.js)
