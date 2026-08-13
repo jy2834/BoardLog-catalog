@@ -6,8 +6,8 @@
 
   function sendToAndroid(type, token = "") {
     const bridge = window.BoardLogTurnstile;
-    if (bridge && typeof bridge.postMessage === "function") {
-      bridge.postMessage(JSON.stringify({ type, token }));
+    if (bridge && typeof bridge.postToken === "function") {
+      bridge.postToken(type === "success" ? token : "");
     }
   }
 

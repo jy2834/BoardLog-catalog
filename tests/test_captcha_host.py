@@ -25,7 +25,8 @@ class CaptchaHostContractTest(unittest.TestCase):
 
     def test_only_sends_the_short_lived_challenge_result_to_android(self):
         self.assertIn("BoardLogTurnstile", self.js)
-        self.assertIn("postMessage", self.js)
+        self.assertIn("postToken", self.js)
+        self.assertNotIn("postMessage", self.js)
         self.assertNotIn("localStorage", self.combined)
         self.assertNotIn("sessionStorage", self.combined)
         for private_name in ("memo", "purchasePrice", "ownerId", "gameName", "payload"):
