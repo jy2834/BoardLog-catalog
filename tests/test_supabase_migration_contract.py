@@ -12,6 +12,7 @@ EDGE_ONLY_MIGRATION = ROOT / "supabase" / "migrations" / "202608120004_require_e
 STORAGE_LOCKDOWN_MIGRATION = ROOT / "supabase" / "migrations" / "202608120005_lock_submission_storage.sql"
 OWNER_STATUS_MIGRATION = ROOT / "supabase" / "migrations" / "202608120006_owner_submission_status.sql"
 ADMIN_CONSOLE_MIGRATION = ROOT / "supabase" / "migrations" / "202608130007_admin_console_reads.sql"
+USAGE_MONITOR_MIGRATION = ROOT / "supabase" / "migrations" / "202608130008_free_usage_monitor.sql"
 RLS_TEST = ROOT / "supabase" / "tests" / "public_catalog_rls.test.sql"
 
 
@@ -33,11 +34,17 @@ class SupabaseMigrationContractTest(unittest.TestCase):
             if ADMIN_CONSOLE_MIGRATION.exists()
             else ""
         )
+        cls.usage_monitor_sql = (
+            USAGE_MONITOR_MIGRATION.read_text(encoding="utf-8")
+            if USAGE_MONITOR_MIGRATION.exists()
+            else ""
+        )
         cls.effective_sql = (
             cls.sql + "\n" + cls.hardening_sql + "\n" + cls.edge_rpc_sql
             + "\n" + cls.edge_only_sql + "\n" + cls.storage_lockdown_sql
             + "\n" + cls.owner_status_sql
             + "\n" + cls.admin_console_sql
+            + "\n" + cls.usage_monitor_sql
         )
         cls.rls_test = RLS_TEST.read_text(encoding="utf-8")
 
@@ -164,6 +171,64 @@ class SupabaseMigrationContractTest(unittest.TestCase):
         ):
             with self.subTest(token=token):
                 self.assertIn(token, self.sql)
+
+    def test_usage_monitor_functions_are_secret_only_and_preserve_maintenance(self):
+        self.assertTrue(USAGE_MONITOR_MIGRATION.exists(), "usage monitor migration is required")
+        self.assertEqual(4, self.usage_monitor_sql.count("set search_path = pg_catalog, pg_temp"))
+        self.assertNotIn("set search_path = public", self.usage_monitor_sql)
+        for function in (
+            "catalog_usage_snapshot",
+            "apply_catalog_usage_status",
+            "catalog_prunable_images",
+            "acknowledge_pruned_submission_images",
+        ):
+            with self.subTest(function=function):
+                self.assertIn(f"function public.{function}", self.usage_monitor_sql)
+                self.assertRegex(
+                    self.usage_monitor_sql,
+                    rf"revoke\s+all\s+on\s+function\s+public\.{function}[\s\S]+?from\s+public",
+                )
+                self.assertRegex(
+                    self.usage_monitor_sql,
+                    rf"grant\s+execute\s+on\s+function\s+public\.{function}[\s\S]+?to\s+service_role",
+                )
+        self.assertRegex(
+            self.usage_monitor_sql,
+            r"service_state\s*=\s*case[\s\S]+?when\s+service_state\s*=\s*'MAINTENANCE'",
+        )
+        self.assertIn("pg_database_size(current_database())", self.usage_monitor_sql)
+        self.assertRegex(
+            self.usage_monitor_sql,
+            r"count\(\*\)\s+filter[\s\S]+?metadata->>'size'\s+is\s+null"
+            r"[\s\S]+?then\s+null",
+        )
+        self.assertIn("bucket_id = 'submission-images'", self.usage_monitor_sql)
+        self.assertIn("interval '30 days'", self.usage_monitor_sql)
+        self.assertIn("interval '1 day'", self.usage_monitor_sql)
+        self.assertIn("p_verified_at >= last_verified_at", self.usage_monitor_sql)
+        self.assertIn("p_verified_at > now() + interval '5 minutes'", self.usage_monitor_sql)
+        self.assertIn("usage level and service state do not match", self.usage_monitor_sql)
+        self.assertIn("pruned image deletion is not verified", self.usage_monitor_sql)
+        self.assertRegex(
+            self.usage_monitor_sql,
+            r"storage\.objects\s+o[\s\S]+?o\.name\s*=\s*any\s*\(p_paths\)"
+            r"[\s\S]+?update\s+public\.game_submissions",
+        )
+        self.assertRegex(
+            self.usage_monitor_sql,
+            r"active\.image_object_path\s*=\s*s\.image_object_path[\s\S]+?active\.status\s*<>\s*'REJECTED'",
+        )
+        self.assertRegex(
+            self.usage_monitor_sql,
+            r"from\s+public\.game_submissions\s+s[\s\S]+?s\.status\s*=\s*'REJECTED'"
+            r"[\s\S]+?s\.image_object_path\s+is\s+not\s+null",
+        )
+        self.assertIn("union\n", self.usage_monitor_sql.lower())
+        self.assertNotIn("union all\n\n    select o.name", self.usage_monitor_sql.lower())
+        self.assertRegex(
+            self.usage_monitor_sql,
+            r"not\s+exists\s*\([\s\S]+?game_submissions[\s\S]+?image_object_path\s*=\s*o\.name",
+        )
 
     def test_storage_bucket_is_private_and_owner_scoped(self):
         self.assertRegex(
