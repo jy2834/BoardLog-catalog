@@ -119,6 +119,31 @@ class SupabaseMigrationContractTest(unittest.TestCase):
         self.assertNotIn("owner_user_id", self.public_unverified_projection)
         self.assertNotIn("admin_note", self.public_unverified_projection)
 
+    def test_in_app_admin_public_feed_preserves_view_compatibility_and_admin_scope(self):
+        sql = self.in_app_admin_sql.lower()
+        my_view = sql.split("create or replace view public.my_game_submissions", 1)[1].split(";", 1)[0]
+        admin_view = sql.split("create or replace view public.admin_game_submissions", 1)[1].split(";", 1)[0]
+        metadata_view = sql.split("create or replace view public.public_unverified_catalog_metadata", 1)[1].split(";", 1)[0]
+        admin_helper = sql.split("create or replace function public.is_catalog_admin", 1)[-1].split("$$;", 1)[0]
+
+        my_view = re.sub(r"\s+", " ", my_view)
+        admin_view = re.sub(r"\s+", " ", admin_view)
+        self.assertIn(
+            "select id, public_game, image_object_path, status, submitter_message, created_at, updated_at, reviewed_at, visibility, removal_requested_at",
+            my_view,
+        )
+        self.assertIn(
+            "select id, owner_user_id, public_game, image_object_path, status, submitter_message, admin_note, reviewer_user_id, created_at, updated_at, reviewed_at, exported_at, visibility",
+            admin_view,
+        )
+        self.assertIn("from public.game_submissions", metadata_view)
+        self.assertNotIn("from public.public_unverified_catalog_games", metadata_view)
+        self.assertNotIn("image_object_path", metadata_view)
+        self.assertIn("create or replace view public.approved_catalog_games", sql)
+        self.assertIn("visibility <> 'hidden'", sql)
+        self.assertIn("auth.uid() is not null", admin_helper)
+        self.assertIn("coalesce((select auth.jwt()->>'is_anonymous')::boolean, true) is false", admin_helper)
+
     def test_email_signup_is_disabled_without_disabling_anonymous_users(self):
         self.assertIn("enable_signup = true", self.config_auth)
         self.assertIn("enable_anonymous_sign_ins = true", self.config_auth)
@@ -376,9 +401,24 @@ class SupabaseMigrationContractTest(unittest.TestCase):
             "admin can approve a submission",
             "pending rows never enter the approved public view",
             "approved test row enters the approved public view",
-            "pending public submission is immediately visible without owner identity",
             "anonymous owner cannot hide public content",
             "owner can request public removal without deleting the row",
+            "anon can read public unverified metadata without private image paths",
+            "anon cannot query the private unverified image view",
+            "authenticated anonymous user can read public unverified metadata",
+            "anonymous admin membership is rejected",
+            "anonymous admin membership cannot read the admin moderation view",
+            "admin can hide an approved public row",
+            "hide creates a public suppression tombstone",
+            "hidden approved row is absent from the public catalog view",
+            "admin can restore a hidden public row",
+            "restore removes the public suppression tombstone",
+            "restored approved row re-enters the public catalog view",
+            "admin can prepare a hidden submission for deletion",
+            "delete preparation creates a public suppression tombstone",
+            "admin can finalize a prepared submission deletion",
+            "finalized deletion removes the submission row",
+            "finalized deletion retains the public suppression tombstone",
         ):
             with self.subTest(phrase=phrase):
                 self.assertIn(phrase, self.rls_test)

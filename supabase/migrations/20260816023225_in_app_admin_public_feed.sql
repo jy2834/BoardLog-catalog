@@ -190,8 +190,16 @@ where (status = 'PENDING' or (status = 'APPROVED' and exported_at is null))
 create or replace view public.public_unverified_catalog_metadata
 with (security_barrier = true)
 as
-select origin_submission_id, catalog_key, public_game, status, created_at, updated_at
-from public.public_unverified_catalog_games;
+select
+  id as origin_submission_id,
+  ('community-' || replace(id::text, '-', '')) as catalog_key,
+  public_game,
+  status,
+  created_at,
+  updated_at
+from public.game_submissions
+where (status = 'PENDING' or (status = 'APPROVED' and exported_at is null))
+  and visibility in ('PUBLIC', 'REMOVAL_REQUESTED');
 
 revoke all on public.public_unverified_catalog_games from public, anon, authenticated;
 revoke all on public.public_unverified_catalog_metadata from public, anon, authenticated;
@@ -407,19 +415,43 @@ $$;
 create or replace view public.my_game_submissions
 with (security_barrier = true)
 as
-select id, public_game, image_object_path, status, visibility, removal_requested_at,
-       submitter_message, created_at, updated_at, reviewed_at
+select id, public_game, image_object_path, status, submitter_message, created_at, updated_at, reviewed_at,
+       visibility, removal_requested_at
 from public.game_submissions
 where owner_user_id = auth.uid();
 
 create or replace view public.admin_game_submissions
 with (security_barrier = true)
 as
-select id, owner_user_id, public_game, image_object_path, status, visibility,
-       removal_requested_at, hidden_at, hidden_reason, submitter_message, admin_note,
-       reviewer_user_id, created_at, updated_at, reviewed_at, exported_at
+select id, owner_user_id, public_game, image_object_path, status, submitter_message, admin_note,
+       reviewer_user_id, created_at, updated_at, reviewed_at, exported_at, visibility,
+       removal_requested_at, hidden_at, hidden_reason
 from public.game_submissions
 where public.is_catalog_admin();
+
+create or replace view public.approved_catalog_games
+with (security_barrier = true)
+as
+select id as origin_submission_id, status, public_game, reviewed_at as published_at
+from public.game_submissions
+where status in ('APPROVED', 'MERGED')
+  and visibility <> 'HIDDEN';
+
+create or replace function public.is_catalog_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public, pg_temp
+as $$
+  select auth.uid() is not null
+    and coalesce((select auth.jwt()->>'is_anonymous')::boolean, true) is false
+    and exists (
+      select 1
+      from public.admin_users
+      where user_id = auth.uid()
+    )
+$$;
 
 revoke all on function public.request_submission_removal(uuid) from public;
 revoke all on function public.withdraw_submission(uuid) from public;
