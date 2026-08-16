@@ -156,6 +156,46 @@ class ExportApprovedTest(unittest.TestCase):
         self.assertEqual([], updated["games"])
         self.assertEqual(["publish"], events)
 
+    def test_suppression_only_outcome_reports_catalog_changed_without_exported_ids(self):
+        from scripts.export_approved import export_cycle_with_result
+
+        class Remote:
+            def fetch_pending(self, _submission_id): return []
+            def fetch_suppressions(self): return {ORIGIN_ONE}
+            def mark_exported(self, _ids): raise AssertionError("no rows were exported")
+            def delete_images(self, _paths): raise AssertionError("no temporary images exist")
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "catalog" / "images").mkdir(parents=True)
+            (root / "catalog" / "images" / "no-cover.svg").write_text("<svg/>", encoding="utf-8")
+            (root / "catalog" / "catalog.json").write_text(
+                json.dumps(document(public_game("suppressed"))), encoding="utf-8"
+            )
+            (root / "catalog" / "schema.json").write_text(
+                Path("catalog/schema.json").read_text(), encoding="utf-8"
+            )
+
+            result = export_cycle_with_result(
+                Remote(), root, lambda: None,
+                generated_at="2026-08-16T01:02:03Z",
+            )
+
+        self.assertEqual([], result.exported_ids)
+        self.assertTrue(result.catalog_changed)
+
+    def test_pages_publish_uses_catalog_change_or_exports_but_ack_uses_exports_only(self):
+        workflow = Path(".github/workflows/export-approved.yml").read_text(encoding="utf-8")
+        pages_condition = (
+            "if: steps.publish.outputs.catalog_changed == 'true' || "
+            "steps.publish.outputs.exported_count != '0'"
+        )
+
+        self.assertIn('echo "catalog_changed=false" >> "$GITHUB_OUTPUT"', workflow)
+        self.assertEqual(4, workflow.count(pages_condition))
+        self.assertIn("name: Mark published rows exported\n        if: steps.publish.outputs.exported_count != '0'", workflow)
+        self.assertLess(workflow.index("actions/deploy-pages@v4"), workflow.index("--acknowledge-ids"))
+
     def test_inserts_approved_rows_deterministically_and_increments_once(self):
         submissions = [
             ApprovedSubmission(ORIGIN_TWO, "APPROVED", public_game("z-game", origin=ORIGIN_TWO), None),

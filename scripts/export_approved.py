@@ -57,6 +57,12 @@ class ApprovedSubmission:
     reviewed_at: str = "2026-08-13T00:00:00Z"
 
 
+@dataclass(frozen=True)
+class ExportCycleResult:
+    exported_ids: list[str]
+    catalog_changed: bool
+
+
 class ExportRemote(Protocol):
     def fetch_pending(self, submission_id: str | None) -> list[ApprovedSubmission]: ...
     def fetch_suppressions(self) -> set[str]: ...
@@ -326,7 +332,7 @@ def _atomic_write(path: Path, data: bytes) -> None:
         raise
 
 
-def export_cycle(
+def export_cycle_with_result(
     remote: ExportRemote,
     repo_root: Path,
     publish: Callable[[], None],
@@ -335,7 +341,7 @@ def export_cycle(
     generated_at: str | None = None,
     image_converter: Callable[[bytes, Path], None] = convert_cover_to_webp,
     acknowledge: bool = True,
-) -> list[str]:
+) -> ExportCycleResult:
     rows = remote.fetch_pending(submission_id)
     fetch_suppressions = getattr(remote, "fetch_suppressions", None)
     suppressed = _validated_suppression_ids(fetch_suppressions() if fetch_suppressions else ())
@@ -381,7 +387,29 @@ def export_cycle(
     if acknowledge and exported_ids:
         exported_set = set(exported_ids)
         _acknowledge_rows(remote, [row for row in rows if row.submission_id in exported_set])
-    return exported_ids
+    return ExportCycleResult(exported_ids=exported_ids, catalog_changed=changed)
+
+
+def export_cycle(
+    remote: ExportRemote,
+    repo_root: Path,
+    publish: Callable[[], None],
+    *,
+    submission_id: str | None = None,
+    generated_at: str | None = None,
+    image_converter: Callable[[bytes, Path], None] = convert_cover_to_webp,
+    acknowledge: bool = True,
+) -> list[str]:
+    """Compatibility wrapper for callers that only need exported IDs."""
+    return export_cycle_with_result(
+        remote,
+        repo_root,
+        publish,
+        submission_id=submission_id,
+        generated_at=generated_at,
+        image_converter=image_converter,
+        acknowledge=acknowledge,
+    ).exported_ids
 
 
 def _acknowledge_rows(remote: ExportRemote, rows: Sequence[ApprovedSubmission]) -> None:
@@ -602,9 +630,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         remote = SupabaseExportRemote(url, secret)
         if args.acknowledge_ids:
             acknowledge_exports(remote, args.acknowledge_ids)
-            exported = list(args.acknowledge_ids)
+            result = ExportCycleResult(exported_ids=list(args.acknowledge_ids), catalog_changed=False)
         else:
-            exported = export_cycle(
+            result = export_cycle_with_result(
                 remote,
                 args.repo_root,
                 lambda: publish_with_git(args.repo_root),
@@ -618,12 +646,16 @@ def main(argv: Sequence[str] | None = None) -> int:
     if github_output:
         try:
             with Path(github_output).open("a", encoding="utf-8") as stream:
-                stream.write(f"exported_count={len(exported)}\n")
-                stream.write("exported_ids=" + ",".join(exported) + "\n")
+                stream.write(f"exported_count={len(result.exported_ids)}\n")
+                stream.write("exported_ids=" + ",".join(result.exported_ids) + "\n")
+                stream.write(f"catalog_changed={str(result.catalog_changed).lower()}\n")
         except OSError as error:
             print(f"Cannot report exporter result to GitHub Actions: {error}", file=sys.stderr)
             return 1
-    print(f"Exported {len(exported)} reviewed submission(s)")
+    print(
+        f"Exported {len(result.exported_ids)} reviewed submission(s); "
+        f"catalog_changed={str(result.catalog_changed).lower()}"
+    )
     return 0
 
 
