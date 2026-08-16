@@ -5,6 +5,7 @@ import {
   MAX_COMMUNITY_RESPONSE_BYTES,
   createCommunityCatalogHandler,
   type CommunityCatalogDependencies,
+  type CommunitySuppressionRow,
 } from "./handler.ts";
 
 const ORIGIN = "11111111-1111-4111-8111-111111111111";
@@ -38,7 +39,10 @@ function fixture(overrides: Partial<CommunityCatalogDependencies> = {}): Communi
     }],
     fetchPrivateImagePaths: async () => new Map([[ORIGIN, "private/path.jpg"]]),
     createSignedImageUrl: async () => "https://project.supabase.co/storage/v1/object/sign/submission-images/signed-token",
-    fetchSuppressions: async () => [{ originSubmissionId: SUPPRESSED }],
+    fetchSuppressions: async () => [{
+      originSubmissionId: SUPPRESSED,
+      createdAt: "2026-08-16T02:30:00Z",
+    }],
     generatedAt: () => "2026-08-16T03:00:00Z",
     ...overrides,
   };
@@ -82,6 +86,55 @@ test("community feed is GET-only and returns a bounded deterministic cache docum
 
   const method = await handler(new Request(request().url, { method: "POST", headers: { apikey: "sb_publishable_test" } }));
   assert.equal(method.status, 405);
+});
+
+test("ETag hashes the exact signed-URL-bearing body", async () => {
+  let signingAttempt = 0;
+  const handler = createCommunityCatalogHandler(fixture({
+    createSignedImageUrl: async () =>
+      `https://project.supabase.co/storage/v1/object/sign/submission-images/cover.jpg?token=${++signingAttempt}`,
+  }));
+
+  const first = await handler(request());
+  const firstEtag = first.headers.get("etag");
+  const second = await handler(request({ "if-none-match": firstEtag! }));
+
+  assert.equal(first.status, 200);
+  assert.equal(second.status, 200);
+  assert.notEqual(second.headers.get("etag"), firstEtag);
+  assert.notEqual(await second.text(), await first.text());
+
+  const stableHandler = createCommunityCatalogHandler(fixture());
+  const stableFirst = await stableHandler(request());
+  const stableSecond = await stableHandler(request({ "if-none-match": stableFirst.headers.get("etag")! }));
+  assert.equal(stableSecond.status, 304);
+});
+
+test("suppression timestamps deterministically change revision and generatedAt without being exposed", async () => {
+  const responseAt = async (createdAt: string) => {
+    const suppression: CommunitySuppressionRow = { originSubmissionId: SUPPRESSED, createdAt };
+    return await createCommunityCatalogHandler(fixture({
+      fetchMetadata: async () => [],
+      fetchPrivateImagePaths: async () => new Map(),
+      fetchSuppressions: async () => [suppression],
+      generatedAt: (_games, suppressions) => suppressions[0].createdAt,
+    }))(request());
+  };
+
+  const first = await responseAt("2026-08-16T01:00:00Z");
+  const second = await responseAt("2026-08-16T02:00:00Z");
+  const firstBody = await first.text();
+  const secondBody = await second.text();
+  const firstDocument = JSON.parse(firstBody);
+  const secondDocument = JSON.parse(secondBody);
+
+  assert.notEqual(firstDocument.revision, secondDocument.revision);
+  assert.equal(firstDocument.generatedAt, "2026-08-16T01:00:00Z");
+  assert.equal(secondDocument.generatedAt, "2026-08-16T02:00:00Z");
+  assert.deepEqual(secondDocument.suppressedOriginSubmissionIds, [SUPPRESSED]);
+  assert.equal(firstBody.includes("createdAt"), false);
+  assert.equal(secondBody.includes("2026-08-16T02:00:00Z"), true);
+  assert.equal(JSON.stringify(secondDocument.suppressedOriginSubmissionIds).includes("2026-08-16"), false);
 });
 
 test("community feed never returns more than 1000 rows", async () => {

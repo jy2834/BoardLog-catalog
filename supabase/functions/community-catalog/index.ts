@@ -104,13 +104,16 @@ const handler = createCommunityCatalogHandler({
   fetchSuppressions: async () => {
     const rows: CommunitySuppressionRow[] = [];
     for (let offset = 0; offset <= MAX_COMMUNITY_SUPPRESSIONS; offset += PAGE_SIZE) {
-      const { data, error } = await publicClient()
-        .from("public_catalog_suppressions")
-        .select("origin_submission_id")
+      const { data, error } = await secretClient()
+        .from("catalog_suppressions")
+        .select("origin_submission_id,created_at")
         .order("origin_submission_id", { ascending: true })
         .range(offset, offset + PAGE_SIZE - 1);
       if (error || !Array.isArray(data)) throw new Error("Community suppressions unavailable");
-      rows.push(...data.map((row) => ({ originSubmissionId: row.origin_submission_id })));
+      rows.push(...data.map((row) => ({
+        originSubmissionId: row.origin_submission_id,
+        createdAt: row.created_at,
+      })));
       if (data.length < PAGE_SIZE) return rows;
     }
     throw new Error("Community suppressions exceed the response bound");
@@ -118,7 +121,7 @@ const handler = createCommunityCatalogHandler({
   generatedAt: (games, suppressions) => {
     const timestamps = [
       ...games.flatMap((row) => [row.createdAt, row.updatedAt]),
-      ...suppressions.map((row) => row.updatedAt).filter((value): value is string => value !== undefined),
+      ...suppressions.map((row) => row.createdAt),
     ].sort();
     return timestamps.at(-1) ?? "1970-01-01T00:00:00Z";
   },

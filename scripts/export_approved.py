@@ -343,8 +343,11 @@ def export_cycle_with_result(
     acknowledge: bool = True,
 ) -> ExportCycleResult:
     rows = remote.fetch_pending(submission_id)
-    fetch_suppressions = getattr(remote, "fetch_suppressions", None)
-    suppressed = _validated_suppression_ids(fetch_suppressions() if fetch_suppressions else ())
+    try:
+        suppression_values = remote.fetch_suppressions()
+    except Exception as error:
+        raise ExportError("Cannot fetch catalog suppressions") from error
+    suppressed = _validated_suppression_ids(suppression_values)
     catalog_path = repo_root / "catalog" / "catalog.json"
     schema_path = repo_root / "catalog" / "schema.json"
     images_dir = repo_root / "catalog" / "images"

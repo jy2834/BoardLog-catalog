@@ -184,6 +184,37 @@ class ExportApprovedTest(unittest.TestCase):
         self.assertEqual([], result.exported_ids)
         self.assertTrue(result.catalog_changed)
 
+    def test_missing_or_failed_suppression_fetch_aborts_before_side_effects(self):
+        from scripts.export_approved import export_cycle_with_result
+
+        events: list[str] = []
+
+        class MissingSuppressionRemote:
+            def fetch_pending(self, _submission_id):
+                return [ApprovedSubmission(ORIGIN_TWO, "APPROVED", public_game("new", origin=ORIGIN_TWO), None)]
+            def mark_exported(self, _ids): events.append("ack")
+            def delete_images(self, _paths): events.append("delete")
+
+        class FailedSuppressionRemote(MissingSuppressionRemote):
+            def fetch_suppressions(self): raise RuntimeError("private database detail")
+
+        for remote in (MissingSuppressionRemote(), FailedSuppressionRemote()):
+            with self.subTest(remote=type(remote).__name__), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                (root / "catalog" / "images").mkdir(parents=True)
+                (root / "catalog" / "images" / "no-cover.svg").write_text("<svg/>", encoding="utf-8")
+                original = json.dumps(document(public_game("existing"))).encode()
+                (root / "catalog" / "catalog.json").write_bytes(original)
+                (root / "catalog" / "schema.json").write_text(
+                    Path("catalog/schema.json").read_text(), encoding="utf-8"
+                )
+
+                with self.assertRaisesRegex(ExportError, "suppression"):
+                    export_cycle_with_result(remote, root, lambda: events.append("publish"))
+
+                self.assertEqual(original, (root / "catalog" / "catalog.json").read_bytes())
+                self.assertEqual([], events)
+
     def test_pages_publish_uses_catalog_change_or_exports_but_ack_uses_exports_only(self):
         workflow = Path(".github/workflows/export-approved.yml").read_text(encoding="utf-8")
         pages_condition = (
@@ -377,6 +408,8 @@ class ExportApprovedTest(unittest.TestCase):
             def fetch_pending(self, _submission_id):
                 return [ApprovedSubmission(ORIGIN_ONE, "APPROVED", public_game("new-game"), None)]
 
+            def fetch_suppressions(self): return set()
+
             def mark_exported(self, submission_ids):
                 events.append("ack:" + ",".join(submission_ids))
 
@@ -405,6 +438,8 @@ class ExportApprovedTest(unittest.TestCase):
         class Remote:
             def fetch_pending(self, _submission_id):
                 return [ApprovedSubmission(ORIGIN_ONE, "APPROVED", public_game("new-game"), None)]
+
+            def fetch_suppressions(self): return set()
 
             def mark_exported(self, _ids):
                 events.append("ack")
@@ -438,6 +473,8 @@ class ExportApprovedTest(unittest.TestCase):
                 events.append(("fetch", submission_id))
                 return [ApprovedSubmission(ORIGIN_ONE, "APPROVED", public_game("new-game"), IMAGE_ONE)]
 
+            def fetch_suppressions(self): return set()
+
             def mark_exported(self, ids):
                 events.append(("ack", list(ids)))
 
@@ -460,6 +497,8 @@ class ExportApprovedTest(unittest.TestCase):
         class Remote:
             def fetch_pending(self, _submission_id):
                 return [ApprovedSubmission(ORIGIN_ONE, "APPROVED", public_game("new-game"), IMAGE_ONE)]
+
+            def fetch_suppressions(self): return set()
 
             def download_image(self, _path):
                 return b"not-used-for-this-test"
@@ -493,6 +532,8 @@ class ExportApprovedTest(unittest.TestCase):
             def fetch_pending(self, _submission_id):
                 return [ApprovedSubmission(ORIGIN_ONE, "APPROVED", public_game("new-game"), "../private.jpg")]
 
+            def fetch_suppressions(self): return set()
+
             def download_image(self, _path):
                 raise AssertionError("unsafe paths must be rejected before download")
 
@@ -520,6 +561,8 @@ class ExportApprovedTest(unittest.TestCase):
         class Remote:
             def fetch_pending(self, _submission_id):
                 return [ApprovedSubmission(ORIGIN_ONE, "APPROVED", public_game("new-game"), None)]
+
+            def fetch_suppressions(self): return set()
 
             def mark_exported(self, submission_ids):
                 events.append("ack:" + ",".join(submission_ids))
@@ -654,6 +697,7 @@ class ExportApprovedTest(unittest.TestCase):
         class Remote:
             def fetch_pending(self, _submission_id):
                 return [ApprovedSubmission(ORIGIN_ONE, "APPROVED", public_game("new-game"), IMAGE_ONE)]
+            def fetch_suppressions(self): return set()
             def download_image(self, _path): return b"cover"
             def mark_exported(self, _ids): events.append("ack")
             def delete_images(self, _paths): raise ExportError("cleanup offline")

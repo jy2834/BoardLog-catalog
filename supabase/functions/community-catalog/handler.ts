@@ -13,7 +13,7 @@ export type CommunityMetadataRow = {
 
 export type CommunitySuppressionRow = {
   originSubmissionId: string;
-  updatedAt?: string;
+  createdAt: string;
 };
 
 export type CommunityCatalogDependencies = {
@@ -113,10 +113,16 @@ async function buildDocument(
     throw new HttpError(503, "TEMPORARY_UNAVAILABLE");
   }
 
-  const suppressions = suppressionRows
-    .filter((row) => typeof row.originSubmissionId === "string")
+  const suppressions = [...suppressionRows]
     .sort((left, right) => left.originSubmissionId.localeCompare(right.originSubmissionId));
   if (suppressions.length > MAX_COMMUNITY_SUPPRESSIONS) {
+    throw new HttpError(503, "TEMPORARY_UNAVAILABLE");
+  }
+  if (
+    suppressions.some((row) =>
+      typeof row.originSubmissionId !== "string" || typeof row.createdAt !== "string"
+    ) || new Set(suppressions.map((row) => row.originSubmissionId)).size !== suppressions.length
+  ) {
     throw new HttpError(503, "TEMPORARY_UNAVAILABLE");
   }
   const suppressedOriginSubmissionIds = [...new Set(suppressions.map((row) => row.originSubmissionId))];
@@ -146,7 +152,7 @@ async function buildDocument(
     gameCount: games.length,
     games: games.map((row) => [row.originSubmissionId, row.createdAt, row.updatedAt]),
     suppressionCount: suppressedOriginSubmissionIds.length,
-    suppressions: suppressions.map((row) => [row.originSubmissionId, row.updatedAt ?? null]),
+    suppressions: suppressions.map((row) => [row.originSubmissionId, row.createdAt]),
   }));
   return {
     schemaVersion: 1,
@@ -176,7 +182,7 @@ export function createCommunityCatalogHandler(
       if (new TextEncoder().encode(serialized).byteLength > MAX_COMMUNITY_RESPONSE_BYTES) {
         throw new HttpError(503, "RESPONSE_TOO_LARGE");
       }
-      const etag = `"${document.revision}"`;
+      const etag = `"${await sha256Hex(serialized)}"`;
       const cacheHeaders = {
         etag,
         "cache-control": "public, max-age=300",
