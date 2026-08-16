@@ -34,6 +34,8 @@ NO_COVER_URL = PAGES_IMAGE_PREFIX + "no-cover.svg"
 MAX_JSON_BYTES = 2 * 1024 * 1024
 MAX_IMAGE_BYTES = 2 * 1024 * 1024
 MAX_EXPORT_BATCH = 25
+MAX_SUPPRESSION_IDS = 10_000
+SUPPRESSION_PAGE_SIZE = 1_000
 STABLE_KEY = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*\Z")
 
 
@@ -57,6 +59,7 @@ class ApprovedSubmission:
 
 class ExportRemote(Protocol):
     def fetch_pending(self, submission_id: str | None) -> list[ApprovedSubmission]: ...
+    def fetch_suppressions(self) -> set[str]: ...
     def download_image(self, path: str) -> bytes: ...
     def mark_exported(self, submission_ids: Sequence[str]) -> None: ...
     def delete_images(self, paths: Sequence[str]) -> None: ...
@@ -152,11 +155,30 @@ def _with_public_defaults(game: Mapping[str, Any]) -> dict[str, Any]:
     return completed
 
 
+def _validated_suppression_ids(values: Iterable[str]) -> set[str]:
+    suppressed: set[str] = set()
+    for value in values:
+        if not isinstance(value, str):
+            raise ExportError("Supabase returned an invalid suppression identity")
+        try:
+            parsed = uuid.UUID(value)
+        except (ValueError, AttributeError, TypeError) as error:
+            raise ExportError("Supabase returned an invalid suppression identity") from error
+        canonical = str(parsed)
+        if value.lower() != canonical:
+            raise ExportError("Supabase returned an invalid suppression identity")
+        suppressed.add(canonical)
+        if len(suppressed) > MAX_SUPPRESSION_IDS:
+            raise ExportError("Supabase returned too many suppression identities")
+    return suppressed
+
+
 def apply_approved_submissions(
     document: Mapping[str, Any],
     submissions: Iterable[ApprovedSubmission],
     *,
     generated_at: str,
+    suppressed_origin_ids: Iterable[str] = (),
     schema_path: Path | None = None,
     images_dir: Path | None = None,
 ) -> tuple[dict[str, Any], list[str]]:
@@ -171,15 +193,24 @@ def apply_approved_submissions(
     }
     if len(by_key) != len(games):
         raise ExportError("Existing catalog contains an invalid or duplicate key")
+    suppressed = _validated_suppression_ids(suppressed_origin_ids)
     exported_ids: list[str] = []
     seen_submission_ids: set[str] = set()
     seen_target_keys: set[str] = set()
-    changed = False
+    suppressed_keys = [
+        key for key, game in by_key.items()
+        if game.get("originSubmissionId") in suppressed
+    ]
+    for key in suppressed_keys:
+        del by_key[key]
+    changed = bool(suppressed_keys)
 
     for submission in sorted(submissions, key=lambda row: row.submission_id):
         if submission.submission_id in seen_submission_ids:
             raise ExportError(f"Duplicate submission in export batch: {submission.submission_id}")
         seen_submission_ids.add(submission.submission_id)
+        if submission.submission_id in suppressed:
+            continue
         candidate = _normalized_submission(submission)
         key = candidate.get("key")
         if not isinstance(key, str):
@@ -306,8 +337,8 @@ def export_cycle(
     acknowledge: bool = True,
 ) -> list[str]:
     rows = remote.fetch_pending(submission_id)
-    if not rows:
-        return []
+    fetch_suppressions = getattr(remote, "fetch_suppressions", None)
+    suppressed = _validated_suppression_ids(fetch_suppressions() if fetch_suppressions else ())
     catalog_path = repo_root / "catalog" / "catalog.json"
     schema_path = repo_root / "catalog" / "schema.json"
     images_dir = repo_root / "catalog" / "images"
@@ -318,6 +349,8 @@ def export_cycle(
         _prepare_validation_images(images_dir, staged_images)
         converted_names: set[str] = set()
         for row in rows:
+            if row.submission_id in suppressed:
+                continue
             image_object_path = _validated_image_object_path(row)
             if image_object_path:
                 game = _normalized_submission(row)
@@ -332,6 +365,7 @@ def export_cycle(
             current,
             rows,
             generated_at=timestamp,
+            suppressed_origin_ids=suppressed,
             schema_path=schema_path,
             images_dir=staged_images,
         )
@@ -341,10 +375,12 @@ def export_cycle(
         for name in converted_names:
             if not (images_dir / name).is_file() or (images_dir / name).read_bytes() != (staged_images / name).read_bytes():
                 _atomic_write(images_dir / name, (staged_images / name).read_bytes())
-        publish()
+        if changed or exported_ids:
+            publish()
 
-    if acknowledge:
-        _acknowledge_rows(remote, rows)
+    if acknowledge and exported_ids:
+        exported_set = set(exported_ids)
+        _acknowledge_rows(remote, [row for row in rows if row.submission_id in exported_set])
     return exported_ids
 
 
@@ -457,6 +493,36 @@ class SupabaseExportRemote:
                 reviewed_at=value.get("reviewed_at"),
             ))
         return rows
+
+    def fetch_suppressions(self) -> set[str]:
+        suppression_ids: list[str] = []
+        offset = 0
+        while True:
+            remaining = MAX_SUPPRESSION_IDS + 1 - len(suppression_ids)
+            limit = min(SUPPRESSION_PAGE_SIZE, remaining)
+            filters = [
+                ("select", "origin_submission_id"),
+                ("order", "origin_submission_id.asc"),
+                ("limit", str(limit)),
+                ("offset", str(offset)),
+            ]
+            try:
+                raw = json.loads(self._request(
+                    "/rest/v1/public_catalog_suppressions?" + urlencode(filters)
+                ).decode("utf-8"))
+            except (UnicodeDecodeError, json.JSONDecodeError) as error:
+                raise ExportError("Supabase returned invalid suppression JSON") from error
+            if not isinstance(raw, list):
+                raise ExportError("Supabase returned an invalid suppression list")
+            for value in raw:
+                if not isinstance(value, Mapping) or set(value) != {"origin_submission_id"}:
+                    raise ExportError("Supabase returned an invalid suppression row")
+                suppression_ids.append(value["origin_submission_id"])
+            if len(suppression_ids) > MAX_SUPPRESSION_IDS:
+                raise ExportError("Supabase returned too many suppression identities")
+            if len(raw) < limit:
+                return _validated_suppression_ids(suppression_ids)
+            offset += len(raw)
 
     def download_image(self, path: str) -> bytes:
         safe_path = "/".join(quote(part, safe="") for part in path.split("/"))

@@ -389,6 +389,20 @@ enabled = true
 verify_jwt = true
 entrypoint = "./functions/submit-game/index.ts"
 
+[functions.community-catalog]
+enabled = true
+# Publishable API keys are not JWTs, so this function validates the apikey
+# header inside the handler before reading its public views.
+verify_jwt = false
+entrypoint = "./functions/community-catalog/index.ts"
+
+[functions.admin-moderate]
+enabled = true
+# The platform validates the user JWT before the handler repeats getUser and
+# the user-scoped is_catalog_admin authorization check.
+verify_jwt = true
+entrypoint = "./functions/admin-moderate/index.ts"
+
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 

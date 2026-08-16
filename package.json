@@ -9,8 +9,8 @@
     "db:status": "supabase migration list --linked --agent no",
     "db:test:linked": "supabase db query --linked --file supabase/tests/public_catalog_rls.test.sql --output-format json --agent no",
     "test:functions": "node --test supabase/functions/**/*.test.ts",
-    "test:functions:deno": "deno test supabase/functions/submit-game/validation.test.ts supabase/functions/submit-game/handler.test.ts",
-    "check:functions": "deno check supabase/functions/submit-game/index.ts"
+    "test:functions:deno": "deno test supabase/functions/submit-game/validation.test.ts supabase/functions/submit-game/handler.test.ts supabase/functions/community-catalog/handler.test.ts supabase/functions/admin-moderate/handler.test.ts",
+    "check:functions": "deno check supabase/functions/submit-game/index.ts supabase/functions/community-catalog/index.ts supabase/functions/admin-moderate/index.ts"
   },
   "devDependencies": {
     "@types/node": "26.2.0",

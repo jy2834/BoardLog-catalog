@@ -51,6 +51,111 @@ def document(*games: dict, revision: int = 1) -> dict:
 
 
 class ExportApprovedTest(unittest.TestCase):
+    def test_suppression_removes_only_the_matching_origin_deterministically(self):
+        suppressed = public_game("suppressed", origin=ORIGIN_ONE)
+        untouched = public_game("untouched", origin=ORIGIN_TWO)
+
+        first, exported_ids = apply_approved_submissions(
+            document(suppressed, untouched, revision=7),
+            [],
+            suppressed_origin_ids=[ORIGIN_ONE],
+            generated_at="2026-08-16T01:02:03Z",
+        )
+        second, _ = apply_approved_submissions(
+            first,
+            [],
+            suppressed_origin_ids=[ORIGIN_ONE],
+            generated_at="2026-08-16T04:05:06Z",
+        )
+
+        self.assertEqual([untouched], first["games"])
+        self.assertEqual(8, first["revision"])
+        self.assertEqual("2026-08-16T01:02:03Z", first["generatedAt"])
+        self.assertEqual([], exported_ids)
+        self.assertEqual(first, second)
+
+    def test_restored_approved_row_with_null_exported_at_is_exported_again(self):
+        restored = ApprovedSubmission(
+            ORIGIN_ONE, "APPROVED", public_game("restored"), None,
+            "2026-08-16T01:00:00Z",
+        )
+
+        updated, exported_ids = apply_approved_submissions(
+            document(revision=3),
+            [restored],
+            suppressed_origin_ids=[],
+            generated_at="2026-08-16T01:02:03Z",
+        )
+
+        self.assertEqual(["restored"], [game["key"] for game in updated["games"]])
+        self.assertEqual([ORIGIN_ONE], exported_ids)
+
+    def test_retained_delete_tombstone_cannot_recreate_its_catalog_row(self):
+        deleted = ApprovedSubmission(
+            ORIGIN_ONE, "APPROVED", public_game("deleted"), None,
+            "2026-08-16T01:00:00Z",
+        )
+
+        updated, exported_ids = apply_approved_submissions(
+            document(public_game("deleted"), revision=4),
+            [deleted],
+            suppressed_origin_ids=[ORIGIN_ONE],
+            generated_at="2026-08-16T01:02:03Z",
+        )
+
+        self.assertEqual([], updated["games"])
+        self.assertEqual([], exported_ids)
+
+    def test_remote_fetches_only_suppression_origin_ids_in_bounded_pages(self):
+        from scripts.export_approved import SupabaseExportRemote
+
+        captured_paths: list[str] = []
+        remote = SupabaseExportRemote("https://project.supabase.co", "sb_secret_test")
+
+        def request(path, **_kwargs):
+            captured_paths.append(path)
+            return json.dumps([{"origin_submission_id": ORIGIN_ONE}]).encode()
+
+        remote._request = request
+        self.assertEqual({ORIGIN_ONE}, remote.fetch_suppressions())
+        self.assertEqual(1, len(captured_paths))
+        self.assertIn("/rest/v1/public_catalog_suppressions?", captured_paths[0])
+        self.assertIn("select=origin_submission_id", captured_paths[0])
+        self.assertNotIn("reason", captured_paths[0])
+        self.assertNotIn("actor", captured_paths[0])
+
+    def test_suppression_only_cycle_rewrites_and_publishes_the_catalog(self):
+        from scripts.export_approved import export_cycle
+
+        events: list[str] = []
+
+        class Remote:
+            def fetch_pending(self, _submission_id): return []
+            def fetch_suppressions(self): return {ORIGIN_ONE}
+            def mark_exported(self, _ids): raise AssertionError("no rows were exported")
+            def delete_images(self, _paths): raise AssertionError("no temporary images exist")
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "catalog" / "images").mkdir(parents=True)
+            (root / "catalog" / "images" / "no-cover.svg").write_text("<svg/>", encoding="utf-8")
+            (root / "catalog" / "catalog.json").write_text(
+                json.dumps(document(public_game("suppressed"))), encoding="utf-8"
+            )
+            (root / "catalog" / "schema.json").write_text(
+                Path("catalog/schema.json").read_text(), encoding="utf-8"
+            )
+
+            exported = export_cycle(
+                Remote(), root, lambda: events.append("publish"),
+                generated_at="2026-08-16T01:02:03Z",
+            )
+            updated = json.loads((root / "catalog" / "catalog.json").read_text())
+
+        self.assertEqual([], exported)
+        self.assertEqual([], updated["games"])
+        self.assertEqual(["publish"], events)
+
     def test_inserts_approved_rows_deterministically_and_increments_once(self):
         submissions = [
             ApprovedSubmission(ORIGIN_TWO, "APPROVED", public_game("z-game", origin=ORIGIN_TWO), None),
