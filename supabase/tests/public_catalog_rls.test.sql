@@ -1,7 +1,7 @@
 begin;
 
 create extension if not exists pgtap with schema extensions;
-select plan(64);
+select plan(67);
 create temporary table tap_results (result text not null);
 grant insert, select on tap_results to anon, authenticated, service_role;
 
@@ -161,6 +161,37 @@ insert into tap_results select lives_ok(
   )$$,
   'edge can submit a privacy-safe game for an authenticated owner'
 );
+reset role;
+create temporary table test_submission_ids as
+select 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'::uuid as id;
+grant select on test_submission_ids to authenticated;
+
+create function pg_temp.test_submission_id()
+returns uuid
+language sql
+stable
+as $$
+  select id from test_submission_ids limit 1
+$$;
+
+insert into tap_results select is(
+  (select count(*)::integer from public.public_unverified_catalog_games),
+  1,
+  'pending public submission is immediately visible without owner identity'
+);
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"11111111-1111-4111-8111-111111111111","role":"authenticated","is_anonymous":true}', true);
+insert into tap_results select throws_ok(
+  $$select public.set_submission_visibility(test_submission_id(), 'HIDDEN', 'not admin')$$,
+  '42501', 'admin access required', 'anonymous owner cannot hide public content'
+);
+insert into tap_results select lives_ok(
+  $$select public.request_submission_removal(test_submission_id())$$,
+  'owner can request public removal without deleting the row'
+);
+
+reset role;
+set local role service_role;
 insert into tap_results select lives_ok(
   $$select public.submit_game_from_edge(
     '11111111-1111-4111-8111-111111111111'::uuid,
@@ -269,11 +300,6 @@ insert into tap_results select is(
   null,
   'cleanup acknowledgement clears only the rejected image reference'
 );
-
-reset role;
-create temporary table test_submission_ids as
-select 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'::uuid as id;
-grant select on test_submission_ids to authenticated;
 
 set local role authenticated;
 select set_config('request.jwt.claims', '{"sub":"22222222-2222-4222-8222-222222222222","role":"authenticated"}', true);
@@ -503,5 +529,5 @@ begin
   end if;
 end;
 $$;
-select 'ok - all 64 pgTAP assertions passed' as result;
+select 'ok - all 67 pgTAP assertions passed' as result;
 rollback;
