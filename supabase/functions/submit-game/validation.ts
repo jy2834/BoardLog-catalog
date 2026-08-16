@@ -153,18 +153,20 @@ export function parseAndValidatePayload(raw: string): JsonObject {
     fail("INVALID_ENTRY_TYPE");
   }
 
-  if (!Array.isArray(payload.sourceUrls) || payload.sourceUrls.length < 1 || payload.sourceUrls.length > 10) {
-    fail("INVALID_SOURCE_URLS");
-  }
-  if (!payload.sourceUrls.every((url) => {
-    if (typeof url !== "string" || url.length > 2048 || url.trim() !== url) return false;
-    try {
-      return new URL(url).protocol === "https:";
-    } catch {
-      return false;
+  if ("sourceUrls" in payload) {
+    if (!Array.isArray(payload.sourceUrls) || payload.sourceUrls.length > 10) {
+      fail("INVALID_SOURCE_URLS");
     }
-  })) {
-    fail("INVALID_SOURCE_URLS");
+    if (!payload.sourceUrls.every((url) => {
+      if (typeof url !== "string" || url.length > 2048 || url.trim() !== url) return false;
+      try {
+        return new URL(url).protocol === "https:";
+      } catch {
+        return false;
+      }
+    })) {
+      fail("INVALID_SOURCE_URLS");
+    }
   }
 
   return payload;

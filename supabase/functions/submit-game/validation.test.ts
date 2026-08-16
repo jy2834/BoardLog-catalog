@@ -34,6 +34,26 @@ describe("parseAndValidatePayload", () => {
     assert.deepEqual(parseAndValidatePayload(JSON.stringify(validPayload)), validPayload);
   });
 
+  test("accepts a simplified submission without source URLs", () => {
+    const { sourceUrls: _sourceUrls, ...withoutSourceUrls } = validPayload;
+
+    assert.deepEqual(
+      parseAndValidatePayload(JSON.stringify(withoutSourceUrls)),
+      withoutSourceUrls,
+    );
+    assert.deepEqual(
+      parseAndValidatePayload(JSON.stringify({ ...withoutSourceUrls, sourceUrls: [] })),
+      { ...withoutSourceUrls, sourceUrls: [] },
+    );
+  });
+
+  test("rejects present source URLs that are not trimmed HTTPS URLs", () => {
+    assert.throws(
+      () => parseAndValidatePayload(JSON.stringify({ ...validPayload, sourceUrls: [" http://example.com"] })),
+      /INVALID_SOURCE_URLS/,
+    );
+  });
+
   test("rejects oversized JSON before parsing", () => {
     const oversized = `{"name":"${"가".repeat(MAX_PAYLOAD_BYTES)}"}`;
     assert.throws(() => parseAndValidatePayload(oversized), /PAYLOAD_TOO_LARGE/);
