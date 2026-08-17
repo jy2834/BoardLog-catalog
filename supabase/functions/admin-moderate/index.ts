@@ -1,7 +1,9 @@
 import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2.112.3";
 
 import {
+  type AdminSubmissionRow,
   createAdminModerationHandler,
+  translateSupabaseModerationError,
   type UserScopedModerationClient,
 } from "./handler.ts";
 
@@ -49,7 +51,7 @@ const handler = createAdminModerationHandler({
     return {
       isCatalogAdmin: async () => {
         const { data, error } = await client.rpc("is_catalog_admin");
-        if (error) throw new Error("Admin authorization unavailable");
+        if (error) throw translateSupabaseModerationError(error);
         return data === true;
       },
       reviewSubmission: async (submissionId, status, reviewedGame, note) => {
@@ -59,7 +61,7 @@ const handler = createAdminModerationHandler({
           p_public_game: reviewedGame,
           p_note: note,
         });
-        if (error) throw new Error("Moderation mutation failed");
+        if (error) throw translateSupabaseModerationError(error);
       },
       setSubmissionVisibility: async (submissionId, visibility, note) => {
         const { error } = await client.rpc("set_submission_visibility", {
@@ -67,23 +69,32 @@ const handler = createAdminModerationHandler({
           p_visibility: visibility,
           p_reason: note,
         });
-        if (error) throw new Error("Moderation mutation failed");
+        if (error) throw translateSupabaseModerationError(error);
       },
       prepareSubmissionDelete: async (submissionId, note) => {
         const { data, error } = await client.rpc("prepare_submission_delete", {
           p_id: submissionId,
           p_reason: note,
         });
-        if (error || !Array.isArray(data) || data.length !== 1) {
-          throw new Error("Delete preparation failed");
-        }
+        if (error) throw translateSupabaseModerationError(error);
+        if (!Array.isArray(data) || data.length !== 1) throw new Error("Delete preparation failed");
         const path = data[0]?.image_object_path;
         if (path !== null && typeof path !== "string") throw new Error("Delete preparation failed");
         return path;
       },
       finalizeSubmissionDelete: async (submissionId) => {
         const { error } = await client.rpc("finalize_submission_delete", { p_id: submissionId });
-        if (error) throw new Error("Delete finalization failed");
+        if (error) throw translateSupabaseModerationError(error);
+      },
+      listSubmissions: async () => {
+        const { data, error } = await client
+          .from("admin_game_submissions")
+          .select("id,public_game,image_object_path,status,visibility,created_at,updated_at")
+          .order("created_at", { ascending: false })
+          .limit(501);
+        if (error) throw translateSupabaseModerationError(error);
+        if (!Array.isArray(data)) throw new Error("Invalid moderation queue");
+        return data as AdminSubmissionRow[];
       },
     };
   },
@@ -93,6 +104,13 @@ const handler = createAdminModerationHandler({
       removeSubmissionImage: async (path) => {
         const { error } = await client.storage.from("submission-images").remove([path]);
         if (error) throw new Error("Storage deletion failed");
+      },
+      createSignedSubmissionImage: async (path, expiresInSeconds) => {
+        const { data, error } = await client.storage
+          .from("submission-images")
+          .createSignedUrl(path, expiresInSeconds);
+        if (error || typeof data?.signedUrl !== "string") throw new Error("Storage signing failed");
+        return data.signedUrl;
       },
     };
   },

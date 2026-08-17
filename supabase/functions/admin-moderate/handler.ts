@@ -1,4 +1,6 @@
 export const MAX_ADMIN_BODY_BYTES = 256 * 1024;
+export const ADMIN_COVER_URL_TTL_SECONDS = 600;
+const MAX_ADMIN_QUEUE_ROWS = 500;
 const MAX_NOTE_LENGTH = 500;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -16,10 +18,22 @@ export type UserScopedModerationClient = {
   setSubmissionVisibility: (submissionId: string, visibility: Visibility, note: string) => Promise<void>;
   prepareSubmissionDelete: (submissionId: string, note: string) => Promise<string | null>;
   finalizeSubmissionDelete: (submissionId: string) => Promise<void>;
+  listSubmissions: () => Promise<AdminSubmissionRow[]>;
 };
 
 export type SecretStorageClient = {
   removeSubmissionImage: (path: string) => Promise<void>;
+  createSignedSubmissionImage: (path: string, expiresInSeconds: number) => Promise<string>;
+};
+
+export type AdminSubmissionRow = {
+  id: string;
+  public_game: Record<string, unknown>;
+  image_object_path: string | null;
+  status: "PENDING" | "APPROVED" | "REJECTED" | "MERGED";
+  visibility: "PUBLIC" | "REMOVAL_REQUESTED" | "HIDDEN";
+  created_at: string;
+  updated_at: string;
 };
 
 export type AdminModerationDependencies = {
@@ -39,6 +53,34 @@ class HttpError extends Error {
   constructor(readonly status: number, readonly code: string) {
     super(code);
   }
+}
+
+type SupabaseFailure = {
+  status?: unknown;
+  code?: unknown;
+  message?: unknown;
+};
+
+export function translateSupabaseModerationError(error: SupabaseFailure): Error {
+  const status = typeof error.status === "number" ? error.status : null;
+  const code = typeof error.code === "string" ? error.code : "";
+  const message = typeof error.message === "string" ? error.message.toLowerCase() : "";
+  if (status === 401 || code === "PGRST301" || code === "PGRST302") {
+    return new HttpError(401, "AUTHENTICATION_REQUIRED");
+  }
+  if (status === 403 || code === "42501") {
+    return new HttpError(403, "ADMIN_REQUIRED");
+  }
+  if (
+    status === 409 ||
+    (code === "22023" && (
+      message.includes("submission not found") ||
+      message.includes("must be hidden before deletion")
+    ))
+  ) {
+    return new HttpError(409, "STALE_SUBMISSION");
+  }
+  return new HttpError(503, "TEMPORARY_UNAVAILABLE");
 }
 
 function jsonResponse(status: number, body: Record<string, unknown>): Response {
@@ -184,17 +226,47 @@ async function mutate(
   await userClient.finalizeSubmissionDelete(input.submissionId);
 }
 
+async function listQueue(
+  userClient: UserScopedModerationClient,
+  deps: AdminModerationDependencies,
+): Promise<Record<string, unknown>[]> {
+  const rows = await userClient.listSubmissions();
+  if (rows.length > MAX_ADMIN_QUEUE_ROWS) throw new HttpError(503, "TEMPORARY_UNAVAILABLE");
+  let storage: SecretStorageClient | undefined;
+  return await Promise.all(rows.map(async (row) => {
+    const { image_object_path: imagePath, ...safeRow } = row;
+    if (imagePath === null) return { ...safeRow, cover: { state: "ABSENT" } };
+    try {
+      validatePrivateImagePath(imagePath, row.id);
+      storage ??= deps.createSecretStorageClient();
+      const url = await storage.createSignedSubmissionImage(imagePath, ADMIN_COVER_URL_TTL_SECONDS);
+      const parsed = new URL(url);
+      if (parsed.protocol !== "https:" || parsed.username !== "" || parsed.password !== "") {
+        throw new Error("unsafe signed URL");
+      }
+      return { ...safeRow, cover: { state: "AVAILABLE", url } };
+    } catch {
+      return { ...safeRow, cover: { state: "SIGNING_FAILED" } };
+    }
+  }));
+}
+
 export function createAdminModerationHandler(
   deps: AdminModerationDependencies,
 ): (request: Request) => Promise<Response> {
   return async (request: Request): Promise<Response> => {
     try {
-      if (request.method !== "POST") throw new HttpError(405, "METHOD_NOT_ALLOWED");
+      if (request.method !== "POST" && request.method !== "GET") {
+        throw new HttpError(405, "METHOD_NOT_ALLOWED");
+      }
       const authorization = request.headers.get("authorization") ?? "";
       if (!/^Bearer\s+\S+$/i.test(authorization)) throw new HttpError(401, "AUTHENTICATION_REQUIRED");
       const userClient = await deps.authenticate(authorization);
       if (userClient === null) throw new HttpError(401, "AUTHENTICATION_REQUIRED");
       if (!(await userClient.isCatalogAdmin())) throw new HttpError(403, "ADMIN_REQUIRED");
+      if (request.method === "GET") {
+        return jsonResponse(200, { submissions: await listQueue(userClient, deps) });
+      }
       const input = validateRequest(await readBoundedJson(request));
       await mutate(input, userClient, deps);
       return jsonResponse(200, { ok: true, submissionId: input.submissionId });

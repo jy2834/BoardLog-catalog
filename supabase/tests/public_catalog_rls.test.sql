@@ -1,7 +1,7 @@
 begin;
 
 create extension if not exists pgtap with schema extensions;
-select plan(82);
+select plan(87);
 create temporary table tap_results (result text not null);
 grant insert, select on tap_results to anon, authenticated, service_role;
 
@@ -313,6 +313,58 @@ insert into tap_results select is(
   ),
   null,
   'cleanup acknowledgement clears only the rejected image reference'
+);
+
+insert into public.game_submissions (id, owner_user_id, public_game, status, visibility)
+values
+  (
+    'ffffffff-ffff-4fff-8fff-ffffffffffff',
+    '11111111-1111-4111-8111-111111111111',
+    '{"targetKey":"existing-target"}'::jsonb,
+    'MERGED',
+    'PUBLIC'
+  ),
+  (
+    '99999999-9999-4999-8999-999999999999',
+    '11111111-1111-4111-8111-111111111111',
+    '{"name":"Hidden pending"}'::jsonb,
+    'PENDING',
+    'HIDDEN'
+  ),
+  (
+    '88888888-8888-4888-8888-888888888888',
+    '33333333-3333-4333-8333-333333333333',
+    '{"name":"Cross owner"}'::jsonb,
+    'PENDING',
+    'PUBLIC'
+  );
+
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"11111111-1111-4111-8111-111111111111","role":"authenticated"}', true);
+insert into tap_results select throws_ok(
+  $$select public.request_submission_removal('dddddddd-dddd-4ddd-8ddd-dddddddddddd'::uuid)$$,
+  '42501', 'owned public removable submission not found',
+  'owner cannot request removal for a rejected submission'
+);
+insert into tap_results select throws_ok(
+  $$select public.request_submission_removal('ffffffff-ffff-4fff-8fff-ffffffffffff'::uuid)$$,
+  '42501', 'owned public removable submission not found',
+  'owner cannot request removal for a merged submission'
+);
+insert into tap_results select throws_ok(
+  $$select public.request_submission_removal('99999999-9999-4999-8999-999999999999'::uuid)$$,
+  '42501', 'owned public removable submission not found',
+  'owner cannot request removal for a hidden submission'
+);
+insert into tap_results select throws_ok(
+  $$select public.request_submission_removal(test_submission_id())$$,
+  '42501', 'owned public removable submission not found',
+  'owner cannot repeat a removal request'
+);
+insert into tap_results select throws_ok(
+  $$select public.request_submission_removal('88888888-8888-4888-8888-888888888888'::uuid)$$,
+  '42501', 'owned public removable submission not found',
+  'owner cannot request removal for another owner submission'
 );
 
 set local role authenticated;
@@ -629,5 +681,5 @@ begin
   end if;
 end;
 $$;
-select 'ok - all 82 pgTAP assertions passed' as result;
+select 'ok - all 87 pgTAP assertions passed' as result;
 rollback;

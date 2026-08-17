@@ -14,6 +14,7 @@ ADMIN_CONSOLE_MIGRATION = ROOT / "supabase" / "migrations" / "202608130007_admin
 USAGE_MONITOR_MIGRATION = ROOT / "supabase" / "migrations" / "202608130008_free_usage_monitor.sql"
 USAGE_ACL_MIGRATION = ROOT / "supabase" / "migrations" / "202608130009_lock_usage_monitor_acl.sql"
 IN_APP_ADMIN_MIGRATION_GLOB = "*_in_app_admin_public_feed.sql"
+OWNER_REMOVAL_MIGRATION_GLOB = "*_restrict_owner_removal_eligibility.sql"
 RLS_TEST = ROOT / "supabase" / "tests" / "public_catalog_rls.test.sql"
 CONFIG = ROOT / "supabase" / "config.toml"
 
@@ -54,6 +55,14 @@ class SupabaseMigrationContractTest(unittest.TestCase):
             if in_app_admin_migrations
             else ""
         )
+        owner_removal_migrations = sorted(
+            (ROOT / "supabase" / "migrations").glob(OWNER_REMOVAL_MIGRATION_GLOB)
+        )
+        cls.owner_removal_sql = (
+            owner_removal_migrations[-1].read_text(encoding="utf-8")
+            if owner_removal_migrations
+            else ""
+        )
         cls.public_unverified_projection = (
             cls.in_app_admin_sql.lower()
             .split("create or replace view public.public_unverified_catalog_games", 1)[-1]
@@ -70,6 +79,7 @@ class SupabaseMigrationContractTest(unittest.TestCase):
             + "\n" + cls.usage_monitor_sql
             + "\n" + cls.usage_acl_sql
             + "\n" + cls.in_app_admin_sql
+            + "\n" + cls.owner_removal_sql
         )
         cls.rls_test = RLS_TEST.read_text(encoding="utf-8")
 
@@ -118,6 +128,15 @@ class SupabaseMigrationContractTest(unittest.TestCase):
         self.assertIn("grant select on public.public_catalog_suppressions to anon, authenticated", sql)
         self.assertNotIn("owner_user_id", self.public_unverified_projection)
         self.assertNotIn("admin_note", self.public_unverified_projection)
+
+    def test_owner_removal_requires_owned_public_pending_or_approved_row(self):
+        sql = re.sub(r"\s+", " ", self.owner_removal_sql.lower())
+        self.assertIn("create or replace function public.request_submission_removal", sql)
+        self.assertIn("owner_user_id = v_owner", sql)
+        self.assertIn("status in ('pending', 'approved')", sql)
+        self.assertIn("visibility = 'public'", sql)
+        self.assertIn("perform public.request_submission_removal(p_id)", sql)
+        self.assertNotIn("delete from public.game_submissions", sql)
 
     def test_in_app_admin_public_feed_preserves_view_compatibility_and_admin_scope(self):
         sql = self.in_app_admin_sql.lower()
