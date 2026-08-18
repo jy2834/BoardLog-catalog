@@ -2,8 +2,10 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import {
+  createAdminAuthenticateAdapter,
   createAdminModerationHandler,
   translateSupabaseModerationError,
+  type AdminQueuePageRequest,
   type AdminModerationDependencies,
   type UserScopedModerationClient,
 } from "./handler.ts";
@@ -19,8 +21,8 @@ function request(body: Record<string, unknown>, authorization = "Bearer valid-us
   });
 }
 
-function listRequest(authorization = "Bearer valid-user-jwt"): Request {
-  return new Request("https://project.functions.supabase.co/admin-moderate", {
+function listRequest(authorization = "Bearer valid-user-jwt", query = ""): Request {
+  return new Request(`https://project.functions.supabase.co/admin-moderate${query}`, {
     method: "GET",
     headers: { authorization },
   });
@@ -104,6 +106,47 @@ test("valid JWT and admin check happen before request mutation", async () => {
   assert.equal(missing.status, 401);
   assert.equal(state.mutationCount, 0);
   assert.equal(state.secretClientCreationCount, 0);
+});
+
+test("actual authenticate adapter distinguishes invalid JWT from auth-service and network failures", async () => {
+  const cases = [
+    {
+      name: "invalid JWT",
+      getUser: async () => ({ data: { user: null }, error: { status: 401, message: "expired jwt detail" } }),
+      expectedStatus: 401,
+      expectedCode: "AUTHENTICATION_REQUIRED",
+      forbiddenDetail: "expired jwt detail",
+    },
+    {
+      name: "auth service failure",
+      getUser: async () => ({ data: { user: null }, error: { status: 500, message: "auth database detail" } }),
+      expectedStatus: 503,
+      expectedCode: "TEMPORARY_UNAVAILABLE",
+      forbiddenDetail: "auth database detail",
+    },
+    {
+      name: "network failure",
+      getUser: async (): Promise<never> => { throw new Error("private network detail"); },
+      expectedStatus: 503,
+      expectedCode: "TEMPORARY_UNAVAILABLE",
+      forbiddenDetail: "private network detail",
+    },
+  ];
+
+  for (const scenario of cases) {
+    const state = fixture();
+    const scopedClient = await state.deps.authenticate("Bearer valid-user-jwt");
+    const authenticate = createAdminAuthenticateAdapter(() => ({
+      getUser: scenario.getUser,
+      scopedClient: scopedClient!,
+    }));
+    const response = await createAdminModerationHandler({ ...state.deps, authenticate })(listRequest());
+    const body = await response.text();
+
+    assert.equal(response.status, scenario.expectedStatus, scenario.name);
+    assert.deepEqual(JSON.parse(body), { code: scenario.expectedCode }, scenario.name);
+    assert.equal(body.includes(scenario.forbiddenDetail), false, scenario.name);
+  }
 });
 
 test("review actions map to the existing review RPC statuses", async () => {
@@ -321,4 +364,68 @@ test("secret storage client creation failure is isolated to image rows", async (
     { state: "SIGNING_FAILED" },
     { state: "ABSENT" },
   ]);
+});
+
+test("501-row queue returns bounded stable-cursor pages instead of a permanent 503", async () => {
+  const state = fixture();
+  const client = await state.deps.authenticate("Bearer valid-user-jwt");
+  const rows = Array.from({ length: 501 }, (_, index) => {
+    const suffix = String(501 - index).padStart(12, "0");
+    return {
+      id: `aaaaaaaa-aaaa-4aaa-8aaa-${suffix}`,
+      public_game: { name: `Game ${index}` },
+      image_object_path: null,
+      status: "PENDING" as const,
+      visibility: "PUBLIC" as const,
+      created_at: "2026-08-18T00:00:00.000Z",
+      updated_at: "2026-08-18T00:00:00.000Z",
+    };
+  });
+  const seenPages: AdminQueuePageRequest[] = [];
+  client!.listSubmissions = async (page: AdminQueuePageRequest) => {
+    seenPages.push(page);
+    const start = (seenPages.length - 1) * 100;
+    return rows.slice(start, start + page.fetchLimit);
+  };
+
+  const receivedIds: string[] = [];
+  let cursor: string | null = null;
+  do {
+    const query = `?limit=100${cursor === null ? "" : `&cursor=${encodeURIComponent(cursor)}`}`;
+    const response = await createAdminModerationHandler(state.deps)(listRequest("Bearer valid-user-jwt", query));
+    const body = await response.json() as { submissions: Array<{ id: string }>; nextCursor: string | null };
+    assert.equal(response.status, 200);
+    assert.ok(body.submissions.length <= 100);
+    receivedIds.push(...body.submissions.map((row) => row.id));
+    cursor = body.nextCursor;
+  } while (cursor !== null);
+
+  assert.deepEqual(receivedIds, rows.map((row) => row.id));
+  assert.equal(seenPages.length, 6);
+  assert.ok(seenPages.every((page) => page.fetchLimit === 101));
+  assert.deepEqual(seenPages[1].cursor, {
+    createdAt: rows[99].created_at,
+    id: rows[99].id,
+  });
+});
+
+test("queue pagination rejects malformed duplicate and out-of-range parameters before querying", async () => {
+  for (const query of [
+    "?limit=0",
+    "?limit=101",
+    "?limit=1.5",
+    "?limit=20&limit=30",
+    "?cursor=not-a-cursor",
+    "?cursor=one&cursor=two",
+    "?unknown=value",
+  ]) {
+    const state = fixture();
+    const client = await state.deps.authenticate("Bearer valid-user-jwt");
+    let queryCalls = 0;
+    client!.listSubmissions = async () => { queryCalls += 1; return []; };
+    const response = await createAdminModerationHandler(state.deps)(listRequest("Bearer valid-user-jwt", query));
+    assert.equal(response.status, 400, query);
+    assert.equal(queryCalls, 0, query);
+    assert.equal(state.secretClientCreationCount, 0, query);
+  }
 });

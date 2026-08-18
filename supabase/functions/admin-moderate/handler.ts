@@ -1,6 +1,8 @@
 export const MAX_ADMIN_BODY_BYTES = 256 * 1024;
 export const ADMIN_COVER_URL_TTL_SECONDS = 600;
-const MAX_ADMIN_QUEUE_ROWS = 500;
+const DEFAULT_ADMIN_PAGE_SIZE = 50;
+const MAX_ADMIN_PAGE_SIZE = 100;
+const MAX_ADMIN_CURSOR_LENGTH = 512;
 const MAX_NOTE_LENGTH = 500;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -18,7 +20,17 @@ export type UserScopedModerationClient = {
   setSubmissionVisibility: (submissionId: string, visibility: Visibility, note: string) => Promise<void>;
   prepareSubmissionDelete: (submissionId: string, note: string) => Promise<string | null>;
   finalizeSubmissionDelete: (submissionId: string) => Promise<void>;
-  listSubmissions: () => Promise<AdminSubmissionRow[]>;
+  listSubmissions: (page: AdminQueuePageRequest) => Promise<AdminSubmissionRow[]>;
+};
+
+export type AdminQueueCursor = {
+  createdAt: string;
+  id: string;
+};
+
+export type AdminQueuePageRequest = {
+  fetchLimit: number;
+  cursor: AdminQueueCursor | null;
 };
 
 export type SecretStorageClient = {
@@ -81,6 +93,30 @@ export function translateSupabaseModerationError(error: SupabaseFailure): Error 
     return new HttpError(409, "STALE_SUBMISSION");
   }
   return new HttpError(503, "TEMPORARY_UNAVAILABLE");
+}
+
+export type AdminAuthenticationClient = {
+  getUser: (token: string) => Promise<{
+    data: { user: { is_anonymous?: boolean } | null };
+    error: SupabaseFailure | null;
+  }>;
+  scopedClient: UserScopedModerationClient;
+};
+
+export function createAdminAuthenticateAdapter(
+  createClient: (authorization: string) => AdminAuthenticationClient,
+): AdminModerationDependencies["authenticate"] {
+  return async (authorization) => {
+    const client = createClient(authorization);
+    const token = authorization.replace(/^Bearer\s+/i, "");
+    const { data, error } = await client.getUser(token);
+    if (error !== null) {
+      if (error.status === 401) return null;
+      throw new HttpError(503, "TEMPORARY_UNAVAILABLE");
+    }
+    if (data.user === null || data.user.is_anonymous === true) return null;
+    return client.scopedClient;
+  };
 }
 
 function jsonResponse(status: number, body: Record<string, unknown>): Response {
@@ -226,14 +262,74 @@ async function mutate(
   await userClient.finalizeSubmissionDelete(input.submissionId);
 }
 
+function isRfc3339(value: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(value) &&
+    Number.isFinite(Date.parse(value));
+}
+
+function encodeQueueCursor(cursor: AdminQueueCursor): string {
+  const bytes = new TextEncoder().encode(JSON.stringify(cursor));
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary).replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/, "");
+}
+
+function decodeQueueCursor(value: string): AdminQueueCursor {
+  if (value.length < 1 || value.length > MAX_ADMIN_CURSOR_LENGTH || !/^[A-Za-z0-9_-]+$/.test(value)) {
+    throw new HttpError(400, "INVALID_CURSOR");
+  }
+  try {
+    const base64 = value.replaceAll("-", "+").replaceAll("_", "/");
+    const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, "=");
+    const binary = atob(padded);
+    const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+    const decoded = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
+    if (
+      !isRecord(decoded) || !exactKeys(decoded, ["createdAt", "id"]) ||
+      typeof decoded.createdAt !== "string" || !isRfc3339(decoded.createdAt) ||
+      typeof decoded.id !== "string" || !UUID.test(decoded.id)
+    ) {
+      throw new Error("invalid cursor payload");
+    }
+    return { createdAt: decoded.createdAt, id: decoded.id };
+  } catch (error) {
+    if (error instanceof HttpError) throw error;
+    throw new HttpError(400, "INVALID_CURSOR");
+  }
+}
+
+function parseQueuePage(request: Request): { limit: number; cursor: AdminQueueCursor | null } {
+  const parameters = new URL(request.url).searchParams;
+  for (const key of parameters.keys()) {
+    if (key !== "limit" && key !== "cursor") throw new HttpError(400, "INVALID_PAGE");
+  }
+  if (parameters.getAll("limit").length > 1 || parameters.getAll("cursor").length > 1) {
+    throw new HttpError(400, "INVALID_PAGE");
+  }
+  const rawLimit = parameters.get("limit");
+  if (rawLimit !== null && !/^\d+$/.test(rawLimit)) throw new HttpError(400, "INVALID_PAGE");
+  const limit = rawLimit === null ? DEFAULT_ADMIN_PAGE_SIZE : Number(rawLimit);
+  if (!Number.isSafeInteger(limit) || limit < 1 || limit > MAX_ADMIN_PAGE_SIZE) {
+    throw new HttpError(400, "INVALID_PAGE");
+  }
+  const rawCursor = parameters.get("cursor");
+  return { limit, cursor: rawCursor === null ? null : decodeQueueCursor(rawCursor) };
+}
+
 async function listQueue(
+  request: Request,
   userClient: UserScopedModerationClient,
   deps: AdminModerationDependencies,
-): Promise<Record<string, unknown>[]> {
-  const rows = await userClient.listSubmissions();
-  if (rows.length > MAX_ADMIN_QUEUE_ROWS) throw new HttpError(503, "TEMPORARY_UNAVAILABLE");
+): Promise<{ submissions: Record<string, unknown>[]; nextCursor: string | null }> {
+  const page = parseQueuePage(request);
+  const rows = await userClient.listSubmissions({ fetchLimit: page.limit + 1, cursor: page.cursor });
+  if (rows.length > page.limit + 1) throw new HttpError(503, "TEMPORARY_UNAVAILABLE");
+  const pageRows = rows.slice(0, page.limit);
+  const nextCursor = rows.length > page.limit && pageRows.length > 0
+    ? encodeQueueCursor({ createdAt: pageRows.at(-1)!.created_at, id: pageRows.at(-1)!.id })
+    : null;
   let storage: SecretStorageClient | undefined;
-  return await Promise.all(rows.map(async (row) => {
+  const submissions = await Promise.all(pageRows.map(async (row) => {
     const { image_object_path: imagePath, ...safeRow } = row;
     if (imagePath === null) return { ...safeRow, cover: { state: "ABSENT" } };
     try {
@@ -249,6 +345,7 @@ async function listQueue(
       return { ...safeRow, cover: { state: "SIGNING_FAILED" } };
     }
   }));
+  return { submissions, nextCursor };
 }
 
 export function createAdminModerationHandler(
@@ -265,7 +362,7 @@ export function createAdminModerationHandler(
       if (userClient === null) throw new HttpError(401, "AUTHENTICATION_REQUIRED");
       if (!(await userClient.isCatalogAdmin())) throw new HttpError(403, "ADMIN_REQUIRED");
       if (request.method === "GET") {
-        return jsonResponse(200, { submissions: await listQueue(userClient, deps) });
+        return jsonResponse(200, await listQueue(request, userClient, deps));
       }
       const input = validateRequest(await readBoundedJson(request));
       await mutate(input, userClient, deps);
