@@ -34,6 +34,8 @@ NO_COVER_URL = PAGES_IMAGE_PREFIX + "no-cover.svg"
 MAX_JSON_BYTES = 2 * 1024 * 1024
 MAX_IMAGE_BYTES = 2 * 1024 * 1024
 MAX_EXPORT_BATCH = 25
+MAX_SUPPRESSION_IDS = 10_000
+SUPPRESSION_PAGE_SIZE = 1_000
 STABLE_KEY = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*\Z")
 
 
@@ -55,8 +57,15 @@ class ApprovedSubmission:
     reviewed_at: str = "2026-08-13T00:00:00Z"
 
 
+@dataclass(frozen=True)
+class ExportCycleResult:
+    exported_ids: list[str]
+    catalog_changed: bool
+
+
 class ExportRemote(Protocol):
     def fetch_pending(self, submission_id: str | None) -> list[ApprovedSubmission]: ...
+    def fetch_suppressions(self) -> set[str]: ...
     def download_image(self, path: str) -> bytes: ...
     def mark_exported(self, submission_ids: Sequence[str]) -> None: ...
     def delete_images(self, paths: Sequence[str]) -> None: ...
@@ -152,11 +161,30 @@ def _with_public_defaults(game: Mapping[str, Any]) -> dict[str, Any]:
     return completed
 
 
+def _validated_suppression_ids(values: Iterable[str]) -> set[str]:
+    suppressed: set[str] = set()
+    for value in values:
+        if not isinstance(value, str):
+            raise ExportError("Supabase returned an invalid suppression identity")
+        try:
+            parsed = uuid.UUID(value)
+        except (ValueError, AttributeError, TypeError) as error:
+            raise ExportError("Supabase returned an invalid suppression identity") from error
+        canonical = str(parsed)
+        if value.lower() != canonical:
+            raise ExportError("Supabase returned an invalid suppression identity")
+        suppressed.add(canonical)
+        if len(suppressed) > MAX_SUPPRESSION_IDS:
+            raise ExportError("Supabase returned too many suppression identities")
+    return suppressed
+
+
 def apply_approved_submissions(
     document: Mapping[str, Any],
     submissions: Iterable[ApprovedSubmission],
     *,
     generated_at: str,
+    suppressed_origin_ids: Iterable[str] = (),
     schema_path: Path | None = None,
     images_dir: Path | None = None,
 ) -> tuple[dict[str, Any], list[str]]:
@@ -171,15 +199,24 @@ def apply_approved_submissions(
     }
     if len(by_key) != len(games):
         raise ExportError("Existing catalog contains an invalid or duplicate key")
+    suppressed = _validated_suppression_ids(suppressed_origin_ids)
     exported_ids: list[str] = []
     seen_submission_ids: set[str] = set()
     seen_target_keys: set[str] = set()
-    changed = False
+    suppressed_keys = [
+        key for key, game in by_key.items()
+        if game.get("originSubmissionId") in suppressed
+    ]
+    for key in suppressed_keys:
+        del by_key[key]
+    changed = bool(suppressed_keys)
 
     for submission in sorted(submissions, key=lambda row: row.submission_id):
         if submission.submission_id in seen_submission_ids:
             raise ExportError(f"Duplicate submission in export batch: {submission.submission_id}")
         seen_submission_ids.add(submission.submission_id)
+        if submission.submission_id in suppressed:
+            continue
         candidate = _normalized_submission(submission)
         key = candidate.get("key")
         if not isinstance(key, str):
@@ -295,7 +332,7 @@ def _atomic_write(path: Path, data: bytes) -> None:
         raise
 
 
-def export_cycle(
+def export_cycle_with_result(
     remote: ExportRemote,
     repo_root: Path,
     publish: Callable[[], None],
@@ -304,10 +341,13 @@ def export_cycle(
     generated_at: str | None = None,
     image_converter: Callable[[bytes, Path], None] = convert_cover_to_webp,
     acknowledge: bool = True,
-) -> list[str]:
+) -> ExportCycleResult:
     rows = remote.fetch_pending(submission_id)
-    if not rows:
-        return []
+    try:
+        suppression_values = remote.fetch_suppressions()
+    except Exception as error:
+        raise ExportError("Cannot fetch catalog suppressions") from error
+    suppressed = _validated_suppression_ids(suppression_values)
     catalog_path = repo_root / "catalog" / "catalog.json"
     schema_path = repo_root / "catalog" / "schema.json"
     images_dir = repo_root / "catalog" / "images"
@@ -318,6 +358,8 @@ def export_cycle(
         _prepare_validation_images(images_dir, staged_images)
         converted_names: set[str] = set()
         for row in rows:
+            if row.submission_id in suppressed:
+                continue
             image_object_path = _validated_image_object_path(row)
             if image_object_path:
                 game = _normalized_submission(row)
@@ -332,6 +374,7 @@ def export_cycle(
             current,
             rows,
             generated_at=timestamp,
+            suppressed_origin_ids=suppressed,
             schema_path=schema_path,
             images_dir=staged_images,
         )
@@ -341,11 +384,35 @@ def export_cycle(
         for name in converted_names:
             if not (images_dir / name).is_file() or (images_dir / name).read_bytes() != (staged_images / name).read_bytes():
                 _atomic_write(images_dir / name, (staged_images / name).read_bytes())
-        publish()
+        if changed or exported_ids:
+            publish()
 
-    if acknowledge:
-        _acknowledge_rows(remote, rows)
-    return exported_ids
+    if acknowledge and exported_ids:
+        exported_set = set(exported_ids)
+        _acknowledge_rows(remote, [row for row in rows if row.submission_id in exported_set])
+    return ExportCycleResult(exported_ids=exported_ids, catalog_changed=changed)
+
+
+def export_cycle(
+    remote: ExportRemote,
+    repo_root: Path,
+    publish: Callable[[], None],
+    *,
+    submission_id: str | None = None,
+    generated_at: str | None = None,
+    image_converter: Callable[[bytes, Path], None] = convert_cover_to_webp,
+    acknowledge: bool = True,
+) -> list[str]:
+    """Compatibility wrapper for callers that only need exported IDs."""
+    return export_cycle_with_result(
+        remote,
+        repo_root,
+        publish,
+        submission_id=submission_id,
+        generated_at=generated_at,
+        image_converter=image_converter,
+        acknowledge=acknowledge,
+    ).exported_ids
 
 
 def _acknowledge_rows(remote: ExportRemote, rows: Sequence[ApprovedSubmission]) -> None:
@@ -458,6 +525,36 @@ class SupabaseExportRemote:
             ))
         return rows
 
+    def fetch_suppressions(self) -> set[str]:
+        suppression_ids: list[str] = []
+        offset = 0
+        while True:
+            remaining = MAX_SUPPRESSION_IDS + 1 - len(suppression_ids)
+            limit = min(SUPPRESSION_PAGE_SIZE, remaining)
+            filters = [
+                ("select", "origin_submission_id"),
+                ("order", "origin_submission_id.asc"),
+                ("limit", str(limit)),
+                ("offset", str(offset)),
+            ]
+            try:
+                raw = json.loads(self._request(
+                    "/rest/v1/public_catalog_suppressions?" + urlencode(filters)
+                ).decode("utf-8"))
+            except (UnicodeDecodeError, json.JSONDecodeError) as error:
+                raise ExportError("Supabase returned invalid suppression JSON") from error
+            if not isinstance(raw, list):
+                raise ExportError("Supabase returned an invalid suppression list")
+            for value in raw:
+                if not isinstance(value, Mapping) or set(value) != {"origin_submission_id"}:
+                    raise ExportError("Supabase returned an invalid suppression row")
+                suppression_ids.append(value["origin_submission_id"])
+            if len(suppression_ids) > MAX_SUPPRESSION_IDS:
+                raise ExportError("Supabase returned too many suppression identities")
+            if len(raw) < limit:
+                return _validated_suppression_ids(suppression_ids)
+            offset += len(raw)
+
     def download_image(self, path: str) -> bytes:
         safe_path = "/".join(quote(part, safe="") for part in path.split("/"))
         return self._request(
@@ -536,9 +633,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         remote = SupabaseExportRemote(url, secret)
         if args.acknowledge_ids:
             acknowledge_exports(remote, args.acknowledge_ids)
-            exported = list(args.acknowledge_ids)
+            result = ExportCycleResult(exported_ids=list(args.acknowledge_ids), catalog_changed=False)
         else:
-            exported = export_cycle(
+            result = export_cycle_with_result(
                 remote,
                 args.repo_root,
                 lambda: publish_with_git(args.repo_root),
@@ -552,12 +649,16 @@ def main(argv: Sequence[str] | None = None) -> int:
     if github_output:
         try:
             with Path(github_output).open("a", encoding="utf-8") as stream:
-                stream.write(f"exported_count={len(exported)}\n")
-                stream.write("exported_ids=" + ",".join(exported) + "\n")
+                stream.write(f"exported_count={len(result.exported_ids)}\n")
+                stream.write("exported_ids=" + ",".join(result.exported_ids) + "\n")
+                stream.write(f"catalog_changed={str(result.catalog_changed).lower()}\n")
         except OSError as error:
             print(f"Cannot report exporter result to GitHub Actions: {error}", file=sys.stderr)
             return 1
-    print(f"Exported {len(exported)} reviewed submission(s)")
+    print(
+        f"Exported {len(result.exported_ids)} reviewed submission(s); "
+        f"catalog_changed={str(result.catalog_changed).lower()}"
+    )
     return 0
 
 

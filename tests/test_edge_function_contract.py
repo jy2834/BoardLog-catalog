@@ -5,6 +5,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 INDEX = ROOT / "supabase" / "functions" / "submit-game" / "index.ts"
 HANDLER = ROOT / "supabase" / "functions" / "submit-game" / "handler.ts"
+SUBMISSION_CONTEXT = ROOT / "supabase" / "functions" / "submit-game" / "submission-context.ts"
 CONFIG = ROOT / "supabase" / "config.toml"
 
 
@@ -13,6 +14,7 @@ class EdgeFunctionContractTest(unittest.TestCase):
     def setUpClass(cls):
         cls.index = INDEX.read_text(encoding="utf-8")
         cls.handler = HANDLER.read_text(encoding="utf-8")
+        cls.submission_context = SUBMISSION_CONTEXT.read_text(encoding="utf-8")
         cls.config = CONFIG.read_text(encoding="utf-8")
 
     def test_platform_jwt_verification_remains_enabled(self):
@@ -25,9 +27,10 @@ class EdgeFunctionContractTest(unittest.TestCase):
         self.assertIn('defaultApiKey("SUPABASE_SECRET_KEYS")', self.index)
         self.assertNotIn("SUPABASE_ANON_KEY", self.index)
         self.assertNotIn("SUPABASE_SERVICE_ROLE_KEY", self.index)
-        self.assertIn('client.rpc("submit_game_from_edge"', self.index)
-        self.assertIn("p_owner_user_id", self.index)
-        self.assertNotIn('client.rpc("submit_game_with_id"', self.index)
+        self.assertIn("createSubmissionAuthContext(data.user.id, edgeClient())", self.index)
+        self.assertIn('edgeClient.rpc("submit_game_from_edge"', self.submission_context)
+        self.assertIn("p_owner_user_id: userId", self.submission_context)
+        self.assertNotIn('rpc("submit_game_with_id"', self.index + self.submission_context)
 
     def test_does_not_log_request_auth_captcha_or_public_game_content(self):
         combined = self.index + "\n" + self.handler

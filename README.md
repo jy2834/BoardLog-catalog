@@ -1,6 +1,6 @@
 # BoardLog Public Catalog
 
-BoardLog 사용자가 제출하고 관리자가 검수한 보드게임만 배포하는 공개 카탈로그입니다. Android 앱의 개인 기록·가격·메모는 이 저장소로 전송되지 않습니다.
+BoardLog의 검수 완료 GitHub 카탈로그와 Supabase community/moderation server contract를 관리합니다. Android 앱의 개인 기록·가격·메모는 이 저장소로 전송되지 않습니다.
 
 ## 공개 주소
 
@@ -38,7 +38,12 @@ python3 scripts/validate_catalog.py \
 
 저장소의 검증 코드와 스키마는 MIT License입니다. 제3자 게임명, 상표, 설명, 메타데이터와 커버 이미지는 각각의 권리자·원출처 조건을 따르며 MIT License로 재허가되지 않습니다. 공개 이미지는 관리자 검수와 출처 확인을 통과한 항목만 추가합니다.
 
-일반 사용자의 제출은 곧바로 공개되지 않습니다. Supabase의 비공개 검수 대기열과 관리자 승인을 거친 뒤 `export-approved.yml`이 최대 25건씩 공개 JSON과 커버를 갱신합니다. 승인 행의 임시 커버는 입력 2 MiB 제한을 다시 확인하고 EXIF를 제거한 최대 1,200px WebP로 변환합니다. 전체 스키마 검증과 Git push 후 같은 작업에서 GitHub Pages 배포까지 성공해야 서버의 `exported_at`을 기록합니다. 검증·변환·push·Pages·서버 확인 중 실패하면 승인 행과 임시 이미지를 남겨 다음 15분 실행에서 안전하게 재시도합니다. 서버 확인 이후 임시 Storage 삭제만 실패한 경우 공개 결과는 유지하며, 남은 고아 파일은 사용량 정리 작업에서 다시 확인합니다.
+공개 노출은 두 계층으로 나뉩니다.
+
+- 등록 성공한 PENDING 행은 `community-catalog`이 owner ID, raw image path, admin note와 개인 필드를 제거한 safe metadata와 선택적 24시간 signed cover만 제공하며, Android 전체 게임에 `사용자 등록 · 미검수`로 즉시 표시됩니다.
+- 검수 완료 GitHub `catalog/catalog.json`과 `catalog/images/`에는 승인 또는 병합된 항목만 들어갑니다. `export-approved.yml`이 최대 25건씩 공개 JSON과 커버를 갱신합니다.
+
+승인 행의 임시 커버는 입력 2 MiB 제한을 다시 확인하고 EXIF를 제거한 최대 1,200px WebP로 변환합니다. 전체 스키마 검증과 Git push 후 같은 작업에서 GitHub Pages 배포까지 성공해야 서버의 `exported_at`을 기록합니다. 검증·변환·push·Pages·서버 확인 중 실패하면 승인 행과 임시 이미지를 남겨 다음 15분 실행에서 안전하게 재시도합니다. 서버 확인 이후 임시 Storage 삭제만 실패한 경우 공개 결과는 유지하며, 남은 고아 파일은 사용량 정리 작업에서 다시 확인합니다.
 
 워크플로 활성화에는 GitHub Actions secret `SUPABASE_URL`과 새 형식의 `SUPABASE_SECRET_KEY`(`sb_secret_…`)가 필요합니다. 구형 `service_role` JWT는 사용하지 않으며, secret은 워크플로 로그·Android·웹 번들·Git에 넣지 않습니다. 수동 실행에서는 특정 승인 UUID 하나 또는 다음 미내보내기 묶음을 선택할 수 있습니다.
 
@@ -55,7 +60,32 @@ python3 scripts/validate_catalog.py \
 - 사용자는 24시간당 최대 3건을 제출할 수 있습니다.
 - 서버 상태는 `NORMAL`, `IMAGE_LIMITED`, `SUBMISSION_CLOSED`, `MAINTENANCE`로 구분합니다.
 
-`202608120001`~`202608130009` DB 마이그레이션이 원격 프로젝트에 적용되었고 원격 pgTAP 64개가 통과했습니다. 제출자 Realtime은 원본 제출 테이블이 아니라 소유자별 불투명 변경 신호만 사용합니다. 익명 로그인과 `submit-game` Edge Function, Turnstile 운영 위젯이 활성화되어 있고 Android 제출·본인 상태 조회 UI도 연결되어 있습니다. 관리자 검수 화면, exporter, 무료 한도 감시 코드와 DB 계약은 준비됐으며 GitHub Actions secret 등록과 첫 수동 실행만 남았습니다.
+`202608120001`~`202608130009` DB 마이그레이션이 원격 프로젝트에 적용되었고 원격 pgTAP 64개가 통과했습니다. 제출자 Realtime은 원본 제출 테이블이 아니라 소유자별 불투명 변경 신호만 사용합니다. 익명 로그인과 `submit-game` Edge Function, Turnstile 운영 위젯이 활성화되어 있고 Android 제출·본인 상태 조회 UI도 연결되어 있습니다.
+
+2026-08-16~18 release candidate에는 `20260816023225`/`20260817234207` migration, `community-catalog`, `admin-moderate`, suppression-aware exporter와 Android 인앱 관리자 화면이 구현되어 있습니다. 이 새 migration/functions, hosted Auth 변경, 영구 관리자 계정 생성/등록과 원격 smoke test는 아직 수행하지 않았습니다. 과거 `BoardLog-web` 관리자 화면 계획은 인앱 관리자 흐름으로 대체되어 운영에 필요하지 않습니다.
+
+### Android 인앱 관리자 계약
+
+- 일반 사용자는 회원가입하지 않습니다. 첫 실행의 `비회원으로 사용`은 Auth 사용자를 만들지 않고, 제출·내 제출 조회처럼 서버 기능을 처음 사용할 때만 익명 세션이 만들어집니다.
+- 관리자는 사용자가 Supabase Dashboard에서 비밀번호를 공유하지 않고 직접 만든 단일 영구 계정입니다. 계정은 non-anonymous 세션이어야 하며 `admin_users` membership을 `is_catalog_admin()`으로 다시 확인합니다.
+- `admin-moderate`는 현재 Bearer token과 publishable `apikey`를 검증한 뒤 bounded `(created_at,id)` cursor queue를 제공합니다. owner ID, raw object path, admin note는 목록 응답에 포함하지 않으며 cover는 signed URL 또는 명시적 상태로만 반환합니다.
+- 관리자만 승인·반려·병합·숨김·복구·삭제할 수 있습니다. 삭제는 suppression을 먼저 만드는 `prepare → private Storage remove → finalize` 순서이고, Storage 실패 시 숨김/tombstone을 유지합니다.
+- 소유자는 PENDING/APPROVED이면서 PUBLIC인 본인 행에 `공개 중단 요청`만 할 수 있습니다. 요청만으로 공개 행이 삭제되지 않으며 최종 조치는 관리자에게 남습니다.
+- community feed의 suppression origin ID는 공개 metadata와 exporter 양쪽에서 동일 항목을 제거합니다. reason과 actor는 public response, exporter query/output, 로그에 포함하지 않습니다.
+
+### 외부 활성화 checkpoint
+
+다음 순서는 각각 외부 상태를 바꾸므로 대상 프로젝트와 작업명을 포함한 새 명시적 승인 전에는 실행하지 않습니다.
+
+1. 새 migration 배포 후 grants/RLS/database advisors 확인
+2. `community-catalog`, `admin-moderate` 배포
+3. 익명 로그인은 유지하고 이메일 신규 가입만 비활성화
+4. 사용자가 Dashboard에서 단일 영구 관리자 계정을 비공개로 생성
+5. user UUID만 복사한 뒤 다시 승인을 받아 `admin_users`에 한 건 등록
+6. guest, non-admin, admin 운영 smoke test
+7. 더 높은 versionCode의 영구 서명 Android APK 준비
+
+비밀번호, UUID, token과 secret은 문서·Git·로그·채팅에 남기지 않습니다. rollback은 community feed를 숨기고 검수 완료 GitHub 카탈로그는 유지하며, 이메일 신규 가입 설정을 이전 값으로 되돌립니다. Android 개인 Room 데이터와 내부 사진은 삭제하지 않습니다.
 
 ### 제출 Edge Function
 

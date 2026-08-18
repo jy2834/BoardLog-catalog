@@ -1,7 +1,7 @@
 begin;
 
 create extension if not exists pgtap with schema extensions;
-select plan(64);
+select plan(87);
 create temporary table tap_results (result text not null);
 grant insert, select on tap_results to anon, authenticated, service_role;
 
@@ -161,6 +161,51 @@ insert into tap_results select lives_ok(
   )$$,
   'edge can submit a privacy-safe game for an authenticated owner'
 );
+reset role;
+create temporary table test_submission_ids as
+select 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'::uuid as id;
+grant select on test_submission_ids to authenticated;
+
+create function pg_temp.test_submission_id()
+returns uuid
+language sql
+stable
+as $$
+  select id from test_submission_ids limit 1
+$$;
+
+set local role anon;
+select set_config('request.jwt.claims', '{"role":"anon"}', true);
+insert into tap_results select is(
+  (select count(*)::integer from public.public_unverified_catalog_metadata),
+  1,
+  'anon can read public unverified metadata without private image paths'
+);
+insert into tap_results select throws_ok(
+  $$select image_object_path from public.public_unverified_catalog_games$$,
+  '42501',
+  'permission denied for view public_unverified_catalog_games',
+  'anon cannot query the private unverified image view'
+);
+reset role;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"11111111-1111-4111-8111-111111111111","role":"authenticated","is_anonymous":true}', true);
+insert into tap_results select is(
+  (select count(*)::integer from public.public_unverified_catalog_metadata),
+  1,
+  'authenticated anonymous user can read public unverified metadata'
+);
+insert into tap_results select throws_ok(
+  $$select public.set_submission_visibility(test_submission_id(), 'HIDDEN', 'not admin')$$,
+  '42501', 'admin access required', 'anonymous owner cannot hide public content'
+);
+insert into tap_results select lives_ok(
+  $$select public.request_submission_removal(test_submission_id())$$,
+  'owner can request public removal without deleting the row'
+);
+
+reset role;
+set local role service_role;
 insert into tap_results select lives_ok(
   $$select public.submit_game_from_edge(
     '11111111-1111-4111-8111-111111111111'::uuid,
@@ -270,10 +315,57 @@ insert into tap_results select is(
   'cleanup acknowledgement clears only the rejected image reference'
 );
 
-reset role;
-create temporary table test_submission_ids as
-select 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'::uuid as id;
-grant select on test_submission_ids to authenticated;
+insert into public.game_submissions (id, owner_user_id, public_game, status, visibility)
+values
+  (
+    'ffffffff-ffff-4fff-8fff-ffffffffffff',
+    '11111111-1111-4111-8111-111111111111',
+    '{"targetKey":"existing-target"}'::jsonb,
+    'MERGED',
+    'PUBLIC'
+  ),
+  (
+    '99999999-9999-4999-8999-999999999999',
+    '11111111-1111-4111-8111-111111111111',
+    '{"name":"Hidden pending"}'::jsonb,
+    'PENDING',
+    'HIDDEN'
+  ),
+  (
+    '88888888-8888-4888-8888-888888888888',
+    '33333333-3333-4333-8333-333333333333',
+    '{"name":"Cross owner"}'::jsonb,
+    'PENDING',
+    'PUBLIC'
+  );
+
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"11111111-1111-4111-8111-111111111111","role":"authenticated"}', true);
+insert into tap_results select throws_ok(
+  $$select public.request_submission_removal('dddddddd-dddd-4ddd-8ddd-dddddddddddd'::uuid)$$,
+  '42501', 'owned public removable submission not found',
+  'owner cannot request removal for a rejected submission'
+);
+insert into tap_results select throws_ok(
+  $$select public.request_submission_removal('ffffffff-ffff-4fff-8fff-ffffffffffff'::uuid)$$,
+  '42501', 'owned public removable submission not found',
+  'owner cannot request removal for a merged submission'
+);
+insert into tap_results select throws_ok(
+  $$select public.request_submission_removal('99999999-9999-4999-8999-999999999999'::uuid)$$,
+  '42501', 'owned public removable submission not found',
+  'owner cannot request removal for a hidden submission'
+);
+insert into tap_results select throws_ok(
+  $$select public.request_submission_removal(test_submission_id())$$,
+  '42501', 'owned public removable submission not found',
+  'owner cannot repeat a removal request'
+);
+insert into tap_results select throws_ok(
+  $$select public.request_submission_removal('88888888-8888-4888-8888-888888888888'::uuid)$$,
+  '42501', 'owned public removable submission not found',
+  'owner cannot request removal for another owner submission'
+);
 
 set local role authenticated;
 select set_config('request.jwt.claims', '{"sub":"22222222-2222-4222-8222-222222222222","role":"authenticated"}', true);
@@ -400,7 +492,20 @@ insert into tap_results select throws_ok(
 );
 
 reset role;
-select set_config('request.jwt.claims', '{"sub":"33333333-3333-4333-8333-333333333333","role":"authenticated"}', true);
+select set_config('request.jwt.claims', '{"sub":"33333333-3333-4333-8333-333333333333","role":"authenticated","is_anonymous":true}', true);
+set local role authenticated;
+insert into tap_results select is(
+  public.is_catalog_admin(),
+  false,
+  'anonymous admin membership is rejected'
+);
+insert into tap_results select is(
+  (select count(*)::integer from public.admin_game_submissions),
+  0,
+  'anonymous admin membership cannot read the admin moderation view'
+);
+reset role;
+select set_config('request.jwt.claims', '{"sub":"33333333-3333-4333-8333-333333333333","role":"authenticated","is_anonymous":false}', true);
 set local role authenticated;
 insert into tap_results select is(
   (
@@ -476,8 +581,81 @@ insert into tap_results select is(
   'approval creates an audit event for the test row'
 );
 
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"33333333-3333-4333-8333-333333333333","role":"authenticated","is_anonymous":false}', true);
+insert into tap_results select lives_ok(
+  $$select public.set_submission_visibility('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'::uuid, 'HIDDEN', 'withdraw public row')$$,
+  'admin can hide an approved public row'
+);
+reset role;
 set local role anon;
 select set_config('request.jwt.claims', '{"role":"anon"}', true);
+insert into tap_results select is(
+  (select count(*)::integer from public.public_catalog_suppressions where origin_submission_id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'),
+  1,
+  'hide creates a public suppression tombstone'
+);
+insert into tap_results select is(
+  (select count(*)::integer from public.approved_catalog_games where origin_submission_id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'),
+  0,
+  'hidden approved row is absent from the public catalog view'
+);
+reset role;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"33333333-3333-4333-8333-333333333333","role":"authenticated","is_anonymous":false}', true);
+insert into tap_results select lives_ok(
+  $$select public.set_submission_visibility('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'::uuid, 'PUBLIC', 'restore public row')$$,
+  'admin can restore a hidden public row'
+);
+reset role;
+set local role anon;
+select set_config('request.jwt.claims', '{"role":"anon"}', true);
+insert into tap_results select is(
+  (select count(*)::integer from public.public_catalog_suppressions where origin_submission_id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'),
+  0,
+  'restore removes the public suppression tombstone'
+);
+insert into tap_results select is(
+  (select count(*)::integer from public.approved_catalog_games where origin_submission_id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'),
+  1,
+  'restored approved row re-enters the public catalog view'
+);
+reset role;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"33333333-3333-4333-8333-333333333333","role":"authenticated","is_anonymous":false}', true);
+insert into tap_results select lives_ok(
+  $$select * from public.prepare_submission_delete('cccccccc-cccc-4ccc-8ccc-cccccccccccc'::uuid, 'delete requested')$$,
+  'admin can prepare a hidden submission for deletion'
+);
+reset role;
+set local role anon;
+select set_config('request.jwt.claims', '{"role":"anon"}', true);
+insert into tap_results select is(
+  (select count(*)::integer from public.public_catalog_suppressions where origin_submission_id = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc'),
+  1,
+  'delete preparation creates a public suppression tombstone'
+);
+reset role;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"33333333-3333-4333-8333-333333333333","role":"authenticated","is_anonymous":false}', true);
+insert into tap_results select lives_ok(
+  $$select public.finalize_submission_delete('cccccccc-cccc-4ccc-8ccc-cccccccccccc'::uuid)$$,
+  'admin can finalize a prepared submission deletion'
+);
+reset role;
+insert into tap_results select is(
+  (select count(*)::integer from public.game_submissions where id = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc'),
+  0,
+  'finalized deletion removes the submission row'
+);
+
+set local role anon;
+select set_config('request.jwt.claims', '{"role":"anon"}', true);
+insert into tap_results select is(
+  (select count(*)::integer from public.public_catalog_suppressions where origin_submission_id = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc'),
+  1,
+  'finalized deletion retains the public suppression tombstone'
+);
 insert into tap_results select is(
   (
     select count(*)::integer
@@ -503,5 +681,5 @@ begin
   end if;
 end;
 $$;
-select 'ok - all 64 pgTAP assertions passed' as result;
+select 'ok - all 87 pgTAP assertions passed' as result;
 rollback;

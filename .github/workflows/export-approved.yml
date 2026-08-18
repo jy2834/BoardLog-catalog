@@ -62,22 +62,23 @@ jobs:
             python3 scripts/export_approved.py --defer-acknowledgement
           else
             echo "exported_count=0" >> "$GITHUB_OUTPUT"
+            echo "catalog_changed=false" >> "$GITHUB_OUTPUT"
             echo "No export target selected."
           fi
       - name: Prepare Pages artifact
-        if: steps.publish.outputs.exported_count != '0'
+        if: steps.publish.outputs.catalog_changed == 'true' || steps.publish.outputs.exported_count != '0'
         run: |
           mkdir -p _site
           cp -R catalog _site/catalog
       - uses: actions/configure-pages@v5
-        if: steps.publish.outputs.exported_count != '0'
+        if: steps.publish.outputs.catalog_changed == 'true' || steps.publish.outputs.exported_count != '0'
       - uses: actions/upload-pages-artifact@v3
-        if: steps.publish.outputs.exported_count != '0'
+        if: steps.publish.outputs.catalog_changed == 'true' || steps.publish.outputs.exported_count != '0'
         with:
           path: _site
       - id: deployment
         uses: actions/deploy-pages@v4
-        if: steps.publish.outputs.exported_count != '0'
+        if: steps.publish.outputs.catalog_changed == 'true' || steps.publish.outputs.exported_count != '0'
       - name: Mark published rows exported
         if: steps.publish.outputs.exported_count != '0'
         env:

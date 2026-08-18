@@ -1,6 +1,5 @@
 import re
 import unittest
-import re
 from pathlib import Path
 
 
@@ -14,7 +13,10 @@ OWNER_STATUS_MIGRATION = ROOT / "supabase" / "migrations" / "202608120006_owner_
 ADMIN_CONSOLE_MIGRATION = ROOT / "supabase" / "migrations" / "202608130007_admin_console_reads.sql"
 USAGE_MONITOR_MIGRATION = ROOT / "supabase" / "migrations" / "202608130008_free_usage_monitor.sql"
 USAGE_ACL_MIGRATION = ROOT / "supabase" / "migrations" / "202608130009_lock_usage_monitor_acl.sql"
+IN_APP_ADMIN_MIGRATION_GLOB = "*_in_app_admin_public_feed.sql"
+OWNER_REMOVAL_MIGRATION_GLOB = "*_restrict_owner_removal_eligibility.sql"
 RLS_TEST = ROOT / "supabase" / "tests" / "public_catalog_rls.test.sql"
+CONFIG = ROOT / "supabase" / "config.toml"
 
 
 class SupabaseMigrationContractTest(unittest.TestCase):
@@ -45,6 +47,30 @@ class SupabaseMigrationContractTest(unittest.TestCase):
             if USAGE_ACL_MIGRATION.exists()
             else ""
         )
+        in_app_admin_migrations = sorted(
+            (ROOT / "supabase" / "migrations").glob(IN_APP_ADMIN_MIGRATION_GLOB)
+        )
+        cls.in_app_admin_sql = (
+            in_app_admin_migrations[-1].read_text(encoding="utf-8")
+            if in_app_admin_migrations
+            else ""
+        )
+        owner_removal_migrations = sorted(
+            (ROOT / "supabase" / "migrations").glob(OWNER_REMOVAL_MIGRATION_GLOB)
+        )
+        cls.owner_removal_sql = (
+            owner_removal_migrations[-1].read_text(encoding="utf-8")
+            if owner_removal_migrations
+            else ""
+        )
+        cls.public_unverified_projection = (
+            cls.in_app_admin_sql.lower()
+            .split("create or replace view public.public_unverified_catalog_games", 1)[-1]
+            .split("from public.game_submissions", 1)[0]
+        )
+        cls.config = CONFIG.read_text(encoding="utf-8")
+        cls.config_auth = cls.config.split("[auth]", 1)[1].split("[auth.rate_limit]", 1)[0]
+        cls.config_email = cls.config.split("[auth.email]", 1)[1].split("[auth.sms]", 1)[0]
         cls.effective_sql = (
             cls.sql + "\n" + cls.hardening_sql + "\n" + cls.edge_rpc_sql
             + "\n" + cls.edge_only_sql + "\n" + cls.storage_lockdown_sql
@@ -52,6 +78,8 @@ class SupabaseMigrationContractTest(unittest.TestCase):
             + "\n" + cls.admin_console_sql
             + "\n" + cls.usage_monitor_sql
             + "\n" + cls.usage_acl_sql
+            + "\n" + cls.in_app_admin_sql
+            + "\n" + cls.owner_removal_sql
         )
         cls.rls_test = RLS_TEST.read_text(encoding="utf-8")
 
@@ -84,6 +112,62 @@ class SupabaseMigrationContractTest(unittest.TestCase):
             self.effective_sql,
             r"grant\s+select\s+on\s+public\.game_submissions\s+to\s+(?:anon|authenticated)",
         )
+
+    def test_in_app_admin_public_feed_contract(self):
+        sql = self.in_app_admin_sql.lower()
+        self.assertIn("create type public.submission_visibility", sql)
+        self.assertIn("create table public.catalog_suppressions", sql)
+        self.assertIn("create or replace view public.public_unverified_catalog_games", sql)
+        self.assertIn("create or replace view public.public_catalog_suppressions", sql)
+        self.assertIn("create or replace function public.request_submission_removal", sql)
+        self.assertIn("create or replace function public.set_submission_visibility", sql)
+        self.assertIn("create or replace function public.prepare_submission_delete", sql)
+        self.assertIn("create or replace function public.finalize_submission_delete", sql)
+        self.assertIn("(select auth.jwt()->>'is_anonymous')::boolean is false", sql)
+        self.assertIn("grant select on public.public_unverified_catalog_metadata to anon, authenticated", sql)
+        self.assertIn("grant select on public.public_catalog_suppressions to anon, authenticated", sql)
+        self.assertNotIn("owner_user_id", self.public_unverified_projection)
+        self.assertNotIn("admin_note", self.public_unverified_projection)
+
+    def test_owner_removal_requires_owned_public_pending_or_approved_row(self):
+        sql = re.sub(r"\s+", " ", self.owner_removal_sql.lower())
+        self.assertIn("create or replace function public.request_submission_removal", sql)
+        self.assertIn("owner_user_id = v_owner", sql)
+        self.assertIn("status in ('pending', 'approved')", sql)
+        self.assertIn("visibility = 'public'", sql)
+        self.assertIn("perform public.request_submission_removal(p_id)", sql)
+        self.assertNotIn("delete from public.game_submissions", sql)
+
+    def test_in_app_admin_public_feed_preserves_view_compatibility_and_admin_scope(self):
+        sql = self.in_app_admin_sql.lower()
+        my_view = sql.split("create or replace view public.my_game_submissions", 1)[1].split(";", 1)[0]
+        admin_view = sql.split("create or replace view public.admin_game_submissions", 1)[1].split(";", 1)[0]
+        metadata_view = sql.split("create or replace view public.public_unverified_catalog_metadata", 1)[1].split(";", 1)[0]
+        admin_helper = sql.split("create or replace function public.is_catalog_admin", 1)[-1].split("$$;", 1)[0]
+
+        my_view = re.sub(r"\s+", " ", my_view)
+        admin_view = re.sub(r"\s+", " ", admin_view)
+        self.assertIn(
+            "select id, public_game, image_object_path, status, submitter_message, created_at, updated_at, reviewed_at, visibility, removal_requested_at",
+            my_view,
+        )
+        self.assertIn(
+            "select id, owner_user_id, public_game, image_object_path, status, submitter_message, admin_note, reviewer_user_id, created_at, updated_at, reviewed_at, exported_at, visibility",
+            admin_view,
+        )
+        self.assertIn("from public.game_submissions", metadata_view)
+        self.assertNotIn("from public.public_unverified_catalog_games", metadata_view)
+        self.assertNotIn("image_object_path", metadata_view)
+        self.assertIn("create or replace view public.approved_catalog_games", sql)
+        self.assertIn("visibility <> 'hidden'", sql)
+        self.assertIn("auth.uid() is not null", admin_helper)
+        self.assertIn("coalesce((select auth.jwt()->>'is_anonymous')::boolean, true) is false", admin_helper)
+
+    def test_email_signup_is_disabled_without_disabling_anonymous_users(self):
+        self.assertIn("enable_signup = true", self.config_auth)
+        self.assertIn("enable_anonymous_sign_ins = true", self.config_auth)
+        self.assertIn("[auth.email]", self.config)
+        self.assertIn("enable_signup = false", self.config_email)
 
     def test_owner_realtime_uses_a_privacy_safe_invalidation_signal(self):
         self.assertTrue(OWNER_STATUS_MIGRATION.exists(), "owner status follow-up migration is required")
@@ -336,6 +420,24 @@ class SupabaseMigrationContractTest(unittest.TestCase):
             "admin can approve a submission",
             "pending rows never enter the approved public view",
             "approved test row enters the approved public view",
+            "anonymous owner cannot hide public content",
+            "owner can request public removal without deleting the row",
+            "anon can read public unverified metadata without private image paths",
+            "anon cannot query the private unverified image view",
+            "authenticated anonymous user can read public unverified metadata",
+            "anonymous admin membership is rejected",
+            "anonymous admin membership cannot read the admin moderation view",
+            "admin can hide an approved public row",
+            "hide creates a public suppression tombstone",
+            "hidden approved row is absent from the public catalog view",
+            "admin can restore a hidden public row",
+            "restore removes the public suppression tombstone",
+            "restored approved row re-enters the public catalog view",
+            "admin can prepare a hidden submission for deletion",
+            "delete preparation creates a public suppression tombstone",
+            "admin can finalize a prepared submission deletion",
+            "finalized deletion removes the submission row",
+            "finalized deletion retains the public suppression tombstone",
         ):
             with self.subTest(phrase=phrase):
                 self.assertIn(phrase, self.rls_test)
