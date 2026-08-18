@@ -1,6 +1,7 @@
 import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2.112.3";
 
-import { createSubmitGameHandler, type AuthContext, type ServiceState } from "./handler.ts";
+import { createSubmitGameHandler, type AuthContext } from "./handler.ts";
+import { createSubmissionAuthContext } from "./submission-context.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SUPABASE_PUBLISHABLE_KEY = defaultApiKey("SUPABASE_PUBLISHABLE_KEYS");
@@ -43,39 +44,7 @@ async function authenticate(authorization: string): Promise<AuthContext | null> 
   const authClient = userClient(authorization);
   const { data, error } = await authClient.auth.getUser(token);
   if (error || !data.user) return null;
-  const client = edgeClient();
-
-  return {
-    userId: data.user.id,
-    getServiceState: async () => {
-      const { data: status, error: statusError } = await authClient
-        .from("service_status")
-        .select("service_state")
-        .eq("singleton", true)
-        .single();
-      if (statusError || !status) throw statusError ?? new Error("Missing service status");
-      return status.service_state as ServiceState;
-    },
-    uploadCover: async (path, bytes, mimeType) => {
-      const { error: uploadError } = await client.storage
-        .from("submission-images")
-        .upload(path, bytes, { contentType: mimeType, upsert: false });
-      if (uploadError) throw uploadError;
-    },
-    removeCover: async (path) => {
-      const { error: removeError } = await client.storage.from("submission-images").remove([path]);
-      if (removeError) throw removeError;
-    },
-    submitGame: async (submissionId, payload, imagePath) => {
-      const { error: submitError } = await client.rpc("submit_game_from_edge", {
-        p_owner_user_id: data.user.id,
-        p_submission_id: submissionId,
-        p_payload: payload,
-        p_image_path: imagePath,
-      });
-      if (submitError) throw submitError;
-    },
-  };
+  return createSubmissionAuthContext(data.user.id, edgeClient());
 }
 
 async function verifyTurnstile(token: string, remoteIp: string | null) {
