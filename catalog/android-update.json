@@ -1,0 +1,18 @@
+{
+  "channel": "stable",
+  "downloadUrl": "https://github.com/jy2834/BoardLog-catalog/releases/download/android-v0.3.4/BoardLog-v0.3.4.apk",
+  "mandatory": false,
+  "packageName": "com.boardlog.app",
+  "publishedAt": "2026-08-26T01:25:19Z",
+  "releaseNotes": [
+    "공용 목록 직접 새로고침",
+    "새 버전 알림과 공개 다운로드 연결"
+  ],
+  "releasePageUrl": "https://github.com/jy2834/BoardLog-catalog/releases/tag/android-v0.3.4",
+  "schemaVersion": 1,
+  "sha256": "1b28763d8ed00c9d4c6fb54413efb0b853c3a0b7a3ecf6349df3680138ee2197",
+  "signingCertificateSha256": "1ACFD934FA432EDEDBB98800172924A34DE185BB17BF1BA503B7FFBDED078D51",
+  "sizeBytes": 41355101,
+  "versionCode": 7,
+  "versionName": "0.3.4"
+}

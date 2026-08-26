@@ -6,6 +6,7 @@ BoardLog 사용자가 제출하고 관리자가 검수한 보드게임만 배포
 
 - 카탈로그: <https://jy2834.github.io/BoardLog-catalog/catalog/catalog.json>
 - 스키마 계약: <https://jy2834.github.io/BoardLog-catalog/catalog/schema.json>
+- Android 업데이트 manifest: <https://jy2834.github.io/BoardLog-catalog/catalog/android-update.json>
 
 `catalog/catalog.json`은 `schemaVersion`, 단조 증가하는 `revision`, UTC `generatedAt`, 정렬된 `games`를 갖습니다. 초기 revision은 승인 게임이 없는 빈 목록입니다.
 
@@ -33,6 +34,18 @@ python3 scripts/validate_catalog.py \
 ```
 
 모든 pull request와 `main` push에서 같은 검증이 실행됩니다. GitHub Pages는 검증이 성공한 `main`만 배포합니다.
+
+## Android 업데이트 배포
+
+Android APK는 Git이나 GitHub Pages에 넣지 않습니다. 영구 서명된 APK는 immutable GitHub Release asset으로만 공개하고, Pages에는 작은 `catalog/android-update.json` manifest만 배포합니다.
+
+게시 순서는 반드시 다음과 같습니다.
+
+1. GitHub Release에 APK를 올리고 asset digest가 로컬 SHA-256과 같은지 확인합니다.
+2. Release를 공개한 뒤 비로그인 다운로드본의 크기와 SHA-256을 다시 확인합니다.
+3. 공개된 asset의 정확한 `publishedAt`·크기·SHA-256으로 manifest를 만들고 `main`에 커밋합니다.
+
+`scripts/build_android_update_manifest.py`는 결정적인 JSON을 만들고 APK 바이트와 함께 validator를 통과할 때만 원자적으로 출력 파일을 교체합니다. `scripts/validate_android_update.py`는 manifest 필드, Release URL, 서명 인증서, APK 크기·SHA-256과 선택한 Release 시각을 확인합니다. `catalog/` 아래에는 `.apk`와 `.zip` 바이너리를 절대 추가하지 않습니다.
 
 ## 이미지와 라이선스
 

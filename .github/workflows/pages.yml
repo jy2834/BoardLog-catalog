@@ -31,6 +31,9 @@ jobs:
           --catalog catalog/catalog.json
           --schema catalog/schema.json
           --images-dir catalog/images
+      - run: >-
+          python3 scripts/validate_android_update.py
+          --manifest catalog/android-update.json
       - run: |
           mkdir -p _site
           cp -R catalog _site/catalog
