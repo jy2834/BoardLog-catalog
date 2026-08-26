@@ -12,6 +12,10 @@ from scripts.validate_android_update import validate_android_update
 REPO_ROOT = Path(__file__).resolve().parents[1]
 CERTIFICATE_SHA256 = "1ACFD934FA432EDEDBB98800172924A34DE185BB17BF1BA503B7FFBDED078D51"
 LONG_MAX_VALUE = 9_223_372_036_854_775_807
+V035_RELEASE_NOTES = [
+    "공용 게임과 직접 등록 게임 수를 하나로 합쳐 표시",
+    "달력 사진을 날짜 칸 전체에 크게 표시",
+]
 
 
 def valid_manifest(apk_bytes: bytes = b"BoardLog v0.3.4 verified APK fixture\n"):
@@ -28,10 +32,7 @@ def valid_manifest(apk_bytes: bytes = b"BoardLog v0.3.4 verified APK fixture\n")
         "sha256": hashlib.sha256(apk_bytes).hexdigest(),
         "signingCertificateSha256": CERTIFICATE_SHA256,
         "mandatory": False,
-        "releaseNotes": [
-            "공용 목록 직접 새로고침",
-            "새 버전 알림과 공개 다운로드 연결",
-        ],
+        "releaseNotes": V035_RELEASE_NOTES,
     }
 
 
@@ -182,6 +183,30 @@ class AndroidUpdateManifestTest(unittest.TestCase):
 
         self.assertEqual(first.read_bytes(), second.read_bytes())
         self.assertEqual(valid_manifest(self.apk_bytes), json.loads(first.read_text(encoding="utf-8")))
+
+    def test_builder_emits_the_audited_v035_release_notes(self):
+        output = Path(self.temp_dir.name) / "v035.json"
+        completed = subprocess.run(
+            [
+                sys.executable,
+                str(REPO_ROOT / "scripts" / "build_android_update_manifest.py"),
+                "--apk", str(self.apk),
+                "--version-code", "8",
+                "--version-name", "0.3.5",
+                "--published-at", "2026-08-26T00:00:00Z",
+                "--certificate-sha256", CERTIFICATE_SHA256,
+                "--output", str(output),
+            ],
+            capture_output=True,
+            check=False,
+            text=True,
+        )
+
+        self.assertEqual(0, completed.returncode, completed.stderr)
+        self.assertEqual(
+            V035_RELEASE_NOTES,
+            json.loads(output.read_text(encoding="utf-8"))["releaseNotes"],
+        )
 
     def test_catalog_tree_never_contains_apk_or_zip_binaries(self):
         binaries = [path for path in Path("catalog").rglob("*") if path.suffix.lower() in {".apk", ".zip"}]

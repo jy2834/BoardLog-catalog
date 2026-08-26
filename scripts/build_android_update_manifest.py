@@ -18,8 +18,8 @@ from validate_android_update import (
 
 
 RELEASE_NOTES = [
-    "공용 목록 직접 새로고침",
-    "새 버전 알림과 공개 다운로드 연결",
+    "공용 게임과 직접 등록 게임 수를 하나로 합쳐 표시",
+    "달력 사진을 날짜 칸 전체에 크게 표시",
 ]
 
 
