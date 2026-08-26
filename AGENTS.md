@@ -22,6 +22,7 @@
 4. 공개 이미지에는 권리·공식 출처 근거가 있어야 하며 임시 제출 이미지는 Supabase 비공개 버킷에만 둔다.
 5. 무료 한도 오류는 마지막으로 확인된 서비스 상태와 일반 네트워크 오류를 구분한다.
 6. 기존 항목 수정은 새 중복 행을 만들지 말고 선택적 `updateTargetKey`로 대상을 명시한다. 대상 key와 BGG ID 충돌 여부를 검수한다.
+7. Android APK 바이너리는 Git이나 GitHub Pages에 넣지 않는다. immutable GitHub Release asset을 먼저 공개·익명 검증한 다음에만 `catalog/android-update.json` manifest를 main에 커밋한다.
 
 커밋 전 반드시 실행한다.
 
@@ -31,6 +32,8 @@ python3 scripts/validate_catalog.py \
   --catalog catalog/catalog.json \
   --schema catalog/schema.json \
   --images-dir catalog/images
+python3 scripts/validate_android_update.py \
+  --manifest catalog/android-update.json
 git diff --check
 ```
 

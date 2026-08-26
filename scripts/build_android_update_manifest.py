@@ -1,0 +1,99 @@
+#!/usr/bin/env python3
+"""Build a deterministic BoardLog Android update manifest from an APK."""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+import tempfile
+from pathlib import Path
+from typing import Sequence
+
+from validate_android_update import (
+    BOARDLOG_PACKAGE_NAME,
+    validate_android_update,
+)
+
+
+RELEASE_NOTES = [
+    "공용 목록 직접 새로고침",
+    "새 버전 알림과 공개 다운로드 연결",
+]
+
+
+def build_android_update_manifest(
+    *,
+    apk_path: Path,
+    version_code: int,
+    version_name: str,
+    published_at: str,
+    certificate_sha256: str,
+) -> dict[str, object]:
+    apk_bytes = apk_path.read_bytes()
+    tag = f"android-v{version_name}"
+    asset = f"BoardLog-v{version_name}.apk"
+    return {
+        "schemaVersion": 1,
+        "channel": "stable",
+        "packageName": BOARDLOG_PACKAGE_NAME,
+        "versionCode": version_code,
+        "versionName": version_name,
+        "publishedAt": published_at,
+        "downloadUrl": f"https://github.com/jy2834/BoardLog-catalog/releases/download/{tag}/{asset}",
+        "releasePageUrl": f"https://github.com/jy2834/BoardLog-catalog/releases/tag/{tag}",
+        "sizeBytes": len(apk_bytes),
+        "sha256": hashlib.sha256(apk_bytes).hexdigest(),
+        "signingCertificateSha256": certificate_sha256,
+        "mandatory": False,
+        "releaseNotes": RELEASE_NOTES,
+    }
+
+
+def write_manifest_atomically(document: dict[str, object], output: Path, apk_path: Path) -> None:
+    errors = validate_android_update(document, apk_path=apk_path)
+    if errors:
+        raise ValueError("\n".join(errors))
+    output.parent.mkdir(parents=True, exist_ok=True)
+    payload = json.dumps(document, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+    descriptor, temporary_name = tempfile.mkstemp(prefix=f".{output.name}.", dir=output.parent, text=True)
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8", newline="\n") as temporary:
+            temporary.write(payload)
+            temporary.flush()
+            os.fsync(temporary.fileno())
+        os.replace(temporary_name, output)
+    except BaseException:
+        try:
+            os.unlink(temporary_name)
+        except FileNotFoundError:
+            pass
+        raise
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--apk", type=Path, required=True)
+    parser.add_argument("--version-code", type=int, required=True)
+    parser.add_argument("--version-name", required=True)
+    parser.add_argument("--published-at", required=True)
+    parser.add_argument("--certificate-sha256", required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args(argv)
+    try:
+        document = build_android_update_manifest(
+            apk_path=args.apk,
+            version_code=args.version_code,
+            version_name=args.version_name,
+            published_at=args.published_at,
+            certificate_sha256=args.certificate_sha256,
+        )
+        write_manifest_atomically(document, args.output, args.apk)
+    except (OSError, ValueError) as error:
+        parser.error(str(error))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
