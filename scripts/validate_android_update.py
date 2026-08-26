@@ -37,6 +37,7 @@ SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 MAX_VERSION_NAME_LENGTH = 64
 MAX_RELEASE_NOTES = 10
 MAX_RELEASE_NOTE_CODE_POINTS = 200
+MAX_SIGNED_64_BIT_INTEGER = 9_223_372_036_854_775_807
 
 
 def _is_int(value: object) -> bool:
@@ -100,10 +101,13 @@ def validate_android_update(
         return ["manifest: must be an object"]
 
     errors: list[str] = []
-    field_names = set(document)
-    for field in sorted(field_names - REQUIRED_FIELDS):
+    field_names = tuple(document)
+    string_field_names = {field for field in field_names if isinstance(field, str)}
+    if any(not isinstance(field, str) for field in field_names):
+        errors.append("manifest: field names must be strings")
+    for field in sorted(string_field_names - REQUIRED_FIELDS):
         errors.append(f"{field}: unexpected field")
-    for field in sorted(REQUIRED_FIELDS - field_names):
+    for field in sorted(REQUIRED_FIELDS - string_field_names):
         errors.append(f"{field}: missing required field")
 
     if document.get("schemaVersion") != 1 or not _is_int(document.get("schemaVersion")):
@@ -114,8 +118,8 @@ def validate_android_update(
         errors.append(f"packageName: must equal {BOARDLOG_PACKAGE_NAME}")
 
     version_code = document.get("versionCode")
-    if not _is_int(version_code) or version_code <= 0:
-        errors.append("versionCode: must be a positive integer")
+    if not _is_int(version_code) or not 0 < version_code <= MAX_SIGNED_64_BIT_INTEGER:
+        errors.append("versionCode: must be a positive signed 64-bit integer")
     version_name = document.get("versionName")
     if not isinstance(version_name, str) or len(version_name) > MAX_VERSION_NAME_LENGTH or not VERSION_NAME_PATTERN.fullmatch(version_name):
         errors.append("versionName: must be a supported semantic version")
@@ -127,8 +131,8 @@ def validate_android_update(
         errors.append("publishedAt: does not match expected published timestamp")
 
     size_bytes = document.get("sizeBytes")
-    if not _is_int(size_bytes) or size_bytes <= 0:
-        errors.append("sizeBytes: must be a positive integer")
+    if not _is_int(size_bytes) or not 0 < size_bytes <= MAX_SIGNED_64_BIT_INTEGER:
+        errors.append("sizeBytes: must be a positive signed 64-bit integer")
     sha256 = document.get("sha256")
     if not isinstance(sha256, str) or not SHA256_PATTERN.fullmatch(sha256):
         errors.append("sha256: must be a lowercase SHA-256 digest")

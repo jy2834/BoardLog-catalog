@@ -11,6 +11,7 @@ from scripts.validate_android_update import validate_android_update
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 CERTIFICATE_SHA256 = "1ACFD934FA432EDEDBB98800172924A34DE185BB17BF1BA503B7FFBDED078D51"
+LONG_MAX_VALUE = 9_223_372_036_854_775_807
 
 
 def valid_manifest(apk_bytes: bytes = b"BoardLog v0.3.4 verified APK fixture\n"):
@@ -74,6 +75,31 @@ class AndroidUpdateManifestTest(unittest.TestCase):
                 document[field] = value
                 self.assertTrue(validate_android_update(document, apk_path=self.apk))
 
+    def test_values_above_signed_64_bit_long_maximum_are_rejected(self):
+        for field in ("versionCode", "sizeBytes"):
+            with self.subTest(field=field):
+                document = valid_manifest(self.apk_bytes)
+                document[field] = LONG_MAX_VALUE + 1
+
+                self.assertIn(
+                    f"{field}: must be a positive signed 64-bit integer",
+                    validate_android_update(document),
+                )
+
+    def test_non_string_mapping_keys_return_manifest_errors(self):
+        document = valid_manifest(self.apk_bytes)
+        document[123] = "not representable in JSON"
+        document[("also", "not", "a", "JSON", "key")] = "not representable in JSON"
+
+        try:
+            errors = validate_android_update(document)
+        except TypeError as error:
+            self.fail(f"non-string mapping keys must return errors, not raise {error!r}")
+        self.assertIn(
+            "manifest: field names must be strings",
+            errors,
+        )
+
     def test_published_at_must_match_release_metadata_when_expected(self):
         document = valid_manifest(self.apk_bytes)
 
@@ -112,6 +138,27 @@ class AndroidUpdateManifestTest(unittest.TestCase):
 
         self.assertEqual(1, completed.returncode)
         self.assertIn("publishedAt: does not match expected published timestamp", completed.stderr)
+
+    def test_cli_rejects_size_above_signed_64_bit_long_maximum(self):
+        manifest = Path(self.temp_dir.name) / "android-update.json"
+        document = valid_manifest(self.apk_bytes)
+        document["sizeBytes"] = LONG_MAX_VALUE + 1
+        manifest.write_text(json.dumps(document), encoding="utf-8")
+
+        completed = subprocess.run(
+            [
+                sys.executable,
+                str(REPO_ROOT / "scripts" / "validate_android_update.py"),
+                "--manifest",
+                str(manifest),
+            ],
+            capture_output=True,
+            check=False,
+            text=True,
+        )
+
+        self.assertEqual(1, completed.returncode)
+        self.assertIn("sizeBytes: must be a positive signed 64-bit integer", completed.stderr)
 
     def test_builder_writes_byte_identical_manifest_for_identical_inputs(self):
         first = Path(self.temp_dir.name) / "first.json"
