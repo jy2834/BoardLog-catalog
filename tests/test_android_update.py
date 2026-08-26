@@ -12,9 +12,16 @@ from scripts.validate_android_update import validate_android_update
 REPO_ROOT = Path(__file__).resolve().parents[1]
 CERTIFICATE_SHA256 = "1ACFD934FA432EDEDBB98800172924A34DE185BB17BF1BA503B7FFBDED078D51"
 LONG_MAX_VALUE = 9_223_372_036_854_775_807
+V034_RELEASE_NOTES = [
+    "공용 목록 직접 새로고침",
+    "새 버전 알림과 공개 다운로드 연결",
+]
 V035_RELEASE_NOTES = [
     "공용 게임과 직접 등록 게임 수를 하나로 합쳐 표시",
     "달력 사진을 날짜 칸 전체에 크게 표시",
+]
+V036_RELEASE_NOTES = [
+    "실제 설치된 앱 버전을 자동으로 표시",
 ]
 
 
@@ -32,7 +39,7 @@ def valid_manifest(apk_bytes: bytes = b"BoardLog v0.3.4 verified APK fixture\n")
         "sha256": hashlib.sha256(apk_bytes).hexdigest(),
         "signingCertificateSha256": CERTIFICATE_SHA256,
         "mandatory": False,
-        "releaseNotes": V035_RELEASE_NOTES,
+        "releaseNotes": V034_RELEASE_NOTES,
     }
 
 
@@ -207,6 +214,59 @@ class AndroidUpdateManifestTest(unittest.TestCase):
             V035_RELEASE_NOTES,
             json.loads(output.read_text(encoding="utf-8"))["releaseNotes"],
         )
+
+    def test_builder_emits_release_notes_for_the_requested_release_only(self):
+        fixtures = (
+            (7, "0.3.4", V034_RELEASE_NOTES),
+            (8, "0.3.5", V035_RELEASE_NOTES),
+            (9, "0.3.6", V036_RELEASE_NOTES),
+        )
+        for version_code, version_name, expected_notes in fixtures:
+            with self.subTest(version_name=version_name):
+                output = Path(self.temp_dir.name) / f"v{version_code}.json"
+                completed = subprocess.run(
+                    [
+                        sys.executable,
+                        str(REPO_ROOT / "scripts" / "build_android_update_manifest.py"),
+                        "--apk", str(self.apk),
+                        "--version-code", str(version_code),
+                        "--version-name", version_name,
+                        "--published-at", "2026-08-26T00:00:00Z",
+                        "--certificate-sha256", CERTIFICATE_SHA256,
+                        "--output", str(output),
+                    ],
+                    capture_output=True,
+                    check=False,
+                    text=True,
+                )
+
+                self.assertEqual(0, completed.returncode, completed.stderr)
+                self.assertEqual(
+                    expected_notes,
+                    json.loads(output.read_text(encoding="utf-8"))["releaseNotes"],
+                )
+
+    def test_builder_rejects_a_version_without_audited_release_notes(self):
+        output = Path(self.temp_dir.name) / "unknown.json"
+        completed = subprocess.run(
+            [
+                sys.executable,
+                str(REPO_ROOT / "scripts" / "build_android_update_manifest.py"),
+                "--apk", str(self.apk),
+                "--version-code", "10",
+                "--version-name", "0.3.7",
+                "--published-at", "2026-08-26T00:00:00Z",
+                "--certificate-sha256", CERTIFICATE_SHA256,
+                "--output", str(output),
+            ],
+            capture_output=True,
+            check=False,
+            text=True,
+        )
+
+        self.assertNotEqual(0, completed.returncode)
+        self.assertIn("release notes", completed.stderr)
+        self.assertFalse(output.exists())
 
     def test_catalog_tree_never_contains_apk_or_zip_binaries(self):
         binaries = [path for path in Path("catalog").rglob("*") if path.suffix.lower() in {".apk", ".zip"}]

@@ -1,18 +1,17 @@
 {
   "channel": "stable",
-  "downloadUrl": "https://github.com/jy2834/BoardLog-catalog/releases/download/android-v0.3.5/BoardLog-v0.3.5.apk",
+  "downloadUrl": "https://github.com/jy2834/BoardLog-catalog/releases/download/android-v0.3.6/BoardLog-v0.3.6.apk",
   "mandatory": false,
   "packageName": "com.boardlog.app",
-  "publishedAt": "2026-08-26T05:23:59Z",
+  "publishedAt": "2026-08-26T08:27:11Z",
   "releaseNotes": [
-    "공용 게임과 직접 등록 게임 수를 하나로 합쳐 표시",
-    "달력 사진을 날짜 칸 전체에 크게 표시"
+    "실제 설치된 앱 버전을 자동으로 표시"
   ],
-  "releasePageUrl": "https://github.com/jy2834/BoardLog-catalog/releases/tag/android-v0.3.5",
+  "releasePageUrl": "https://github.com/jy2834/BoardLog-catalog/releases/tag/android-v0.3.6",
   "schemaVersion": 1,
-  "sha256": "5c976988e5e9211eadf92c1ad77548115769a170f28e24e615e6d1578cff3ef5",
+  "sha256": "7336d616dc6c2b606f06a520dcd6f1d81d09fbc28da522ad191fd859b8c8bbed",
   "signingCertificateSha256": "1ACFD934FA432EDEDBB98800172924A34DE185BB17BF1BA503B7FFBDED078D51",
-  "sizeBytes": 41355101,
-  "versionCode": 8,
-  "versionName": "0.3.5"
+  "sizeBytes": 41355097,
+  "versionCode": 9,
+  "versionName": "0.3.6"
 }
