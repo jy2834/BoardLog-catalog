@@ -17,10 +17,19 @@ from validate_android_update import (
 )
 
 
-RELEASE_NOTES = [
-    "공용 게임과 직접 등록 게임 수를 하나로 합쳐 표시",
-    "달력 사진을 날짜 칸 전체에 크게 표시",
-]
+RELEASE_NOTES_BY_VERSION = {
+    "0.3.4": [
+        "공용 목록 직접 새로고침",
+        "새 버전 알림과 공개 다운로드 연결",
+    ],
+    "0.3.5": [
+        "공용 게임과 직접 등록 게임 수를 하나로 합쳐 표시",
+        "달력 사진을 날짜 칸 전체에 크게 표시",
+    ],
+    "0.3.6": [
+        "실제 설치된 앱 버전을 자동으로 표시",
+    ],
+}
 
 
 def build_android_update_manifest(
@@ -32,6 +41,10 @@ def build_android_update_manifest(
     certificate_sha256: str,
 ) -> dict[str, object]:
     apk_bytes = apk_path.read_bytes()
+    try:
+        release_notes = RELEASE_NOTES_BY_VERSION[version_name]
+    except KeyError as error:
+        raise ValueError(f"release notes are not audited for version {version_name}") from error
     tag = f"android-v{version_name}"
     asset = f"BoardLog-v{version_name}.apk"
     return {
@@ -47,7 +60,7 @@ def build_android_update_manifest(
         "sha256": hashlib.sha256(apk_bytes).hexdigest(),
         "signingCertificateSha256": certificate_sha256,
         "mandatory": False,
-        "releaseNotes": RELEASE_NOTES,
+        "releaseNotes": list(release_notes),
     }
 
 
