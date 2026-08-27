@@ -1,17 +1,18 @@
 {
   "channel": "stable",
-  "downloadUrl": "https://github.com/jy2834/BoardLog-catalog/releases/download/android-v0.3.6/BoardLog-v0.3.6.apk",
+  "downloadUrl": "https://github.com/jy2834/BoardLog-catalog/releases/download/android-v0.3.7/BoardLog-v0.3.7.apk",
   "mandatory": false,
   "packageName": "com.boardlog.app",
-  "publishedAt": "2026-08-26T08:27:11Z",
+  "publishedAt": "2026-08-27T00:12:49Z",
   "releaseNotes": [
-    "실제 설치된 앱 버전을 자동으로 표시"
+    "달력 기록에서 전체·내 게임·추천을 한 화면에서 검색",
+    "체크박스로 여러 게임을 한 번에 선택하고 기존 콜라주 설정을 보존"
   ],
-  "releasePageUrl": "https://github.com/jy2834/BoardLog-catalog/releases/tag/android-v0.3.6",
+  "releasePageUrl": "https://github.com/jy2834/BoardLog-catalog/releases/tag/android-v0.3.7",
   "schemaVersion": 1,
-  "sha256": "7336d616dc6c2b606f06a520dcd6f1d81d09fbc28da522ad191fd859b8c8bbed",
+  "sha256": "65c90fdc8cbde208e149f2cc10e98212c0fd5b2b5722bfd94f122e4c76fb2042",
   "signingCertificateSha256": "1ACFD934FA432EDEDBB98800172924A34DE185BB17BF1BA503B7FFBDED078D51",
-  "sizeBytes": 41355097,
-  "versionCode": 9,
-  "versionName": "0.3.6"
+  "sizeBytes": 41371485,
+  "versionCode": 10,
+  "versionName": "0.3.7"
 }
