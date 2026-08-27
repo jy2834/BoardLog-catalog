@@ -23,6 +23,10 @@ V035_RELEASE_NOTES = [
 V036_RELEASE_NOTES = [
     "실제 설치된 앱 버전을 자동으로 표시",
 ]
+V037_RELEASE_NOTES = [
+    "달력 기록에서 전체·내 게임·추천을 한 화면에서 검색",
+    "체크박스로 여러 게임을 한 번에 선택하고 기존 콜라주 설정을 보존",
+]
 
 
 def valid_manifest(apk_bytes: bytes = b"BoardLog v0.3.4 verified APK fixture\n"):
@@ -220,6 +224,7 @@ class AndroidUpdateManifestTest(unittest.TestCase):
             (7, "0.3.4", V034_RELEASE_NOTES),
             (8, "0.3.5", V035_RELEASE_NOTES),
             (9, "0.3.6", V036_RELEASE_NOTES),
+            (10, "0.3.7", V037_RELEASE_NOTES),
         )
         for version_code, version_name, expected_notes in fixtures:
             with self.subTest(version_name=version_name):
@@ -253,8 +258,8 @@ class AndroidUpdateManifestTest(unittest.TestCase):
                 sys.executable,
                 str(REPO_ROOT / "scripts" / "build_android_update_manifest.py"),
                 "--apk", str(self.apk),
-                "--version-code", "10",
-                "--version-name", "0.3.7",
+                "--version-code", "11",
+                "--version-name", "0.3.8",
                 "--published-at", "2026-08-26T00:00:00Z",
                 "--certificate-sha256", CERTIFICATE_SHA256,
                 "--output", str(output),
