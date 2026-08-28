@@ -1,18 +1,19 @@
 {
   "channel": "stable",
-  "downloadUrl": "https://github.com/jy2834/BoardLog-catalog/releases/download/android-v0.3.7/BoardLog-v0.3.7.apk",
+  "downloadUrl": "https://github.com/jy2834/BoardLog-catalog/releases/download/android-v0.3.8/BoardLog-v0.3.8.apk",
   "mandatory": false,
   "packageName": "com.boardlog.app",
-  "publishedAt": "2026-08-27T00:12:49Z",
+  "publishedAt": "2026-08-28T12:57:19Z",
   "releaseNotes": [
-    "달력 기록에서 전체·내 게임·추천을 한 화면에서 검색",
-    "체크박스로 여러 게임을 한 번에 선택하고 기존 콜라주 설정을 보존"
+    "기록에 카페·음식·기타 지출을 입력하고 월·연도·전체 통계로 확인",
+    "빠른 내 게임 등록과 기록용 게임 표지 합성",
+    "검토된 게임 500개를 더해 내장 카탈로그를 1,500개로 확장"
   ],
-  "releasePageUrl": "https://github.com/jy2834/BoardLog-catalog/releases/tag/android-v0.3.7",
+  "releasePageUrl": "https://github.com/jy2834/BoardLog-catalog/releases/tag/android-v0.3.8",
   "schemaVersion": 1,
-  "sha256": "65c90fdc8cbde208e149f2cc10e98212c0fd5b2b5722bfd94f122e4c76fb2042",
+  "sha256": "62acf8403477d799371b6d521c6147df321e9450e20befc15a34c9ff9def2c9d",
   "signingCertificateSha256": "1ACFD934FA432EDEDBB98800172924A34DE185BB17BF1BA503B7FFBDED078D51",
-  "sizeBytes": 41371485,
-  "versionCode": 10,
-  "versionName": "0.3.7"
+  "sizeBytes": 42026877,
+  "versionCode": 11,
+  "versionName": "0.3.8"
 }
