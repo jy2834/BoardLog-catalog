@@ -1,19 +1,19 @@
 {
   "channel": "stable",
-  "downloadUrl": "https://github.com/jy2834/BoardLog-catalog/releases/download/android-v0.3.8/BoardLog-v0.3.8.apk",
+  "downloadUrl": "https://github.com/jy2834/BoardLog-catalog/releases/download/android-v0.3.9/BoardLog-v0.3.9.apk",
   "mandatory": false,
   "packageName": "com.boardlog.app",
-  "publishedAt": "2026-08-28T12:57:19Z",
+  "publishedAt": "2026-08-29T07:13:20Z",
   "releaseNotes": [
-    "기록에 카페·음식·기타 지출을 입력하고 월·연도·전체 통계로 확인",
-    "빠른 내 게임 등록과 기록용 게임 표지 합성",
-    "검토된 게임 500개를 더해 내장 카탈로그를 1,500개로 확장"
+    "월·연도·전체 통계 화면을 구분된 카드형 구성으로 개선",
+    "달력 기록의 지출 입력을 작고 빠른 방식으로 개선",
+    "하단 탭 순서와 달력 사진 배율을 보기 좋게 조정"
   ],
-  "releasePageUrl": "https://github.com/jy2834/BoardLog-catalog/releases/tag/android-v0.3.8",
+  "releasePageUrl": "https://github.com/jy2834/BoardLog-catalog/releases/tag/android-v0.3.9",
   "schemaVersion": 1,
-  "sha256": "62acf8403477d799371b6d521c6147df321e9450e20befc15a34c9ff9def2c9d",
+  "sha256": "b38d4af0d90079b10fa20180b7191e675f11164d70541bb810a7ce37f1cd3fa6",
   "signingCertificateSha256": "1ACFD934FA432EDEDBB98800172924A34DE185BB17BF1BA503B7FFBDED078D51",
-  "sizeBytes": 42026877,
-  "versionCode": 11,
-  "versionName": "0.3.8"
+  "sizeBytes": 42111669,
+  "versionCode": 12,
+  "versionName": "0.3.9"
 }
