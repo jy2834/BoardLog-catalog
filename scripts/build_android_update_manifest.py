@@ -17,27 +17,32 @@ from validate_android_update import (
 )
 
 
-RELEASE_NOTES_BY_VERSION = {
-    "0.3.4": [
+AUDITED_RELEASES_BY_VERSION = {
+    "0.3.4": (7, [
         "공용 목록 직접 새로고침",
         "새 버전 알림과 공개 다운로드 연결",
-    ],
-    "0.3.5": [
+    ]),
+    "0.3.5": (8, [
         "공용 게임과 직접 등록 게임 수를 하나로 합쳐 표시",
         "달력 사진을 날짜 칸 전체에 크게 표시",
-    ],
-    "0.3.6": [
+    ]),
+    "0.3.6": (9, [
         "실제 설치된 앱 버전을 자동으로 표시",
-    ],
-    "0.3.7": [
+    ]),
+    "0.3.7": (10, [
         "달력 기록에서 전체·내 게임·추천을 한 화면에서 검색",
         "체크박스로 여러 게임을 한 번에 선택하고 기존 콜라주 설정을 보존",
-    ],
-    "0.3.8": [
+    ]),
+    "0.3.8": (11, [
         "기록에 카페·음식·기타 지출을 입력하고 월·연도·전체 통계로 확인",
         "빠른 내 게임 등록과 기록용 게임 표지 합성",
         "검토된 게임 500개를 더해 내장 카탈로그를 1,500개로 확장",
-    ],
+    ]),
+    "0.3.9": (12, [
+        "월·연도·전체 통계 화면을 구분된 카드형 구성으로 개선",
+        "달력 기록의 지출 입력을 작고 빠른 방식으로 개선",
+        "하단 탭 순서와 달력 사진 배율을 보기 좋게 조정",
+    ]),
 }
 
 
@@ -51,9 +56,14 @@ def build_android_update_manifest(
 ) -> dict[str, object]:
     apk_bytes = apk_path.read_bytes()
     try:
-        release_notes = RELEASE_NOTES_BY_VERSION[version_name]
+        expected_version_code, release_notes = AUDITED_RELEASES_BY_VERSION[version_name]
     except KeyError as error:
         raise ValueError(f"release notes are not audited for version {version_name}") from error
+    if version_code != expected_version_code:
+        raise ValueError(
+            f"version code {version_code} does not match audited version {version_name} "
+            f"(expected {expected_version_code})"
+        )
     tag = f"android-v{version_name}"
     asset = f"BoardLog-v{version_name}.apk"
     return {

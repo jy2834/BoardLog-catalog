@@ -32,6 +32,11 @@ V038_RELEASE_NOTES = [
     "빠른 내 게임 등록과 기록용 게임 표지 합성",
     "검토된 게임 500개를 더해 내장 카탈로그를 1,500개로 확장",
 ]
+V039_RELEASE_NOTES = [
+    "월·연도·전체 통계 화면을 구분된 카드형 구성으로 개선",
+    "달력 기록의 지출 입력을 작고 빠른 방식으로 개선",
+    "하단 탭 순서와 달력 사진 배율을 보기 좋게 조정",
+]
 
 
 def valid_manifest(apk_bytes: bytes = b"BoardLog v0.3.4 verified APK fixture\n"):
@@ -231,6 +236,7 @@ class AndroidUpdateManifestTest(unittest.TestCase):
             (9, "0.3.6", V036_RELEASE_NOTES),
             (10, "0.3.7", V037_RELEASE_NOTES),
             (11, "0.3.8", V038_RELEASE_NOTES),
+            (12, "0.3.9", V039_RELEASE_NOTES),
         )
         for version_code, version_name, expected_notes in fixtures:
             with self.subTest(version_name=version_name):
@@ -264,8 +270,8 @@ class AndroidUpdateManifestTest(unittest.TestCase):
                 sys.executable,
                 str(REPO_ROOT / "scripts" / "build_android_update_manifest.py"),
                 "--apk", str(self.apk),
-                "--version-code", "12",
-                "--version-name", "0.3.9",
+                "--version-code", "13",
+                "--version-name", "0.3.10",
                 "--published-at", "2026-08-26T00:00:00Z",
                 "--certificate-sha256", CERTIFICATE_SHA256,
                 "--output", str(output),
@@ -278,6 +284,30 @@ class AndroidUpdateManifestTest(unittest.TestCase):
         self.assertNotEqual(0, completed.returncode)
         self.assertIn("release notes", completed.stderr)
         self.assertFalse(output.exists())
+
+    def test_builder_rejects_mismatched_version_code_and_name(self):
+        for version_code, version_name in ((11, "0.3.9"), (12, "0.3.8")):
+            with self.subTest(version_code=version_code, version_name=version_name):
+                output = Path(self.temp_dir.name) / f"mismatched-{version_code}-{version_name}.json"
+                completed = subprocess.run(
+                    [
+                        sys.executable,
+                        str(REPO_ROOT / "scripts" / "build_android_update_manifest.py"),
+                        "--apk", str(self.apk),
+                        "--version-code", str(version_code),
+                        "--version-name", version_name,
+                        "--published-at", "2026-08-26T00:00:00Z",
+                        "--certificate-sha256", CERTIFICATE_SHA256,
+                        "--output", str(output),
+                    ],
+                    capture_output=True,
+                    check=False,
+                    text=True,
+                )
+
+                self.assertNotEqual(0, completed.returncode)
+                self.assertIn("version code", completed.stderr)
+                self.assertFalse(output.exists())
 
     def test_catalog_tree_never_contains_apk_or_zip_binaries(self):
         binaries = [path for path in Path("catalog").rglob("*") if path.suffix.lower() in {".apk", ".zip"}]
