@@ -37,6 +37,11 @@ V039_RELEASE_NOTES = [
     "달력 기록의 지출 입력을 작고 빠른 방식으로 개선",
     "하단 탭 순서와 달력 사진 배율을 보기 좋게 조정",
 ]
+V0310_RELEASE_NOTES = [
+    "달력 기록 날짜 수정과 최대 8장 사진·콜라주 지원",
+    "머더미스터리 전용 탭과 독립 타이머, 역할·검거 결과 기록",
+    "통계의 과거 이름 기록과 카탈로그 기록을 같은 게임으로 안전하게 합산",
+]
 
 
 def valid_manifest(apk_bytes: bytes = b"BoardLog v0.3.4 verified APK fixture\n"):
@@ -237,6 +242,7 @@ class AndroidUpdateManifestTest(unittest.TestCase):
             (10, "0.3.7", V037_RELEASE_NOTES),
             (11, "0.3.8", V038_RELEASE_NOTES),
             (12, "0.3.9", V039_RELEASE_NOTES),
+            (13, "0.3.10", V0310_RELEASE_NOTES),
         )
         for version_code, version_name, expected_notes in fixtures:
             with self.subTest(version_name=version_name):
@@ -270,8 +276,8 @@ class AndroidUpdateManifestTest(unittest.TestCase):
                 sys.executable,
                 str(REPO_ROOT / "scripts" / "build_android_update_manifest.py"),
                 "--apk", str(self.apk),
-                "--version-code", "13",
-                "--version-name", "0.3.10",
+                "--version-code", "14",
+                "--version-name", "0.3.11",
                 "--published-at", "2026-08-26T00:00:00Z",
                 "--certificate-sha256", CERTIFICATE_SHA256,
                 "--output", str(output),
@@ -286,7 +292,7 @@ class AndroidUpdateManifestTest(unittest.TestCase):
         self.assertFalse(output.exists())
 
     def test_builder_rejects_mismatched_version_code_and_name(self):
-        for version_code, version_name in ((11, "0.3.9"), (12, "0.3.8")):
+        for version_code, version_name in ((11, "0.3.9"), (12, "0.3.8"), (12, "0.3.10"), (13, "0.3.9")):
             with self.subTest(version_code=version_code, version_name=version_name):
                 output = Path(self.temp_dir.name) / f"mismatched-{version_code}-{version_name}.json"
                 completed = subprocess.run(
