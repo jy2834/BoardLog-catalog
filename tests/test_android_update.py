@@ -42,6 +42,11 @@ V0310_RELEASE_NOTES = [
     "머더미스터리 전용 탭과 독립 타이머, 역할·검거 결과 기록",
     "통계의 과거 이름 기록과 카탈로그 기록을 같은 게임으로 안전하게 합산",
 ]
+V0311_RELEASE_NOTES = [
+    "달력 사진 위 날짜 숫자를 숨기고 사진 없는 날짜 표시를 정돈",
+    "월·연도 통계를 실제 기록 일수 기준으로 집계",
+    "월간 날짜와 연간 막대를 눌러 게임별 플레이 횟수를 확인",
+]
 
 
 def valid_manifest(apk_bytes: bytes = b"BoardLog v0.3.4 verified APK fixture\n"):
@@ -243,6 +248,7 @@ class AndroidUpdateManifestTest(unittest.TestCase):
             (11, "0.3.8", V038_RELEASE_NOTES),
             (12, "0.3.9", V039_RELEASE_NOTES),
             (13, "0.3.10", V0310_RELEASE_NOTES),
+            (14, "0.3.11", V0311_RELEASE_NOTES),
         )
         for version_code, version_name, expected_notes in fixtures:
             with self.subTest(version_name=version_name):
@@ -276,8 +282,8 @@ class AndroidUpdateManifestTest(unittest.TestCase):
                 sys.executable,
                 str(REPO_ROOT / "scripts" / "build_android_update_manifest.py"),
                 "--apk", str(self.apk),
-                "--version-code", "14",
-                "--version-name", "0.3.11",
+                "--version-code", "15",
+                "--version-name", "0.3.12",
                 "--published-at", "2026-08-26T00:00:00Z",
                 "--certificate-sha256", CERTIFICATE_SHA256,
                 "--output", str(output),
