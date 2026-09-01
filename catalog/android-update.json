@@ -1,19 +1,19 @@
 {
   "channel": "stable",
-  "downloadUrl": "https://github.com/jy2834/BoardLog-catalog/releases/download/android-v0.3.10/BoardLog-v0.3.10.apk",
+  "downloadUrl": "https://github.com/jy2834/BoardLog-catalog/releases/download/android-v0.3.11/BoardLog-v0.3.11.apk",
   "mandatory": false,
   "packageName": "com.boardlog.app",
-  "publishedAt": "2026-09-01T08:31:20Z",
+  "publishedAt": "2026-09-01T10:28:43Z",
   "releaseNotes": [
-    "달력 기록 날짜 수정과 최대 8장 사진·콜라주 지원",
-    "머더미스터리 전용 탭과 독립 타이머, 역할·검거 결과 기록",
-    "통계의 과거 이름 기록과 카탈로그 기록을 같은 게임으로 안전하게 합산"
+    "달력 사진 위 날짜 숫자를 숨기고 사진 없는 날짜 표시를 정돈",
+    "월·연도 통계를 실제 기록 일수 기준으로 집계",
+    "월간 날짜와 연간 막대를 눌러 게임별 플레이 횟수를 확인"
   ],
-  "releasePageUrl": "https://github.com/jy2834/BoardLog-catalog/releases/tag/android-v0.3.10",
+  "releasePageUrl": "https://github.com/jy2834/BoardLog-catalog/releases/tag/android-v0.3.11",
   "schemaVersion": 1,
-  "sha256": "96bf6508db0f24ae0e8244f6785dc817bc43972c13f5046cc5244d821120147c",
+  "sha256": "ae8ffd51a39f8144c9b9c58dc65744661db8d93f13bf7602a31a1e3e645d2a9d",
   "signingCertificateSha256": "1ACFD934FA432EDEDBB98800172924A34DE185BB17BF1BA503B7FFBDED078D51",
-  "sizeBytes": 42721333,
-  "versionCode": 13,
-  "versionName": "0.3.10"
+  "sizeBytes": 42754101,
+  "versionCode": 14,
+  "versionName": "0.3.11"
 }
