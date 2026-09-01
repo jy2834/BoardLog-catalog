@@ -47,6 +47,11 @@ V0311_RELEASE_NOTES = [
     "월·연도 통계를 실제 기록 일수 기준으로 집계",
     "월간 날짜와 연간 막대를 눌러 게임별 플레이 횟수를 확인",
 ]
+V0312_RELEASE_NOTES = [
+    "수동 업데이트 확인이 이전 ETag와 HTTP 캐시를 우회",
+    "자동 확인과 겹친 수동 확인도 공개 원본을 한 번 더 조회",
+    "이전 버전을 최신으로 잘못 표시하던 업데이트 판정 보완",
+]
 
 
 def valid_manifest(apk_bytes: bytes = b"BoardLog v0.3.4 verified APK fixture\n"):
@@ -249,6 +254,7 @@ class AndroidUpdateManifestTest(unittest.TestCase):
             (12, "0.3.9", V039_RELEASE_NOTES),
             (13, "0.3.10", V0310_RELEASE_NOTES),
             (14, "0.3.11", V0311_RELEASE_NOTES),
+            (15, "0.3.12", V0312_RELEASE_NOTES),
         )
         for version_code, version_name, expected_notes in fixtures:
             with self.subTest(version_name=version_name):
@@ -282,8 +288,8 @@ class AndroidUpdateManifestTest(unittest.TestCase):
                 sys.executable,
                 str(REPO_ROOT / "scripts" / "build_android_update_manifest.py"),
                 "--apk", str(self.apk),
-                "--version-code", "15",
-                "--version-name", "0.3.12",
+                "--version-code", "16",
+                "--version-name", "0.3.13",
                 "--published-at", "2026-08-26T00:00:00Z",
                 "--certificate-sha256", CERTIFICATE_SHA256,
                 "--output", str(output),
