@@ -1,19 +1,19 @@
 {
   "channel": "stable",
-  "downloadUrl": "https://github.com/jy2834/BoardLog-catalog/releases/download/android-v0.3.12/BoardLog-v0.3.12.apk",
+  "downloadUrl": "https://github.com/jy2834/BoardLog-catalog/releases/download/android-v0.3.13/BoardLog-v0.3.13.apk",
   "mandatory": false,
   "packageName": "com.boardlog.app",
-  "publishedAt": "2026-09-01T23:02:39Z",
+  "publishedAt": "2026-09-02T09:08:03Z",
   "releaseNotes": [
-    "수동 업데이트 확인이 이전 ETag와 HTTP 캐시를 우회",
-    "자동 확인과 겹친 수동 확인도 공개 원본을 한 번 더 조회",
-    "이전 버전을 최신으로 잘못 표시하던 업데이트 판정 보완"
+    "플레이한 머더미스터리 항목을 누르면 최신 기록 수정 화면으로 바로 이동",
+    "통계를 월·연도 중심으로 단순화하고 전체 통계 탭 제거",
+    "월 달력의 날짜별 게임 기록 수를 0회/1회/2회/3회 이상 색으로 명확히 구분"
   ],
-  "releasePageUrl": "https://github.com/jy2834/BoardLog-catalog/releases/tag/android-v0.3.12",
+  "releasePageUrl": "https://github.com/jy2834/BoardLog-catalog/releases/tag/android-v0.3.13",
   "schemaVersion": 1,
-  "sha256": "dff1521dca9d30166393c95f9cfad579f78317f72f35b21fe5a26c58bcaa151b",
+  "sha256": "b49cf9ed4bd3f27ed81c0b4d4ee3b77d5254a9d6616d1a09a5960f4bdca4d9cb",
   "signingCertificateSha256": "1ACFD934FA432EDEDBB98800172924A34DE185BB17BF1BA503B7FFBDED078D51",
-  "sizeBytes": 42754101,
-  "versionCode": 15,
-  "versionName": "0.3.12"
+  "sizeBytes": 42721333,
+  "versionCode": 16,
+  "versionName": "0.3.13"
 }
