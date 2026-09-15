@@ -52,6 +52,11 @@ V0312_RELEASE_NOTES = [
     "자동 확인과 겹친 수동 확인도 공개 원본을 한 번 더 조회",
     "이전 버전을 최신으로 잘못 표시하던 업데이트 판정 보완",
 ]
+V0314_RELEASE_NOTES = [
+    "머더미스터리 기록 수정 시 달력의 게임·사진·메모·지출을 그대로 보존",
+    "달력 탭을 다시 누르면 오늘로 이동하고 오늘 날짜를 은은하게 표시",
+    "사진 2장과 여러 게임 표지를 달력 칸에 빈틈없이 표시",
+]
 
 
 def valid_manifest(apk_bytes: bytes = b"BoardLog v0.3.4 verified APK fixture\n"):
@@ -255,6 +260,7 @@ class AndroidUpdateManifestTest(unittest.TestCase):
             (13, "0.3.10", V0310_RELEASE_NOTES),
             (14, "0.3.11", V0311_RELEASE_NOTES),
             (15, "0.3.12", V0312_RELEASE_NOTES),
+            (17, "0.3.14", V0314_RELEASE_NOTES),
         )
         for version_code, version_name, expected_notes in fixtures:
             with self.subTest(version_name=version_name):
