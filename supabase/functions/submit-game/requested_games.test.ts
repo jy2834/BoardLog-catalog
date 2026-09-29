@@ -21,3 +21,19 @@ test("every requested pending game passes the production submission validator", 
     );
   }
 });
+
+test("every source-backed murder-mystery seed passes the production submission validator", () => {
+  const fixture = JSON.parse(readFileSync(
+    new URL("../../../data/murder-mystery-community-games-2026-09-29.json", import.meta.url),
+    "utf8",
+  ));
+
+  assert.equal(fixture.games.length, 100);
+  for (const row of fixture.games) {
+    assert.deepEqual(
+      parseAndValidatePayload(JSON.stringify(row.submission)),
+      row.submission,
+      row.submission.name,
+    );
+  }
+});

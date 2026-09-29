@@ -1,0 +1,4208 @@
+{
+  "schemaVersion": 1,
+  "source": "MURMYLAB official scenario pages",
+  "capturedAt": "2026-09-29",
+  "sourceScenarioCount": 493,
+  "sourceSnapshotSha256": "c538f04177729a6377d1a591d73cb539add1382ee1357d14163974f6ccea95e6",
+  "selectionPolicy": [
+    "isDomestic=true",
+    "playType=오프라인",
+    "category in 추천/신작소개",
+    "fixed player count of at least 3",
+    "numeric play time and HTTPS official cover",
+    "no normalized identity collision with bundled 1,500 or live community",
+    "rank by 3*playCount + 2*reviews + likes, then reviews/rating/display order",
+    "manual review of official synopsis for role, secret, incident, and discussion structure"
+  ],
+  "identityAudit": {
+    "bundledCatalogGameCount": 1500,
+    "committedCommunityIdentityCount": 42,
+    "liveCommunityGameCount": 44,
+    "eligibleAfterIdentityExclusions": 141,
+    "exactIdentityCollisionCount": 37,
+    "manualExclusions": {
+      "685b9f43-ae7a-f87d-1e2a-0d6200000000": "포루투나호 살인사건 is a typo-equivalent of bundled 포르투나호 살인사건"
+    },
+    "manualReviewHoldoutCount": 27
+  },
+  "existingBundledScenarioIds": [
+    "6ceff249-0e96-45f5-8488-ad5d39b483b6",
+    "79aa0b30-f4a6-4fab-83a8-68524efe86a8",
+    "d18c078e-3f22-41c8-965d-177048d7b548",
+    "6fcd25a3-abad-4010-ad16-32e6f8a7bcf0",
+    "15ffe584-3f0b-43ea-b7bd-5cc0fdb52f17",
+    "5e0f47eb-f942-4111-850b-fa32758607e2",
+    "c226a924-295b-45f7-b98e-09e2ed75c6cc",
+    "a8cb5509-331b-4b56-9884-228f8009a5ee",
+    "6052f7d5-e58a-4c32-812c-aea35980ed97",
+    "193cfc95-2d07-4c28-ad1b-e05ed8caea1c",
+    "a4a2c190-5101-4217-a15b-8cffdc66d8ba",
+    "a54631da-b0df-4df5-a2cf-f7f28e0a0046",
+    "d38d8f17-4df0-4d12-8280-2b3d2cd826bd",
+    "029072bc-3a25-4857-83ff-233418e29d90",
+    "042e7887-859e-43fc-8ef0-ab68a7c6b759",
+    "512f903b-c1cb-4757-bc4f-e4b6dfd51bf6",
+    "4eedcab6-5589-4529-bdca-ee7e6fa2559b",
+    "edd42836-5d7f-4fae-807d-cad36896f01c",
+    "00566c5f-7db1-4a82-8e4a-1480309c66c8",
+    "75edabc8-fbac-4361-8a33-a023a37a8d85",
+    "9604f4e7-81e3-4b6c-b536-146fb9b32103",
+    "205c721e-c8c1-4f1a-b413-8253f7062234",
+    "c81f9026-3f58-46db-ad01-2b580e30926c",
+    "5a277797-f5c7-402a-a2b1-79a0c7ce125c",
+    "4dc7b546-493d-4860-982f-c1cee0f2ce10",
+    "1e1e5058-979f-444f-9a46-5b2c4108e329",
+    "e1614033-0f8f-41c1-9319-2ec36b86fccc",
+    "f35ab67f-ae64-4aa0-b0a1-60ab588bc7a1",
+    "a0413872-6526-4965-a523-a515abbac186",
+    "c43ab6b2-1546-4605-93b5-6c992e3a1313",
+    "ea79faf5-0760-4a31-8d52-6091606f7b41",
+    "06665acd-00c8-4554-99e2-7131c3168b3a",
+    "6c9df469-686a-4772-98f0-7efadfcf331b",
+    "48ce3534-7daf-4d37-b11c-24fc069bf488",
+    "c5d5cf6d-9689-40c1-b3cc-69f3185f3280",
+    "bb211dff-b50e-42cd-8c55-a8502a0833a4",
+    "9a14dd29-b612-4be7-9cc0-b96454edcb8a",
+    "7be7a899-9893-4275-811d-4c47ebfea280",
+    "3503c5cb-3377-4f15-ac45-097c1151ae27",
+    "e0f04887-5f95-4bf1-a990-71ad77e7dfd7",
+    "cc25cd3d-b725-48bb-aa6d-8a23d32dc468",
+    "91f5022e-d994-43a1-861a-25a8fb7cc468",
+    "7050d466-cb21-438d-b48a-139d3ee966f4",
+    "502e5809-3edc-4f43-9998-b90aac883322",
+    "87322145-fe61-437d-9f3e-3486df772f3e",
+    "e3ae9931-eda7-47a1-89e0-600a2a54ad90",
+    "68e99be2-a6ff-4013-9b2b-ed2212574b5f",
+    "02329fec-7892-4ab8-bbef-5aa77a008907",
+    "28f57c93-f562-43a5-9684-7e83c6255f1f",
+    "53ca91c2-ef8e-4a99-861d-8258ef01daf7"
+  ],
+  "existingBundledNames": [
+    "꽃같은 젊음에 죽음을",
+    "꽃이, 지던 날",
+    "천서",
+    "DEAD HEAD DAD",
+    "Paimon",
+    "경성야화록",
+    "포르투나호 살인사건",
+    "변경의 마녀",
+    "동묘 귀시장",
+    "종결사건 File #2 백화점 마네킹",
+    "Moonstruck",
+    "누가 고양이를 죽였나",
+    "시리게도, 봄이었다",
+    "별주부전",
+    "퀴리",
+    "종결사건 File #1 욕실 사고사",
+    "침식",
+    "꼬마각시를 기다리는 밤",
+    "마음을 모아 비는 소원",
+    "수면 위로 떠오른 진실",
+    "타워",
+    "흰 까마귀, 붉게 물들다",
+    "기상천외, 암네시아",
+    "강변 밤의 꿈",
+    "혈석류학원",
+    "원고용지는 알고 있다",
+    "만월사당 살인사건",
+    "소녀는 S에 빠진다",
+    "연애 리얼리티 쇼 Reveal",
+    "야간열차에서 총구는 춤춘다",
+    "침입자",
+    "붉은 도깨비가 울던 밤",
+    "공화에 생명을",
+    "나기의 귀적",
+    "회황관 살인 사건",
+    "유년",
+    "데스 엑스 마키나",
+    "입술",
+    "껍질 속의 우상",
+    "인조는 비웃는다",
+    "종점",
+    "늑대 신화와 거짓말쟁이를 싫어하는 공주님",
+    "영원이라는 이름의 살인",
+    "누가 이코마코토리를 죽였나",
+    "백합은 S를 바친다",
+    "천사는 꽃빛 아래에서",
+    "죽음의 도깨비님",
+    "롤코의 서커스",
+    "나는 파편이 되고 싶다",
+    "잔혹동화"
+  ],
+  "existingLiveScenarioIds": [
+    "67b209c2-4f74-e8f5-c6c3-2ea400000000",
+    "67b209c2-4f74-e8f5-c6c3-2ea500000000",
+    "66f1ff5f-7f12-aa6f-cc77-6fb500000000",
+    "66f1ff5f-7f12-aa6f-cc77-6fb400000000",
+    "66f1ff5f-7f12-aa6f-cc77-6fb600000000",
+    "687dfa95-0cf7-04bc-e465-dc2300000000",
+    "66f2b821-abbd-6df4-d6a8-4f7a00000000",
+    "66f3ceef-cc91-6ba9-c453-6b8900000000",
+    "6759bba6-19ed-77da-51b0-d20300000000",
+    "682800c8-06c6-b423-ac5d-788000000000",
+    "682800c8-06c6-b423-ac5d-788100000000",
+    "68934b09-70d5-8724-3eb3-8dd000000000",
+    "66f55cea-1089-785d-725f-959000000000",
+    "68e7c49d-a0e0-d9a3-7928-fc5d00000000",
+    "672327b9-728a-89b8-d76d-30d700000000",
+    "66fa6c04-e195-6ae6-7883-6f7300000000",
+    "66f3eb76-cc91-6ba9-c453-6bf000000000",
+    "6811ae3c-edc0-bfb2-fe16-bb2000000000",
+    "66eab077-881a-95e0-5727-957a00000000"
+  ],
+  "existingLiveNames": [
+    "우물에 깃든 소리",
+    "그날이 오면",
+    "스쿨드: 운명의 실타래",
+    "베르단디: 사건의 서막",
+    "우르드: 여정의 끝",
+    "레드x리그렛",
+    "햇살고아원: 여섯 아이의 탈출극",
+    "새장 속 제비는 꿈을 꾼다",
+    "양심의 기생",
+    "다크 율에 속죄를",
+    "게놈의 탑",
+    "탐욕 PART.01 탐욕의 저택",
+    "J.모리아티의 암약",
+    "절벽산장 살인사건",
+    "셜록 Part.01 주홍색 연구",
+    "사라진 속옷과 하늘을 나는 물고기",
+    "무령",
+    "껍질 속 세상",
+    "지구에서 사랑을 담아",
+    "웬디, 어른이 되렴",
+    "살인라이브"
+  ],
+  "reviewHoldouts": [
+    {
+      "scenarioId": "6759b835-19ed-77da-51b0-d16d00000000",
+      "name": "폭풍과 함께 마왕이 오셨도다",
+      "reason": "OFFICIAL_METADATA_DESCRIPTION_MISMATCH"
+    },
+    {
+      "scenarioId": "6960ff84-1b75-e40a-89fa-d4d500000000",
+      "name": "여신상이 염려하는 미래",
+      "reason": "OFFICIAL_METADATA_DESCRIPTION_MISMATCH"
+    },
+    {
+      "scenarioId": "66fdab14-6ac3-6f08-ff9c-557400000000",
+      "name": "MOTEL NOBODY",
+      "reason": "OFFICIAL_METADATA_DESCRIPTION_MISMATCH"
+    },
+    {
+      "scenarioId": "690eb7b2-8b4d-e2b9-dd1c-ad2900000000",
+      "name": "이세계의 성녀는 해방을 꿈꾼다",
+      "reason": "OFFICIAL_METADATA_DESCRIPTION_MISMATCH"
+    },
+    {
+      "scenarioId": "6960ff84-1b75-e40a-89fa-d4d800000000",
+      "name": "미스터리 동아리 내 연속 살인",
+      "reason": "OFFICIAL_METADATA_DESCRIPTION_MISMATCH"
+    },
+    {
+      "scenarioId": "66f3902c-c448-1a6b-af57-3d5700000000",
+      "name": "호텔 레드럼: 노란 죽음",
+      "reason": "OFFICIAL_METADATA_DESCRIPTION_MISMATCH"
+    },
+    {
+      "scenarioId": "66f3902c-c448-1a6b-af57-3d5600000000",
+      "name": "호텔 레드럼: 푸른 죽음",
+      "reason": "OFFICIAL_METADATA_DESCRIPTION_MISMATCH"
+    },
+    {
+      "scenarioId": "670167ad-daa8-95b4-7742-6a4c00000000",
+      "name": "탐정사무소",
+      "reason": "ROLE_DISCUSSION_STRUCTURE_NOT_CLEAR_ENOUGH"
+    },
+    {
+      "scenarioId": "670018e6-6131-9fa6-2f5b-d9fd00000000",
+      "name": "천안대학교 민속학연구동아리 활동보고서 #벌명당산",
+      "reason": "ROLE_DISCUSSION_STRUCTURE_NOT_CLEAR_ENOUGH"
+    },
+    {
+      "scenarioId": "682800c8-06c6-b423-ac5d-788400000000",
+      "name": "여름방학의 흡혈귀",
+      "reason": "ROLE_DISCUSSION_STRUCTURE_NOT_CLEAR_ENOUGH"
+    },
+    {
+      "scenarioId": "66f394ba-c448-1a6b-af57-3d7100000000",
+      "name": "메모리즈: 수수께끼 상자",
+      "reason": "ROLE_DISCUSSION_STRUCTURE_NOT_CLEAR_ENOUGH"
+    },
+    {
+      "scenarioId": "66f2b821-abbd-6df4-d6a8-4f7b00000000",
+      "name": "백귀야행: 여섯 요괴의 추리극",
+      "reason": "ROLE_DISCUSSION_STRUCTURE_NOT_CLEAR_ENOUGH"
+    },
+    {
+      "scenarioId": "66f3e051-cc91-6ba9-c453-6ba800000000",
+      "name": "늑대 무리 속 침묵",
+      "reason": "ROLE_DISCUSSION_STRUCTURE_NOT_CLEAR_ENOUGH"
+    },
+    {
+      "scenarioId": "6702aeaa-6e4f-1c18-b602-d2c800000000",
+      "name": "LAST MYSTIC ~주살과 인연의 경계~",
+      "reason": "ROLE_DISCUSSION_STRUCTURE_NOT_CLEAR_ENOUGH"
+    },
+    {
+      "scenarioId": "68e7c49d-a0e0-d9a3-7928-fc5e00000000",
+      "name": "경계 도시",
+      "reason": "ROLE_DISCUSSION_STRUCTURE_NOT_CLEAR_ENOUGH"
+    },
+    {
+      "scenarioId": "66fdacee-6ac3-6f08-ff9c-55c000000000",
+      "name": "스위트 홈: 작은 교회 The Church",
+      "reason": "ROLE_DISCUSSION_STRUCTURE_NOT_CLEAR_ENOUGH"
+    },
+    {
+      "scenarioId": "66f563b3-1089-785d-725f-95c500000000",
+      "name": "해피 쏘 머치",
+      "reason": "ROLE_DISCUSSION_STRUCTURE_NOT_CLEAR_ENOUGH"
+    },
+    {
+      "scenarioId": "66f3ceef-cc91-6ba9-c453-6b8800000000",
+      "name": "주마등은 흰색으로 빛난다",
+      "reason": "ROLE_DISCUSSION_STRUCTURE_NOT_CLEAR_ENOUGH"
+    },
+    {
+      "scenarioId": "67c71be0-e6b8-ccb5-92bc-c7d000000000",
+      "name": "판도라의 택배",
+      "reason": "ROLE_DISCUSSION_STRUCTURE_NOT_CLEAR_ENOUGH"
+    },
+    {
+      "scenarioId": "670019f3-6131-9fa6-2f5b-da5200000000",
+      "name": "무진 : 불신지옥",
+      "reason": "ROLE_DISCUSSION_STRUCTURE_NOT_CLEAR_ENOUGH"
+    },
+    {
+      "scenarioId": "671287a2-d1a2-3760-ae37-d25700000000",
+      "name": "리그렛",
+      "reason": "ROLE_DISCUSSION_STRUCTURE_NOT_CLEAR_ENOUGH"
+    },
+    {
+      "scenarioId": "67b209c2-4f74-e8f5-c6c3-2ea300000000",
+      "name": "아스모데우스의 만찬",
+      "reason": "ROLE_DISCUSSION_STRUCTURE_NOT_CLEAR_ENOUGH"
+    },
+    {
+      "scenarioId": "66f46c32-cc91-6ba9-c453-6c2c00000000",
+      "name": "별빛 우주 패러랠라인",
+      "reason": "ROLE_DISCUSSION_STRUCTURE_NOT_CLEAR_ENOUGH"
+    },
+    {
+      "scenarioId": "66f55cea-1089-785d-725f-959400000000",
+      "name": "몽환의 세계와 비밀의 사랑",
+      "reason": "ROLE_DISCUSSION_STRUCTURE_NOT_CLEAR_ENOUGH"
+    },
+    {
+      "scenarioId": "66f55cea-1089-785d-725f-959300000000",
+      "name": "우주 고릴라 팬데믹!",
+      "reason": "ROLE_DISCUSSION_STRUCTURE_NOT_CLEAR_ENOUGH"
+    },
+    {
+      "scenarioId": "66fdaf6b-6ac3-6f08-ff9c-56f500000000",
+      "name": "황홀한 돼지",
+      "reason": "ROLE_DISCUSSION_STRUCTURE_NOT_CLEAR_ENOUGH"
+    },
+    {
+      "scenarioId": "670de093-9703-a1a4-c921-253e00000000",
+      "name": "보물섬",
+      "reason": "GENERIC_TITLE_CONFUSION"
+    }
+  ],
+  "games": [
+    {
+      "selectionRank": 1,
+      "scenarioId": "6929bfff-02d2-8e5b-bbdb-f4cf00000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/6929bfff-02d2-8e5b-bbdb-f4cf00000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "4명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 9,
+        "playCount": 15,
+        "reviews": 12,
+        "rating": 4.1,
+        "author": "사쿠베",
+        "publisher": "사쿠베",
+        "popularityScore": 78,
+        "difficulty": 3.8,
+        "difficultyVotes": 12
+      },
+      "submission": {
+        "name": "괴조는 깊은 탄식의 끝에",
+        "aliases": [],
+        "minPlayers": 4,
+        "maxPlayers": 4,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/6929bfff-02d2-8e5b-bbdb-f4cf00000000"
+        ],
+        "publicRating": 4.1,
+        "weight": 3.8
+      }
+    },
+    {
+      "selectionRank": 2,
+      "scenarioId": "67868821-8e95-ff0e-be6e-e1e200000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/67868821-8e95-ff0e-be6e-e1e200000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "5명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 8,
+        "playCount": 16,
+        "reviews": 6,
+        "rating": 2.9,
+        "author": "itohaki",
+        "publisher": "리얼월드",
+        "popularityScore": 68,
+        "difficulty": 2.8,
+        "difficultyVotes": 6
+      },
+      "submission": {
+        "name": "에이다",
+        "aliases": [],
+        "minPlayers": 5,
+        "maxPlayers": 5,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/67868821-8e95-ff0e-be6e-e1e200000000"
+        ],
+        "publicRating": 2.9,
+        "weight": 2.8
+      }
+    },
+    {
+      "selectionRank": 3,
+      "scenarioId": "677c061b-95ea-36a1-fbdf-9a3700000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/677c061b-95ea-36a1-fbdf-9a3700000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "4명",
+        "playTimeText": "150분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 4,
+        "playCount": 12,
+        "reviews": 6,
+        "rating": 4.2,
+        "author": "MYSTERY GAMES",
+        "publisher": "MYSTERY GAMES",
+        "popularityScore": 52,
+        "difficulty": 3.3,
+        "difficultyVotes": 6
+      },
+      "submission": {
+        "name": "숨겨진 이야기 H",
+        "aliases": [],
+        "minPlayers": 4,
+        "maxPlayers": 4,
+        "minPlayMinutes": 150,
+        "maxPlayMinutes": 150,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/677c061b-95ea-36a1-fbdf-9a3700000000"
+        ],
+        "publicRating": 4.2,
+        "weight": 3.3
+      }
+    },
+    {
+      "selectionRank": 4,
+      "scenarioId": "66fdadd1-6ac3-6f08-ff9c-565900000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/66fdadd1-6ac3-6f08-ff9c-565900000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "5명",
+        "playTimeText": "150분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 5,
+        "playCount": 12,
+        "reviews": 5,
+        "rating": 3.4,
+        "author": "Rufuro",
+        "publisher": "언더독 게임즈",
+        "popularityScore": 51,
+        "difficulty": 3.3,
+        "difficultyVotes": 5
+      },
+      "submission": {
+        "name": "라이노 교수가 아는 다가올 오늘 중의 죽음",
+        "aliases": [],
+        "minPlayers": 5,
+        "maxPlayers": 5,
+        "minPlayMinutes": 150,
+        "maxPlayMinutes": 150,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/66fdadd1-6ac3-6f08-ff9c-565900000000"
+        ],
+        "publicRating": 3.4,
+        "weight": 3.3
+      }
+    },
+    {
+      "selectionRank": 5,
+      "scenarioId": "6759b835-19ed-77da-51b0-d16c00000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/6759b835-19ed-77da-51b0-d16c00000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "4명",
+        "playTimeText": "90분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 2,
+        "playCount": 9,
+        "reviews": 4,
+        "rating": 3.4,
+        "author": "Group SNE",
+        "publisher": "Group SNE",
+        "popularityScore": 37,
+        "difficulty": 3.6,
+        "difficultyVotes": 4
+      },
+      "submission": {
+        "name": "미싱 파이터",
+        "aliases": [],
+        "minPlayers": 4,
+        "maxPlayers": 4,
+        "minPlayMinutes": 90,
+        "maxPlayMinutes": 90,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/6759b835-19ed-77da-51b0-d16c00000000"
+        ],
+        "publicRating": 3.4,
+        "weight": 3.6
+      }
+    },
+    {
+      "selectionRank": 6,
+      "scenarioId": "67075ea9-68fa-0f28-2160-f00200000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/67075ea9-68fa-0f28-2160-f00200000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "5명",
+        "playTimeText": "60분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 4,
+        "playCount": 9,
+        "reviews": 2,
+        "rating": 2.3,
+        "author": "F",
+        "publisher": "미스터리 게임즈",
+        "popularityScore": 35,
+        "difficulty": 1.8,
+        "difficultyVotes": 2
+      },
+      "submission": {
+        "name": "보통의 머더 미스터리",
+        "aliases": [],
+        "minPlayers": 5,
+        "maxPlayers": 5,
+        "minPlayMinutes": 60,
+        "maxPlayMinutes": 60,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/67075ea9-68fa-0f28-2160-f00200000000"
+        ],
+        "publicRating": 2.3,
+        "weight": 1.8
+      }
+    },
+    {
+      "selectionRank": 7,
+      "scenarioId": "66eab077-881a-95e0-5727-957d00000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/66eab077-881a-95e0-5727-957d00000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "3명",
+        "playTimeText": "90분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 2,
+        "playCount": 8,
+        "reviews": 4,
+        "rating": 3.6,
+        "author": "Junichi Kawabata",
+        "publisher": "언더독 게임즈",
+        "popularityScore": 34,
+        "difficulty": 1.9,
+        "difficultyVotes": 4
+      },
+      "submission": {
+        "name": "시간을 달리는 트라이앵글",
+        "aliases": [],
+        "minPlayers": 3,
+        "maxPlayers": 3,
+        "minPlayMinutes": 90,
+        "maxPlayMinutes": 90,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/66eab077-881a-95e0-5727-957d00000000"
+        ],
+        "publicRating": 3.6,
+        "weight": 1.9
+      }
+    },
+    {
+      "selectionRank": 8,
+      "scenarioId": "68b7d5ae-f468-cf6e-d8d7-dd1e00000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/68b7d5ae-f468-cf6e-d8d7-dd1e00000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "6명",
+        "playTimeText": "180분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 4,
+        "playCount": 8,
+        "reviews": 3,
+        "rating": 3.2,
+        "author": "호커스 포커스",
+        "publisher": "호커스 포커스",
+        "popularityScore": 34,
+        "difficulty": 1.7,
+        "difficultyVotes": 3
+      },
+      "submission": {
+        "name": "종이 울릴 때까지 신데렐라",
+        "aliases": [],
+        "minPlayers": 6,
+        "maxPlayers": 6,
+        "minPlayMinutes": 180,
+        "maxPlayMinutes": 180,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/68b7d5ae-f468-cf6e-d8d7-dd1e00000000"
+        ],
+        "publicRating": 3.2,
+        "weight": 1.7
+      }
+    },
+    {
+      "selectionRank": 9,
+      "scenarioId": "674468fd-6a9c-2642-d4f3-a4fc00000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/674468fd-6a9c-2642-d4f3-a4fc00000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "6명",
+        "playTimeText": "210분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 3,
+        "playCount": 9,
+        "reviews": 2,
+        "rating": 3.8,
+        "author": "버수정류장",
+        "publisher": "버수정류장",
+        "popularityScore": 34,
+        "difficulty": 3.5,
+        "difficultyVotes": 2
+      },
+      "submission": {
+        "name": "달님, 제 소원을 들어주세요",
+        "aliases": [],
+        "minPlayers": 6,
+        "maxPlayers": 6,
+        "minPlayMinutes": 210,
+        "maxPlayMinutes": 210,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/674468fd-6a9c-2642-d4f3-a4fc00000000"
+        ],
+        "publicRating": 3.8,
+        "weight": 3.5
+      }
+    },
+    {
+      "selectionRank": 10,
+      "scenarioId": "67f95ac1-8644-eb2f-464f-11a800000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/67f95ac1-8644-eb2f-464f-11a800000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "6명",
+        "playTimeText": "200분",
+        "category": "신작소개",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 3,
+        "playCount": 5,
+        "reviews": 7,
+        "rating": 2.6,
+        "author": "미상",
+        "publisher": "미스터리 게임즈",
+        "popularityScore": 32,
+        "difficulty": 3.6,
+        "difficultyVotes": 7
+      },
+      "submission": {
+        "name": "이 어둠을 당신과",
+        "aliases": [],
+        "minPlayers": 6,
+        "maxPlayers": 6,
+        "minPlayMinutes": 200,
+        "maxPlayMinutes": 200,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/67f95ac1-8644-eb2f-464f-11a800000000"
+        ],
+        "publicRating": 2.6,
+        "weight": 3.6
+      }
+    },
+    {
+      "selectionRank": 11,
+      "scenarioId": "66f2b579-abbd-6df4-d6a8-4f2c00000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/66f2b579-abbd-6df4-d6a8-4f2c00000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "7명",
+        "playTimeText": "150분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 3,
+        "playCount": 7,
+        "reviews": 2,
+        "rating": 3.3,
+        "author": "사건의 지평선",
+        "publisher": "사건의 지평선",
+        "popularityScore": 28,
+        "difficulty": 3.3,
+        "difficultyVotes": 2
+      },
+      "submission": {
+        "name": "버틀런트 저택의 비밀",
+        "aliases": [],
+        "minPlayers": 7,
+        "maxPlayers": 7,
+        "minPlayMinutes": 150,
+        "maxPlayMinutes": 150,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/66f2b579-abbd-6df4-d6a8-4f2c00000000"
+        ],
+        "publicRating": 3.3,
+        "weight": 3.3
+      }
+    },
+    {
+      "selectionRank": 12,
+      "scenarioId": "686d6099-90ba-a454-3c41-937600000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/686d6099-90ba-a454-3c41-937600000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "4명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 3,
+        "playCount": 6,
+        "reviews": 3,
+        "rating": 3,
+        "author": "아크라이트",
+        "publisher": "아이프롬 게임즈",
+        "popularityScore": 27,
+        "difficulty": 1.7,
+        "difficultyVotes": 3
+      },
+      "submission": {
+        "name": "빨간 모자, 무도회에서 시체와 만나다",
+        "aliases": [],
+        "minPlayers": 4,
+        "maxPlayers": 4,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/686d6099-90ba-a454-3c41-937600000000"
+        ],
+        "publicRating": 3.0,
+        "weight": 1.7
+      }
+    },
+    {
+      "selectionRank": 13,
+      "scenarioId": "6759b835-19ed-77da-51b0-d16b00000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/6759b835-19ed-77da-51b0-d16b00000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "5명",
+        "playTimeText": "60분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 2,
+        "playCount": 7,
+        "reviews": 2,
+        "rating": 2.5,
+        "author": "Group SNE",
+        "publisher": "Group SNE",
+        "popularityScore": 27,
+        "difficulty": 1.5,
+        "difficultyVotes": 2
+      },
+      "submission": {
+        "name": "최후의 수아레",
+        "aliases": [],
+        "minPlayers": 5,
+        "maxPlayers": 5,
+        "minPlayMinutes": 60,
+        "maxPlayMinutes": 60,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/6759b835-19ed-77da-51b0-d16b00000000"
+        ],
+        "publicRating": 2.5,
+        "weight": 1.5
+      }
+    },
+    {
+      "selectionRank": 14,
+      "scenarioId": "67c1e121-ffe1-94c2-8916-3b1300000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/67c1e121-ffe1-94c2-8916-3b1300000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "5명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 1,
+        "playCount": 8,
+        "reviews": 1,
+        "rating": 3,
+        "author": "KADOKAWA",
+        "publisher": "KADOKAWA",
+        "popularityScore": 27,
+        "difficulty": 4,
+        "difficultyVotes": 1
+      },
+      "submission": {
+        "name": "아스토리아의 표징",
+        "aliases": [],
+        "minPlayers": 5,
+        "maxPlayers": 5,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/67c1e121-ffe1-94c2-8916-3b1300000000"
+        ],
+        "publicRating": 3.0,
+        "weight": 4.0
+      }
+    },
+    {
+      "selectionRank": 15,
+      "scenarioId": "67868804-8e95-ff0e-be6e-e13800000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/67868804-8e95-ff0e-be6e-e13800000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "4명",
+        "playTimeText": "90분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 1,
+        "playCount": 7,
+        "reviews": 2,
+        "rating": 3.3,
+        "author": "딜라이트",
+        "publisher": "딜라이트",
+        "popularityScore": 26,
+        "difficulty": 2,
+        "difficultyVotes": 2
+      },
+      "submission": {
+        "name": "파랑새",
+        "aliases": [],
+        "minPlayers": 4,
+        "maxPlayers": 4,
+        "minPlayMinutes": 90,
+        "maxPlayMinutes": 90,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/67868804-8e95-ff0e-be6e-e13800000000"
+        ],
+        "publicRating": 3.3,
+        "weight": 2.0
+      }
+    },
+    {
+      "selectionRank": 16,
+      "scenarioId": "66eab077-881a-95e0-5727-958100000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/66eab077-881a-95e0-5727-958100000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "4명",
+        "playTimeText": "90분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 1,
+        "playCount": 7,
+        "reviews": 2,
+        "rating": 1.3,
+        "author": "Makoto Nakamura",
+        "publisher": "언더독 게임즈",
+        "popularityScore": 26,
+        "difficulty": 0.8,
+        "difficultyVotes": 2
+      },
+      "submission": {
+        "name": "교토 이세계 투어",
+        "aliases": [],
+        "minPlayers": 4,
+        "maxPlayers": 4,
+        "minPlayMinutes": 90,
+        "maxPlayMinutes": 90,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/66eab077-881a-95e0-5727-958100000000"
+        ],
+        "publicRating": 1.3,
+        "weight": 0.8
+      }
+    },
+    {
+      "selectionRank": 17,
+      "scenarioId": "67017ae0-daa8-95b4-7742-6c8000000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/67017ae0-daa8-95b4-7742-6c8000000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "4명",
+        "playTimeText": "60분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 2,
+        "playCount": 7,
+        "reviews": 1,
+        "rating": 2,
+        "author": "Izumi Jinguji",
+        "publisher": "언더독 게임즈",
+        "popularityScore": 25,
+        "difficulty": 3,
+        "difficultyVotes": 1
+      },
+      "submission": {
+        "name": "괴도 에트워스의 도전장",
+        "aliases": [],
+        "minPlayers": 4,
+        "maxPlayers": 4,
+        "minPlayMinutes": 60,
+        "maxPlayMinutes": 60,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/67017ae0-daa8-95b4-7742-6c8000000000"
+        ],
+        "publicRating": 2.0,
+        "weight": 3.0
+      }
+    },
+    {
+      "selectionRank": 18,
+      "scenarioId": "6819949e-319c-1237-2775-28d800000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/6819949e-319c-1237-2775-28d800000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "4명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 3,
+        "playCount": 5,
+        "reviews": 3,
+        "rating": 4.2,
+        "author": "밀감네",
+        "publisher": "밀감네",
+        "popularityScore": 24,
+        "difficulty": 3.2,
+        "difficultyVotes": 3
+      },
+      "submission": {
+        "name": "사라진 귀걸이를 찾아라",
+        "aliases": [],
+        "minPlayers": 4,
+        "maxPlayers": 4,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/6819949e-319c-1237-2775-28d800000000"
+        ],
+        "publicRating": 4.2,
+        "weight": 3.2
+      }
+    },
+    {
+      "selectionRank": 19,
+      "scenarioId": "67232e4b-728a-89b8-d76d-32e200000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/67232e4b-728a-89b8-d76d-32e200000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "6명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 0,
+        "playCount": 6,
+        "reviews": 3,
+        "rating": 3.7,
+        "author": "보틀링컴",
+        "publisher": "보틀링컴퍼니",
+        "popularityScore": 24,
+        "difficulty": 2.7,
+        "difficultyVotes": 3
+      },
+      "submission": {
+        "name": "무경고등학교",
+        "aliases": [],
+        "minPlayers": 6,
+        "maxPlayers": 6,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/67232e4b-728a-89b8-d76d-32e200000000"
+        ],
+        "publicRating": 3.7,
+        "weight": 2.7
+      }
+    },
+    {
+      "selectionRank": 20,
+      "scenarioId": "66f3eb76-cc91-6ba9-c453-6bf100000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/66f3eb76-cc91-6ba9-c453-6bf100000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "4명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 2,
+        "playCount": 6,
+        "reviews": 2,
+        "rating": 3.8,
+        "author": "ozelphie",
+        "publisher": "브라운 스튜디오",
+        "popularityScore": 24,
+        "difficulty": 3.8,
+        "difficultyVotes": 2
+      },
+      "submission": {
+        "name": "0719: 낙하를 향하는 두 개의 수",
+        "aliases": [],
+        "minPlayers": 4,
+        "maxPlayers": 4,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/66f3eb76-cc91-6ba9-c453-6bf100000000"
+        ],
+        "publicRating": 3.8,
+        "weight": 3.8
+      }
+    },
+    {
+      "selectionRank": 21,
+      "scenarioId": "67868804-8e95-ff0e-be6e-e13700000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/67868804-8e95-ff0e-be6e-e13700000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "5명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 2,
+        "playCount": 6,
+        "reviews": 2,
+        "rating": 2.8,
+        "author": "딜라이트",
+        "publisher": "딜라이트",
+        "popularityScore": 24,
+        "difficulty": 3,
+        "difficultyVotes": 2
+      },
+      "submission": {
+        "name": "오늘, 벚꽃이 죽어버렸다",
+        "aliases": [],
+        "minPlayers": 5,
+        "maxPlayers": 5,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/67868804-8e95-ff0e-be6e-e13700000000"
+        ],
+        "publicRating": 2.8,
+        "weight": 3.0
+      }
+    },
+    {
+      "selectionRank": 22,
+      "scenarioId": "66eab077-881a-95e0-5727-957f00000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/66eab077-881a-95e0-5727-957f00000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "4명",
+        "playTimeText": "90분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 1,
+        "playCount": 7,
+        "reviews": 1,
+        "rating": 2.5,
+        "author": "Tadaaki Kawahito",
+        "publisher": "언더독 게임즈",
+        "popularityScore": 24,
+        "difficulty": 2,
+        "difficultyVotes": 1
+      },
+      "submission": {
+        "name": "카나리아는 지저귀지 않는다",
+        "aliases": [],
+        "minPlayers": 4,
+        "maxPlayers": 4,
+        "minPlayMinutes": 90,
+        "maxPlayMinutes": 90,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/66eab077-881a-95e0-5727-957f00000000"
+        ],
+        "publicRating": 2.5,
+        "weight": 2.0
+      }
+    },
+    {
+      "selectionRank": 23,
+      "scenarioId": "67017cd0-daa8-95b4-7742-6ce200000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/67017cd0-daa8-95b4-7742-6ce200000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "5명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 2,
+        "playCount": 5,
+        "reviews": 3,
+        "rating": 1.8,
+        "author": "Lucy Lovegoodwill",
+        "publisher": "카드캐슬",
+        "popularityScore": 23,
+        "difficulty": 3.2,
+        "difficultyVotes": 3
+      },
+      "submission": {
+        "name": "목베는 마을",
+        "aliases": [],
+        "minPlayers": 5,
+        "maxPlayers": 5,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/67017cd0-daa8-95b4-7742-6ce200000000"
+        ],
+        "publicRating": 1.8,
+        "weight": 3.2
+      }
+    },
+    {
+      "selectionRank": 24,
+      "scenarioId": "66f2ff08-abbd-6df4-d6a8-4f9400000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/66f2ff08-abbd-6df4-d6a8-4f9400000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "4명",
+        "playTimeText": "150분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 1,
+        "playCount": 6,
+        "reviews": 2,
+        "rating": 3.5,
+        "author": "3B게임즈",
+        "publisher": "3B게임즈",
+        "popularityScore": 23,
+        "difficulty": 4,
+        "difficultyVotes": 1
+      },
+      "submission": {
+        "name": "프로젝트 노아",
+        "aliases": [],
+        "minPlayers": 4,
+        "maxPlayers": 4,
+        "minPlayMinutes": 150,
+        "maxPlayMinutes": 150,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/66f2ff08-abbd-6df4-d6a8-4f9400000000"
+        ],
+        "publicRating": 3.5,
+        "weight": 4.0
+      }
+    },
+    {
+      "selectionRank": 25,
+      "scenarioId": "66fa7f83-e195-6ae6-7883-6ff200000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/66fa7f83-e195-6ae6-7883-6ff200000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "5명",
+        "playTimeText": "70분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 2,
+        "playCount": 5,
+        "reviews": 2,
+        "rating": 3.3,
+        "author": "Masashi Kawaguchi",
+        "publisher": "언더독 게임즈",
+        "popularityScore": 21,
+        "difficulty": 2.8,
+        "difficultyVotes": 2
+      },
+      "submission": {
+        "name": "설화와 해바라기 베이커리",
+        "aliases": [],
+        "minPlayers": 5,
+        "maxPlayers": 5,
+        "minPlayMinutes": 70,
+        "maxPlayMinutes": 70,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/66fa7f83-e195-6ae6-7883-6ff200000000"
+        ],
+        "publicRating": 3.3,
+        "weight": 2.8
+      }
+    },
+    {
+      "selectionRank": 26,
+      "scenarioId": "66f46c32-cc91-6ba9-c453-6c2e00000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/66f46c32-cc91-6ba9-c453-6c2e00000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "5명",
+        "playTimeText": "200분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 4,
+        "playCount": 4,
+        "reviews": 2,
+        "rating": 4.8,
+        "author": "보또",
+        "publisher": "보또",
+        "popularityScore": 20,
+        "difficulty": 3.3,
+        "difficultyVotes": 2
+      },
+      "submission": {
+        "name": "아테나: 4%의 비밀",
+        "aliases": [],
+        "minPlayers": 5,
+        "maxPlayers": 5,
+        "minPlayMinutes": 200,
+        "maxPlayMinutes": 200,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/66f46c32-cc91-6ba9-c453-6c2e00000000"
+        ],
+        "publicRating": 4.8,
+        "weight": 3.3
+      }
+    },
+    {
+      "selectionRank": 27,
+      "scenarioId": "67868821-8e95-ff0e-be6e-e1e100000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/67868821-8e95-ff0e-be6e-e1e100000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "6명",
+        "playTimeText": "200분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 1,
+        "playCount": 5,
+        "reviews": 2,
+        "rating": 4.5,
+        "author": "itohaki",
+        "publisher": "미스터리 게임즈",
+        "popularityScore": 20,
+        "difficulty": 3.8,
+        "difficultyVotes": 2
+      },
+      "submission": {
+        "name": "그림자 찾기",
+        "aliases": [],
+        "minPlayers": 6,
+        "maxPlayers": 6,
+        "minPlayMinutes": 200,
+        "maxPlayMinutes": 200,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/67868821-8e95-ff0e-be6e-e1e100000000"
+        ],
+        "publicRating": 4.5,
+        "weight": 3.8
+      }
+    },
+    {
+      "selectionRank": 28,
+      "scenarioId": "68c6f7dc-ac30-29a7-d01a-8bcf00000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/68c6f7dc-ac30-29a7-d01a-8bcf00000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "5명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 4,
+        "playCount": 4,
+        "reviews": 2,
+        "rating": 3.8,
+        "author": "Studio NG",
+        "publisher": "Studio NG",
+        "popularityScore": 20,
+        "difficulty": 2.3,
+        "difficultyVotes": 2
+      },
+      "submission": {
+        "name": "이스터 에그 ver.3 몬스터 브레이크",
+        "aliases": [],
+        "minPlayers": 5,
+        "maxPlayers": 5,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/68c6f7dc-ac30-29a7-d01a-8bcf00000000"
+        ],
+        "publicRating": 3.8,
+        "weight": 2.3
+      }
+    },
+    {
+      "selectionRank": 29,
+      "scenarioId": "676d7f81-08d6-9b5b-4456-5a0600000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/676d7f81-08d6-9b5b-4456-5a0600000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "7명",
+        "playTimeText": "180분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 0,
+        "playCount": 6,
+        "reviews": 1,
+        "rating": 3.5,
+        "author": "미상",
+        "publisher": "언더독 게임즈",
+        "popularityScore": 20
+      },
+      "submission": {
+        "name": "테르모필라이의 협잡꾼",
+        "aliases": [],
+        "minPlayers": 7,
+        "maxPlayers": 7,
+        "minPlayMinutes": 180,
+        "maxPlayMinutes": 180,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/676d7f81-08d6-9b5b-4456-5a0600000000"
+        ],
+        "publicRating": 3.5
+      }
+    },
+    {
+      "selectionRank": 30,
+      "scenarioId": "68b7d5ae-f468-cf6e-d8d7-dd1f00000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/68b7d5ae-f468-cf6e-d8d7-dd1f00000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "6명",
+        "playTimeText": "180분",
+        "category": "신작소개",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 2,
+        "playCount": 3,
+        "reviews": 4,
+        "rating": 2.6,
+        "author": "미상",
+        "publisher": "사월 게임즈",
+        "popularityScore": 19,
+        "difficulty": 2.1,
+        "difficultyVotes": 4
+      },
+      "submission": {
+        "name": "시인촌기담",
+        "aliases": [],
+        "minPlayers": 6,
+        "maxPlayers": 6,
+        "minPlayMinutes": 180,
+        "maxPlayMinutes": 180,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/68b7d5ae-f468-cf6e-d8d7-dd1f00000000"
+        ],
+        "publicRating": 2.6,
+        "weight": 2.1
+      }
+    },
+    {
+      "selectionRank": 31,
+      "scenarioId": "685b9f43-ae7a-f87d-1e2a-0d6400000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/685b9f43-ae7a-f87d-1e2a-0d6400000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "6명",
+        "playTimeText": "210분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 3,
+        "playCount": 4,
+        "reviews": 2,
+        "rating": 3.5,
+        "author": "히노키다 마사시",
+        "publisher": "히트 게임즈",
+        "popularityScore": 19,
+        "difficulty": 3.5,
+        "difficultyVotes": 2
+      },
+      "submission": {
+        "name": "얼어붙은 당신에게 6개의 등불을",
+        "aliases": [],
+        "minPlayers": 6,
+        "maxPlayers": 6,
+        "minPlayMinutes": 210,
+        "maxPlayMinutes": 210,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/685b9f43-ae7a-f87d-1e2a-0d6400000000"
+        ],
+        "publicRating": 3.5,
+        "weight": 3.5
+      }
+    },
+    {
+      "selectionRank": 32,
+      "scenarioId": "677c0b3b-95ea-36a1-fbdf-9b7d00000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/677c0b3b-95ea-36a1-fbdf-9b7d00000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "4명",
+        "playTimeText": "90분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 0,
+        "playCount": 5,
+        "reviews": 2,
+        "rating": 3.3,
+        "author": "보드게임카페 미플",
+        "publisher": "보드게임카페 미플",
+        "popularityScore": 19,
+        "difficulty": 2.5,
+        "difficultyVotes": 2
+      },
+      "submission": {
+        "name": "이세계를 구할 완벽한 파티 입니다만?",
+        "aliases": [],
+        "minPlayers": 4,
+        "maxPlayers": 4,
+        "minPlayMinutes": 90,
+        "maxPlayMinutes": 90,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/677c0b3b-95ea-36a1-fbdf-9b7d00000000"
+        ],
+        "publicRating": 3.3,
+        "weight": 2.5
+      }
+    },
+    {
+      "selectionRank": 33,
+      "scenarioId": "677c061b-95ea-36a1-fbdf-9a3800000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/677c061b-95ea-36a1-fbdf-9a3800000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "4명",
+        "playTimeText": "180분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 2,
+        "playCount": 5,
+        "reviews": 1,
+        "rating": 4,
+        "author": "MYSTERY GAMES",
+        "publisher": "MYSTERY GAMES",
+        "popularityScore": 19,
+        "difficulty": 5,
+        "difficultyVotes": 1
+      },
+      "submission": {
+        "name": "개화, 꽃피우다",
+        "aliases": [],
+        "minPlayers": 4,
+        "maxPlayers": 4,
+        "minPlayMinutes": 180,
+        "maxPlayMinutes": 180,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/677c061b-95ea-36a1-fbdf-9a3800000000"
+        ],
+        "publicRating": 4.0,
+        "weight": 5.0
+      }
+    },
+    {
+      "selectionRank": 34,
+      "scenarioId": "696ef503-1c4c-919d-455b-b20400000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/696ef503-1c4c-919d-455b-b20400000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "6명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 4,
+        "playCount": 5,
+        "reviews": 0,
+        "rating": 0,
+        "author": "루시안",
+        "publisher": "미스터리 게임즈",
+        "popularityScore": 19
+      },
+      "submission": {
+        "name": "무녀마을 금기의 저주",
+        "aliases": [],
+        "minPlayers": 6,
+        "maxPlayers": 6,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/696ef503-1c4c-919d-455b-b20400000000"
+        ]
+      }
+    },
+    {
+      "selectionRank": 35,
+      "scenarioId": "671726d7-5d8d-b178-0ba1-939300000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/671726d7-5d8d-b178-0ba1-939300000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "5명",
+        "playTimeText": "100분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 0,
+        "playCount": 4,
+        "reviews": 3,
+        "rating": 3.8,
+        "author": "프로젝트 고구마",
+        "publisher": "프로젝트 고구",
+        "popularityScore": 18,
+        "difficulty": 3,
+        "difficultyVotes": 1
+      },
+      "submission": {
+        "name": "비더리타",
+        "aliases": [],
+        "minPlayers": 5,
+        "maxPlayers": 5,
+        "minPlayMinutes": 100,
+        "maxPlayMinutes": 100,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/671726d7-5d8d-b178-0ba1-939300000000"
+        ],
+        "publicRating": 3.8,
+        "weight": 3.0
+      }
+    },
+    {
+      "selectionRank": 36,
+      "scenarioId": "68b7d5ae-f468-cf6e-d8d7-dd2100000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/68b7d5ae-f468-cf6e-d8d7-dd2100000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "5명",
+        "playTimeText": "90분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 1,
+        "playCount": 3,
+        "reviews": 3,
+        "rating": 3.5,
+        "author": "미상",
+        "publisher": "보틀링컴퍼니",
+        "popularityScore": 16,
+        "difficulty": 2,
+        "difficultyVotes": 3
+      },
+      "submission": {
+        "name": "눈이 멈추기 전에",
+        "aliases": [],
+        "minPlayers": 5,
+        "maxPlayers": 5,
+        "minPlayMinutes": 90,
+        "maxPlayMinutes": 90,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/68b7d5ae-f468-cf6e-d8d7-dd2100000000"
+        ],
+        "publicRating": 3.5,
+        "weight": 2.0
+      }
+    },
+    {
+      "selectionRank": 37,
+      "scenarioId": "685b9f43-ae7a-f87d-1e2a-0d6300000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/685b9f43-ae7a-f87d-1e2a-0d6300000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "6명",
+        "playTimeText": "180분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 1,
+        "playCount": 4,
+        "reviews": 1,
+        "rating": 4,
+        "author": "톤톤",
+        "publisher": "히트 게임즈, Studio OZON",
+        "popularityScore": 15,
+        "difficulty": 4,
+        "difficultyVotes": 1
+      },
+      "submission": {
+        "name": "마법학교의 혼혈아들이 금지된 마도서를 해독하려다 모두 죽은 사건",
+        "aliases": [],
+        "minPlayers": 6,
+        "maxPlayers": 6,
+        "minPlayMinutes": 180,
+        "maxPlayMinutes": 180,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/685b9f43-ae7a-f87d-1e2a-0d6300000000"
+        ],
+        "publicRating": 4.0,
+        "weight": 4.0
+      }
+    },
+    {
+      "selectionRank": 38,
+      "scenarioId": "66f563b3-1089-785d-725f-95c600000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/66f563b3-1089-785d-725f-95c600000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "3명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 4,
+        "playCount": 3,
+        "reviews": 1,
+        "rating": 4,
+        "author": "다이브시어터",
+        "publisher": "다이브시어터",
+        "popularityScore": 15,
+        "difficulty": 2.5,
+        "difficultyVotes": 1
+      },
+      "submission": {
+        "name": "해독불가 트로이메라이",
+        "aliases": [],
+        "minPlayers": 3,
+        "maxPlayers": 3,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/66f563b3-1089-785d-725f-95c600000000"
+        ],
+        "publicRating": 4.0,
+        "weight": 2.5
+      }
+    },
+    {
+      "selectionRank": 39,
+      "scenarioId": "6879c813-59d2-964e-9dd3-3db900000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/6879c813-59d2-964e-9dd3-3db900000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "5명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 1,
+        "playCount": 4,
+        "reviews": 1,
+        "rating": 3,
+        "author": "미상",
+        "publisher": "엘피",
+        "popularityScore": 15,
+        "difficulty": 2,
+        "difficultyVotes": 1
+      },
+      "submission": {
+        "name": "북부대공을 암살하는 법",
+        "aliases": [],
+        "minPlayers": 5,
+        "maxPlayers": 5,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/6879c813-59d2-964e-9dd3-3db900000000"
+        ],
+        "publicRating": 3.0,
+        "weight": 2.0
+      }
+    },
+    {
+      "selectionRank": 40,
+      "scenarioId": "676d7f81-08d6-9b5b-4456-5a0500000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/676d7f81-08d6-9b5b-4456-5a0500000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "4명",
+        "playTimeText": "60분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 1,
+        "playCount": 4,
+        "reviews": 1,
+        "rating": 3,
+        "author": "미상",
+        "publisher": "언더독 게임즈",
+        "popularityScore": 15,
+        "difficulty": 3,
+        "difficultyVotes": 1
+      },
+      "submission": {
+        "name": "크세르크세스의 그림자",
+        "aliases": [],
+        "minPlayers": 4,
+        "maxPlayers": 4,
+        "minPlayMinutes": 60,
+        "maxPlayMinutes": 60,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/676d7f81-08d6-9b5b-4456-5a0500000000"
+        ],
+        "publicRating": 3.0,
+        "weight": 3.0
+      }
+    },
+    {
+      "selectionRank": 41,
+      "scenarioId": "6738df95-504c-19ab-1687-8c0200000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/6738df95-504c-19ab-1687-8c0200000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "4명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 1,
+        "playCount": 4,
+        "reviews": 1,
+        "rating": 2.5,
+        "author": "Oshio",
+        "publisher": "언더독 게임즈",
+        "popularityScore": 15,
+        "difficulty": 2,
+        "difficultyVotes": 1
+      },
+      "submission": {
+        "name": "보성전 살인",
+        "aliases": [],
+        "minPlayers": 4,
+        "maxPlayers": 4,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/6738df95-504c-19ab-1687-8c0200000000"
+        ],
+        "publicRating": 2.5,
+        "weight": 2.0
+      }
+    },
+    {
+      "selectionRank": 42,
+      "scenarioId": "66f46c32-cc91-6ba9-c453-6c2d00000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/66f46c32-cc91-6ba9-c453-6c2d00000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "4명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 1,
+        "playCount": 4,
+        "reviews": 1,
+        "rating": 2.5,
+        "author": "브라운스튜디오",
+        "publisher": "브라운스튜디오",
+        "popularityScore": 15,
+        "difficulty": 3,
+        "difficultyVotes": 1
+      },
+      "submission": {
+        "name": "기울어진 천칭의 운명",
+        "aliases": [],
+        "minPlayers": 4,
+        "maxPlayers": 4,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/66f46c32-cc91-6ba9-c453-6c2d00000000"
+        ],
+        "publicRating": 2.5,
+        "weight": 3.0
+      }
+    },
+    {
+      "selectionRank": 43,
+      "scenarioId": "66fa7f83-e195-6ae6-7883-6ff100000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/66fa7f83-e195-6ae6-7883-6ff100000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "5명",
+        "playTimeText": "70분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 1,
+        "playCount": 4,
+        "reviews": 1,
+        "rating": 1.5,
+        "author": "Masashi Kawaguchi",
+        "publisher": "언더독 게임즈",
+        "popularityScore": 15,
+        "difficulty": 3.5,
+        "difficultyVotes": 1
+      },
+      "submission": {
+        "name": "설화와 회색빛 몽견초",
+        "aliases": [],
+        "minPlayers": 5,
+        "maxPlayers": 5,
+        "minPlayMinutes": 70,
+        "maxPlayMinutes": 70,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/66fa7f83-e195-6ae6-7883-6ff100000000"
+        ],
+        "publicRating": 1.5,
+        "weight": 3.5
+      }
+    },
+    {
+      "selectionRank": 44,
+      "scenarioId": "69173957-d07f-1eeb-41d2-a9ea00000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/69173957-d07f-1eeb-41d2-a9ea00000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "4명",
+        "playTimeText": "100분",
+        "category": "신작소개",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 3,
+        "playCount": 1,
+        "reviews": 4,
+        "rating": 3.3,
+        "author": "엔딩 노트",
+        "publisher": "엔딩 노트",
+        "popularityScore": 14,
+        "difficulty": 3,
+        "difficultyVotes": 3
+      },
+      "submission": {
+        "name": "두근두근 고백 대소동",
+        "aliases": [],
+        "minPlayers": 4,
+        "maxPlayers": 4,
+        "minPlayMinutes": 100,
+        "maxPlayMinutes": 100,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/69173957-d07f-1eeb-41d2-a9ea00000000"
+        ],
+        "publicRating": 3.3,
+        "weight": 3.0
+      }
+    },
+    {
+      "selectionRank": 45,
+      "scenarioId": "66fda9f8-6ac3-6f08-ff9c-549300000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/66fda9f8-6ac3-6f08-ff9c-549300000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "4명",
+        "playTimeText": "150분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 0,
+        "playCount": 4,
+        "reviews": 1,
+        "rating": 2.5,
+        "author": "미상",
+        "publisher": "딜라이트",
+        "popularityScore": 14,
+        "difficulty": 2,
+        "difficultyVotes": 1
+      },
+      "submission": {
+        "name": "낙원 주점",
+        "aliases": [],
+        "minPlayers": 4,
+        "maxPlayers": 4,
+        "minPlayMinutes": 150,
+        "maxPlayMinutes": 150,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/66fda9f8-6ac3-6f08-ff9c-549300000000"
+        ],
+        "publicRating": 2.5,
+        "weight": 2.0
+      }
+    },
+    {
+      "selectionRank": 46,
+      "scenarioId": "67d45b8f-a271-72c6-de99-d97900000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/67d45b8f-a271-72c6-de99-d97900000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "5명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 2,
+        "playCount": 3,
+        "reviews": 1,
+        "rating": 4,
+        "author": "미상",
+        "publisher": "Team GRK",
+        "popularityScore": 13,
+        "difficulty": 3,
+        "difficultyVotes": 1
+      },
+      "submission": {
+        "name": "오늘 내가 죽었다",
+        "aliases": [],
+        "minPlayers": 5,
+        "maxPlayers": 5,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/67d45b8f-a271-72c6-de99-d97900000000"
+        ],
+        "publicRating": 4.0,
+        "weight": 3.0
+      }
+    },
+    {
+      "selectionRank": 47,
+      "scenarioId": "67f95ac1-8644-eb2f-464f-11a600000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/67f95ac1-8644-eb2f-464f-11a600000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "5명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 1,
+        "playCount": 4,
+        "reviews": 0,
+        "rating": 0,
+        "author": "MM Days",
+        "publisher": "Friday",
+        "popularityScore": 13
+      },
+      "submission": {
+        "name": "코덱스 기가스 PART.1 - 성스러운 십자가",
+        "aliases": [],
+        "minPlayers": 5,
+        "maxPlayers": 5,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/67f95ac1-8644-eb2f-464f-11a600000000"
+        ]
+      }
+    },
+    {
+      "selectionRank": 48,
+      "scenarioId": "67f95ac1-8644-eb2f-464f-11a700000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/67f95ac1-8644-eb2f-464f-11a700000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "5명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 1,
+        "playCount": 4,
+        "reviews": 0,
+        "rating": 0,
+        "author": "MM Days",
+        "publisher": "Friday",
+        "popularityScore": 13
+      },
+      "submission": {
+        "name": "코덱스 기가스 PART.2 - 탐욕의 열쇠",
+        "aliases": [],
+        "minPlayers": 5,
+        "maxPlayers": 5,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/67f95ac1-8644-eb2f-464f-11a700000000"
+        ]
+      }
+    },
+    {
+      "selectionRank": 49,
+      "scenarioId": "66fa7f83-e195-6ae6-7883-6fee00000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/66fa7f83-e195-6ae6-7883-6fee00000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "6명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 1,
+        "playCount": 4,
+        "reviews": 0,
+        "rating": 0,
+        "author": "Toshin Kagami",
+        "publisher": "언더독 게임즈",
+        "popularityScore": 13
+      },
+      "submission": {
+        "name": "탐정 시드 업다이크: 슬로터즈 팰러스",
+        "aliases": [],
+        "minPlayers": 6,
+        "maxPlayers": 6,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/66fa7f83-e195-6ae6-7883-6fee00000000"
+        ]
+      }
+    },
+    {
+      "selectionRank": 50,
+      "scenarioId": "686d6099-90ba-a454-3c41-937800000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/686d6099-90ba-a454-3c41-937800000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "5명",
+        "playTimeText": "150분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 2,
+        "playCount": 2,
+        "reviews": 2,
+        "rating": 4,
+        "author": "미상",
+        "publisher": "goonie cafe",
+        "popularityScore": 12,
+        "difficulty": 5,
+        "difficultyVotes": 1
+      },
+      "submission": {
+        "name": "SOMMEIL",
+        "aliases": [],
+        "minPlayers": 5,
+        "maxPlayers": 5,
+        "minPlayMinutes": 150,
+        "maxPlayMinutes": 150,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/686d6099-90ba-a454-3c41-937800000000"
+        ],
+        "publicRating": 4.0,
+        "weight": 5.0
+      }
+    },
+    {
+      "selectionRank": 51,
+      "scenarioId": "6879cdcd-2ba6-a9e2-e9ec-496500000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/6879cdcd-2ba6-a9e2-e9ec-496500000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "7명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 2,
+        "playCount": 2,
+        "reviews": 2,
+        "rating": 3.8,
+        "author": "보드게임카페 미플",
+        "publisher": "보드게임카페 미플",
+        "popularityScore": 12,
+        "difficulty": 1.5,
+        "difficultyVotes": 1
+      },
+      "submission": {
+        "name": "심해의 사계",
+        "aliases": [],
+        "minPlayers": 7,
+        "maxPlayers": 7,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/6879cdcd-2ba6-a9e2-e9ec-496500000000"
+        ],
+        "publicRating": 3.8,
+        "weight": 1.5
+      }
+    },
+    {
+      "selectionRank": 52,
+      "scenarioId": "690485d4-ce20-78a6-cd20-d84100000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/690485d4-ce20-78a6-cd20-d84100000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "5명",
+        "playTimeText": "180분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 2,
+        "playCount": 2,
+        "reviews": 2,
+        "rating": 3.5,
+        "author": "더프",
+        "publisher": "더프리블",
+        "popularityScore": 12,
+        "difficulty": 3,
+        "difficultyVotes": 2
+      },
+      "submission": {
+        "name": "다시금 피어난 불꽃은",
+        "aliases": [],
+        "minPlayers": 5,
+        "maxPlayers": 5,
+        "minPlayMinutes": 180,
+        "maxPlayMinutes": 180,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/690485d4-ce20-78a6-cd20-d84100000000"
+        ],
+        "publicRating": 3.5,
+        "weight": 3.0
+      }
+    },
+    {
+      "selectionRank": 53,
+      "scenarioId": "6887a5fe-16d0-76e7-728b-345400000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/6887a5fe-16d0-76e7-728b-345400000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "4명",
+        "playTimeText": "210분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 2,
+        "playCount": 2,
+        "reviews": 2,
+        "rating": 3.5,
+        "author": "미상",
+        "publisher": "학산문화사",
+        "popularityScore": 12,
+        "difficulty": 2.5,
+        "difficultyVotes": 2
+      },
+      "submission": {
+        "name": "남쪽 하늘의 폴라리스",
+        "aliases": [],
+        "minPlayers": 4,
+        "maxPlayers": 4,
+        "minPlayMinutes": 210,
+        "maxPlayMinutes": 210,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/6887a5fe-16d0-76e7-728b-345400000000"
+        ],
+        "publicRating": 3.5,
+        "weight": 2.5
+      }
+    },
+    {
+      "selectionRank": 54,
+      "scenarioId": "67075a1f-68fa-0f28-2160-ef9600000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/67075a1f-68fa-0f28-2160-ef9600000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "5명",
+        "playTimeText": "150분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 1,
+        "playCount": 3,
+        "reviews": 1,
+        "rating": 4,
+        "author": "초하 스튜디오",
+        "publisher": "초하 스튜디오",
+        "popularityScore": 12,
+        "difficulty": 2.5,
+        "difficultyVotes": 1
+      },
+      "submission": {
+        "name": "로맨스 판타지 속에서 살아남는 방법에 대하여",
+        "aliases": [],
+        "minPlayers": 5,
+        "maxPlayers": 5,
+        "minPlayMinutes": 150,
+        "maxPlayMinutes": 150,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/67075a1f-68fa-0f28-2160-ef9600000000"
+        ],
+        "publicRating": 4.0,
+        "weight": 2.5
+      }
+    },
+    {
+      "selectionRank": 55,
+      "scenarioId": "672327b9-728a-89b8-d76d-30d800000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/672327b9-728a-89b8-d76d-30d800000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "5명",
+        "playTimeText": "60분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 1,
+        "playCount": 3,
+        "reviews": 1,
+        "rating": 3,
+        "author": "아크라이트",
+        "publisher": "아이프롬 게임즈",
+        "popularityScore": 12,
+        "difficulty": 3,
+        "difficultyVotes": 1
+      },
+      "submission": {
+        "name": "로나에나 - 재앙의 선물",
+        "aliases": [],
+        "minPlayers": 5,
+        "maxPlayers": 5,
+        "minPlayMinutes": 60,
+        "maxPlayMinutes": 60,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/672327b9-728a-89b8-d76d-30d800000000"
+        ],
+        "publicRating": 3.0,
+        "weight": 3.0
+      }
+    },
+    {
+      "selectionRank": 56,
+      "scenarioId": "66fa6b8e-e195-6ae6-7883-6f3600000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/66fa6b8e-e195-6ae6-7883-6f3600000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "6명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 1,
+        "playCount": 3,
+        "reviews": 1,
+        "rating": 2,
+        "author": "789게임즈",
+        "publisher": "789게임즈",
+        "popularityScore": 12,
+        "difficulty": 3,
+        "difficultyVotes": 1
+      },
+      "submission": {
+        "name": "동상이몽",
+        "aliases": [],
+        "minPlayers": 6,
+        "maxPlayers": 6,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/66fa6b8e-e195-6ae6-7883-6f3600000000"
+        ],
+        "publicRating": 2.0,
+        "weight": 3.0
+      }
+    },
+    {
+      "selectionRank": 57,
+      "scenarioId": "68e7c49d-a0e0-d9a3-7928-fc5c00000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/68e7c49d-a0e0-d9a3-7928-fc5c00000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "5명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 3,
+        "playCount": 3,
+        "reviews": 0,
+        "rating": 0,
+        "author": "미상",
+        "publisher": "VingBeing Games",
+        "popularityScore": 12
+      },
+      "submission": {
+        "name": "뮤지컬펜션 살인사건",
+        "aliases": [],
+        "minPlayers": 5,
+        "maxPlayers": 5,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/68e7c49d-a0e0-d9a3-7928-fc5c00000000"
+        ]
+      }
+    },
+    {
+      "selectionRank": 58,
+      "scenarioId": "66f6a80d-36a7-c8c0-679a-29d000000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/66f6a80d-36a7-c8c0-679a-29d000000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "5명",
+        "playTimeText": "150분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 0,
+        "playCount": 4,
+        "reviews": 0,
+        "rating": 0,
+        "author": "DION",
+        "publisher": "D:ON",
+        "popularityScore": 12
+      },
+      "submission": {
+        "name": "사해",
+        "aliases": [],
+        "minPlayers": 5,
+        "maxPlayers": 5,
+        "minPlayMinutes": 150,
+        "maxPlayMinutes": 150,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/66f6a80d-36a7-c8c0-679a-29d000000000"
+        ]
+      }
+    },
+    {
+      "selectionRank": 59,
+      "scenarioId": "67232a34-728a-89b8-d76d-315900000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/67232a34-728a-89b8-d76d-315900000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "9명",
+        "playTimeText": "90분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 0,
+        "playCount": 4,
+        "reviews": 0,
+        "rating": 0,
+        "author": "미스터",
+        "publisher": "미스터리 게임즈",
+        "popularityScore": 12
+      },
+      "submission": {
+        "name": "4명의 탐정과 물의 유령",
+        "aliases": [],
+        "minPlayers": 9,
+        "maxPlayers": 9,
+        "minPlayMinutes": 90,
+        "maxPlayMinutes": 90,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/67232a34-728a-89b8-d76d-315900000000"
+        ]
+      }
+    },
+    {
+      "selectionRank": 60,
+      "scenarioId": "6759bee7-19ed-77da-51b0-d33300000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/6759bee7-19ed-77da-51b0-d33300000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "4명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 0,
+        "playCount": 4,
+        "reviews": 0,
+        "rating": 0,
+        "author": "Haneko Takayama",
+        "publisher": "언더독 게임즈",
+        "popularityScore": 12
+      },
+      "submission": {
+        "name": "스페이스 퐁퐁호 살인 사건",
+        "aliases": [],
+        "minPlayers": 4,
+        "maxPlayers": 4,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/6759bee7-19ed-77da-51b0-d33300000000"
+        ]
+      }
+    },
+    {
+      "selectionRank": 61,
+      "scenarioId": "66eab077-881a-95e0-5727-957e00000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/66eab077-881a-95e0-5727-957e00000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "4명",
+        "playTimeText": "90분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 0,
+        "playCount": 4,
+        "reviews": 0,
+        "rating": 0,
+        "author": "Hitoshi Yasuda, Megumi Tsuge",
+        "publisher": "언더독 게임즈",
+        "popularityScore": 12
+      },
+      "submission": {
+        "name": "문스톤 저택 살인사건",
+        "aliases": [],
+        "minPlayers": 4,
+        "maxPlayers": 4,
+        "minPlayMinutes": 90,
+        "maxPlayMinutes": 90,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/66eab077-881a-95e0-5727-957e00000000"
+        ]
+      }
+    },
+    {
+      "selectionRank": 62,
+      "scenarioId": "68b7d5ae-f468-cf6e-d8d7-dd2000000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/68b7d5ae-f468-cf6e-d8d7-dd2000000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "6명",
+        "playTimeText": "180분",
+        "category": "신작소개",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 2,
+        "playCount": 1,
+        "reviews": 3,
+        "rating": 2.5,
+        "author": "미상",
+        "publisher": "사월 게임즈",
+        "popularityScore": 11,
+        "difficulty": 1.7,
+        "difficultyVotes": 3
+      },
+      "submission": {
+        "name": "기계섬기담",
+        "aliases": [],
+        "minPlayers": 6,
+        "maxPlayers": 6,
+        "minPlayMinutes": 180,
+        "maxPlayMinutes": 180,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/68b7d5ae-f468-cf6e-d8d7-dd2000000000"
+        ],
+        "publicRating": 2.5,
+        "weight": 1.7
+      }
+    },
+    {
+      "selectionRank": 63,
+      "scenarioId": "67c1e121-ffe1-94c2-8916-3b1400000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/67c1e121-ffe1-94c2-8916-3b1400000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "4명",
+        "playTimeText": "60분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 1,
+        "playCount": 2,
+        "reviews": 2,
+        "rating": 3.3,
+        "author": "JOLDEEN",
+        "publisher": "JOLDEEN",
+        "popularityScore": 11,
+        "difficulty": 3.3,
+        "difficultyVotes": 2
+      },
+      "submission": {
+        "name": "슬럼독스 & 탐정은 춤춘다",
+        "aliases": [],
+        "minPlayers": 4,
+        "maxPlayers": 4,
+        "minPlayMinutes": 60,
+        "maxPlayMinutes": 60,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/67c1e121-ffe1-94c2-8916-3b1400000000"
+        ],
+        "publicRating": 3.3,
+        "weight": 3.3
+      }
+    },
+    {
+      "selectionRank": 64,
+      "scenarioId": "691dcad1-9a89-7724-6353-22c200000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/691dcad1-9a89-7724-6353-22c200000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "6명",
+        "playTimeText": "240분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 3,
+        "playCount": 2,
+        "reviews": 1,
+        "rating": 4,
+        "author": "난수박물관",
+        "publisher": "Group SNE",
+        "popularityScore": 11,
+        "difficulty": 5,
+        "difficultyVotes": 1
+      },
+      "submission": {
+        "name": "탐정금지영역",
+        "aliases": [],
+        "minPlayers": 6,
+        "maxPlayers": 6,
+        "minPlayMinutes": 240,
+        "maxPlayMinutes": 240,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/691dcad1-9a89-7724-6353-22c200000000"
+        ],
+        "publicRating": 4.0,
+        "weight": 5.0
+      }
+    },
+    {
+      "selectionRank": 65,
+      "scenarioId": "6811ae3c-edc0-bfb2-fe16-bb2100000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/6811ae3c-edc0-bfb2-fe16-bb2100000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "5명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 0,
+        "playCount": 3,
+        "reviews": 1,
+        "rating": 3.5,
+        "author": "다이브시어터",
+        "publisher": "다이브시어터",
+        "popularityScore": 11,
+        "difficulty": 3.5,
+        "difficultyVotes": 1
+      },
+      "submission": {
+        "name": "블루 노트보다 창백한",
+        "aliases": [],
+        "minPlayers": 5,
+        "maxPlayers": 5,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/6811ae3c-edc0-bfb2-fe16-bb2100000000"
+        ],
+        "publicRating": 3.5,
+        "weight": 3.5
+      }
+    },
+    {
+      "selectionRank": 66,
+      "scenarioId": "686d6099-90ba-a454-3c41-937b00000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/686d6099-90ba-a454-3c41-937b00000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "6명",
+        "playTimeText": "60분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 3,
+        "playCount": 2,
+        "reviews": 1,
+        "rating": 3,
+        "author": "이수",
+        "publisher": "이수",
+        "popularityScore": 11,
+        "difficulty": 1.5,
+        "difficultyVotes": 1
+      },
+      "submission": {
+        "name": "DT-마지막 여행",
+        "aliases": [],
+        "minPlayers": 6,
+        "maxPlayers": 6,
+        "minPlayMinutes": 60,
+        "maxPlayMinutes": 60,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/686d6099-90ba-a454-3c41-937b00000000"
+        ],
+        "publicRating": 3.0,
+        "weight": 1.5
+      }
+    },
+    {
+      "selectionRank": 67,
+      "scenarioId": "67017893-daa8-95b4-7742-6c1e00000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/67017893-daa8-95b4-7742-6c1e00000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "4명",
+        "playTimeText": "180분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 0,
+        "playCount": 3,
+        "reviews": 1,
+        "rating": 3,
+        "author": "Lucy Lovegoodwill",
+        "publisher": "카드캐슬",
+        "popularityScore": 11,
+        "difficulty": 2.5,
+        "difficultyVotes": 1
+      },
+      "submission": {
+        "name": "Y의 장례식",
+        "aliases": [],
+        "minPlayers": 4,
+        "maxPlayers": 4,
+        "minPlayMinutes": 180,
+        "maxPlayMinutes": 180,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/67017893-daa8-95b4-7742-6c1e00000000"
+        ],
+        "publicRating": 3.0,
+        "weight": 2.5
+      }
+    },
+    {
+      "selectionRank": 68,
+      "scenarioId": "677c0b3b-95ea-36a1-fbdf-9b7e00000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/677c0b3b-95ea-36a1-fbdf-9b7e00000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "4명",
+        "playTimeText": "150분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 0,
+        "playCount": 3,
+        "reviews": 1,
+        "rating": 0.5,
+        "author": "적분 서클",
+        "publisher": "적분 서클",
+        "popularityScore": 11,
+        "difficulty": 1,
+        "difficultyVotes": 1
+      },
+      "submission": {
+        "name": "데스게임一데스테스트",
+        "aliases": [],
+        "minPlayers": 4,
+        "maxPlayers": 4,
+        "minPlayMinutes": 150,
+        "maxPlayMinutes": 150,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/677c0b3b-95ea-36a1-fbdf-9b7e00000000"
+        ],
+        "publicRating": 0.5,
+        "weight": 1.0
+      }
+    },
+    {
+      "selectionRank": 69,
+      "scenarioId": "6811ae3c-edc0-bfb2-fe16-bb2200000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/6811ae3c-edc0-bfb2-fe16-bb2200000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "5명",
+        "playTimeText": "90분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 0,
+        "playCount": 2,
+        "reviews": 2,
+        "rating": 4,
+        "author": "째",
+        "publisher": "MYSTERY GAMES",
+        "popularityScore": 10,
+        "difficulty": 2,
+        "difficultyVotes": 2
+      },
+      "submission": {
+        "name": "달콤한 노랑",
+        "aliases": [],
+        "minPlayers": 5,
+        "maxPlayers": 5,
+        "minPlayMinutes": 90,
+        "maxPlayMinutes": 90,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/6811ae3c-edc0-bfb2-fe16-bb2200000000"
+        ],
+        "publicRating": 4.0,
+        "weight": 2.0
+      }
+    },
+    {
+      "selectionRank": 70,
+      "scenarioId": "67c1e121-ffe1-94c2-8916-3b1200000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/67c1e121-ffe1-94c2-8916-3b1200000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "4명",
+        "playTimeText": "60분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 2,
+        "playCount": 2,
+        "reviews": 1,
+        "rating": 3.5,
+        "author": "보틀링컴",
+        "publisher": "보틀링컴퍼니",
+        "popularityScore": 10,
+        "difficulty": 1,
+        "difficultyVotes": 1
+      },
+      "submission": {
+        "name": "크림향 낭자한 만쥬의 죽음",
+        "aliases": [],
+        "minPlayers": 4,
+        "maxPlayers": 4,
+        "minPlayMinutes": 60,
+        "maxPlayMinutes": 60,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/67c1e121-ffe1-94c2-8916-3b1200000000"
+        ],
+        "publicRating": 3.5,
+        "weight": 1.0
+      }
+    },
+    {
+      "selectionRank": 71,
+      "scenarioId": "67172567-5d8d-b178-0ba1-929900000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/67172567-5d8d-b178-0ba1-929900000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "5명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 1,
+        "playCount": 3,
+        "reviews": 0,
+        "rating": 0,
+        "author": "프로젝트 고구마",
+        "publisher": "프로젝트 고구",
+        "popularityScore": 10
+      },
+      "submission": {
+        "name": "그렇게 X는 다시 태어났다.",
+        "aliases": [],
+        "minPlayers": 5,
+        "maxPlayers": 5,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/67172567-5d8d-b178-0ba1-929900000000"
+        ]
+      }
+    },
+    {
+      "selectionRank": 72,
+      "scenarioId": "66f3055f-abbd-6df4-d6a8-4faa00000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/66f3055f-abbd-6df4-d6a8-4faa00000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "3명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 1,
+        "playCount": 3,
+        "reviews": 0,
+        "rating": 0,
+        "author": "소하",
+        "publisher": "소하",
+        "popularityScore": 10
+      },
+      "submission": {
+        "name": "DEJAVU",
+        "aliases": [],
+        "minPlayers": 3,
+        "maxPlayers": 3,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/66f3055f-abbd-6df4-d6a8-4faa00000000"
+        ]
+      }
+    },
+    {
+      "selectionRank": 73,
+      "scenarioId": "66fa7f83-e195-6ae6-7883-6fef00000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/66fa7f83-e195-6ae6-7883-6fef00000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "6명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 1,
+        "playCount": 3,
+        "reviews": 0,
+        "rating": 0,
+        "author": "Toshin Kagami",
+        "publisher": "언더독 게임즈",
+        "popularityScore": 10
+      },
+      "submission": {
+        "name": "탐정 시드 업다이크: 칼라미티 트루퍼즈",
+        "aliases": [],
+        "minPlayers": 6,
+        "maxPlayers": 6,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/66fa7f83-e195-6ae6-7883-6fef00000000"
+        ]
+      }
+    },
+    {
+      "selectionRank": 74,
+      "scenarioId": "66f394ba-c448-1a6b-af57-3d7200000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/66f394ba-c448-1a6b-af57-3d7200000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "5명",
+        "playTimeText": "150분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 1,
+        "playCount": 2,
+        "reviews": 1,
+        "rating": 4,
+        "author": "째",
+        "publisher": "미스터리 게임즈",
+        "popularityScore": 9,
+        "difficulty": 1.5,
+        "difficultyVotes": 1
+      },
+      "submission": {
+        "name": "감자의 꿈",
+        "aliases": [],
+        "minPlayers": 5,
+        "maxPlayers": 5,
+        "minPlayMinutes": 150,
+        "maxPlayMinutes": 150,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/66f394ba-c448-1a6b-af57-3d7200000000"
+        ],
+        "publicRating": 4.0,
+        "weight": 1.5
+      }
+    },
+    {
+      "selectionRank": 75,
+      "scenarioId": "672a108c-de97-a5cd-82d2-4d6c00000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/672a108c-de97-a5cd-82d2-4d6c00000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "4명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 1,
+        "playCount": 2,
+        "reviews": 1,
+        "rating": 3.5,
+        "author": "아",
+        "publisher": "아리스 연대기",
+        "popularityScore": 9,
+        "difficulty": 1.5,
+        "difficultyVotes": 1
+      },
+      "submission": {
+        "name": "별의 추락",
+        "aliases": [],
+        "minPlayers": 4,
+        "maxPlayers": 4,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/672a108c-de97-a5cd-82d2-4d6c00000000"
+        ],
+        "publicRating": 3.5,
+        "weight": 1.5
+      }
+    },
+    {
+      "selectionRank": 76,
+      "scenarioId": "67a33678-da00-2ece-db4b-cda300000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/67a33678-da00-2ece-db4b-cda300000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "5명",
+        "playTimeText": "150분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 1,
+        "playCount": 2,
+        "reviews": 1,
+        "rating": 3,
+        "author": "난수박물관",
+        "publisher": "난수박물관",
+        "popularityScore": 9,
+        "difficulty": 4,
+        "difficultyVotes": 1
+      },
+      "submission": {
+        "name": "영원한 졸업식",
+        "aliases": [],
+        "minPlayers": 5,
+        "maxPlayers": 5,
+        "minPlayMinutes": 150,
+        "maxPlayMinutes": 150,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/67a33678-da00-2ece-db4b-cda300000000"
+        ],
+        "publicRating": 3.0,
+        "weight": 4.0
+      }
+    },
+    {
+      "selectionRank": 77,
+      "scenarioId": "686d6099-90ba-a454-3c41-937900000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/686d6099-90ba-a454-3c41-937900000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "4명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 1,
+        "playCount": 2,
+        "reviews": 1,
+        "rating": 2,
+        "author": "미상",
+        "publisher": "apri la porta",
+        "popularityScore": 9,
+        "difficulty": 3,
+        "difficultyVotes": 1
+      },
+      "submission": {
+        "name": "망령열차",
+        "aliases": [],
+        "minPlayers": 4,
+        "maxPlayers": 4,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/686d6099-90ba-a454-3c41-937900000000"
+        ],
+        "publicRating": 2.0,
+        "weight": 3.0
+      }
+    },
+    {
+      "selectionRank": 78,
+      "scenarioId": "676d818e-08d6-9b5b-4456-5b3e00000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/676d818e-08d6-9b5b-4456-5b3e00000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "4명",
+        "playTimeText": "60분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 0,
+        "playCount": 3,
+        "reviews": 0,
+        "rating": 0,
+        "author": "Show Tomono",
+        "publisher": "언더독 게임즈",
+        "popularityScore": 9
+      },
+      "submission": {
+        "name": "안개가 떨어지는 고개",
+        "aliases": [],
+        "minPlayers": 4,
+        "maxPlayers": 4,
+        "minPlayMinutes": 60,
+        "maxPlayMinutes": 60,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/676d818e-08d6-9b5b-4456-5b3e00000000"
+        ]
+      }
+    },
+    {
+      "selectionRank": 79,
+      "scenarioId": "6929bfff-02d2-8e5b-bbdb-f4ce00000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/6929bfff-02d2-8e5b-bbdb-f4ce00000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "4명",
+        "playTimeText": "100분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 0,
+        "playCount": 2,
+        "reviews": 1,
+        "rating": 3,
+        "author": "미상",
+        "publisher": "보틀링컴퍼니",
+        "popularityScore": 8,
+        "difficulty": 1,
+        "difficultyVotes": 1
+      },
+      "submission": {
+        "name": "안개여각의 죽음",
+        "aliases": [],
+        "minPlayers": 4,
+        "maxPlayers": 4,
+        "minPlayMinutes": 100,
+        "maxPlayMinutes": 100,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/6929bfff-02d2-8e5b-bbdb-f4ce00000000"
+        ],
+        "publicRating": 3.0,
+        "weight": 1.0
+      }
+    },
+    {
+      "selectionRank": 80,
+      "scenarioId": "6960ff84-1b75-e40a-89fa-d4d700000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/6960ff84-1b75-e40a-89fa-d4d700000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "3명",
+        "playTimeText": "60분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 0,
+        "playCount": 2,
+        "reviews": 1,
+        "rating": 2.5,
+        "author": "미상",
+        "publisher": "탐정 아틀리에",
+        "popularityScore": 8,
+        "difficulty": 0.5,
+        "difficultyVotes": 1
+      },
+      "submission": {
+        "name": "대괴도의 떡잎들",
+        "aliases": [],
+        "minPlayers": 3,
+        "maxPlayers": 3,
+        "minPlayMinutes": 60,
+        "maxPlayMinutes": 60,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/6960ff84-1b75-e40a-89fa-d4d700000000"
+        ],
+        "publicRating": 2.5,
+        "weight": 0.5
+      }
+    },
+    {
+      "selectionRank": 81,
+      "scenarioId": "671726d7-5d8d-b178-0ba1-939200000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/671726d7-5d8d-b178-0ba1-939200000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "5명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 0,
+        "playCount": 2,
+        "reviews": 1,
+        "rating": 2,
+        "author": "프로젝트 고구마",
+        "publisher": "프로젝트 고구",
+        "popularityScore": 8,
+        "difficulty": 3,
+        "difficultyVotes": 1
+      },
+      "submission": {
+        "name": "BUT.",
+        "aliases": [],
+        "minPlayers": 5,
+        "maxPlayers": 5,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/671726d7-5d8d-b178-0ba1-939200000000"
+        ],
+        "publicRating": 2.0,
+        "weight": 3.0
+      }
+    },
+    {
+      "selectionRank": 82,
+      "scenarioId": "67001cbb-6131-9fa6-2f5b-db5400000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/67001cbb-6131-9fa6-2f5b-db5400000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "5명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 2,
+        "playCount": 2,
+        "reviews": 0,
+        "rating": 0,
+        "author": "DO, YOU",
+        "publisher": "두유게임즈",
+        "popularityScore": 8
+      },
+      "submission": {
+        "name": "작가와의 만남",
+        "aliases": [],
+        "minPlayers": 5,
+        "maxPlayers": 5,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/67001cbb-6131-9fa6-2f5b-db5400000000"
+        ]
+      }
+    },
+    {
+      "selectionRank": 83,
+      "scenarioId": "686d6099-90ba-a454-3c41-937700000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/686d6099-90ba-a454-3c41-937700000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "5명",
+        "playTimeText": "150분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 2,
+        "playCount": 1,
+        "reviews": 1,
+        "rating": 4,
+        "author": "미상",
+        "publisher": "goonie cafe",
+        "popularityScore": 7,
+        "difficulty": 5,
+        "difficultyVotes": 1
+      },
+      "submission": {
+        "name": "SORCIER",
+        "aliases": [],
+        "minPlayers": 5,
+        "maxPlayers": 5,
+        "minPlayMinutes": 150,
+        "maxPlayMinutes": 150,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/686d6099-90ba-a454-3c41-937700000000"
+        ],
+        "publicRating": 4.0,
+        "weight": 5.0
+      }
+    },
+    {
+      "selectionRank": 84,
+      "scenarioId": "685b9f43-ae7a-f87d-1e2a-0d6100000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/685b9f43-ae7a-f87d-1e2a-0d6100000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "5명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 1,
+        "playCount": 2,
+        "reviews": 0,
+        "rating": 0,
+        "author": "거베라게임즈",
+        "publisher": "거베라게임즈",
+        "popularityScore": 7
+      },
+      "submission": {
+        "name": "설령 테세우스의 배의 작은 얼룩에 불과할지라도",
+        "aliases": [],
+        "minPlayers": 5,
+        "maxPlayers": 5,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/685b9f43-ae7a-f87d-1e2a-0d6100000000"
+        ]
+      }
+    },
+    {
+      "selectionRank": 85,
+      "scenarioId": "66f3055f-abbd-6df4-d6a8-4fab00000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/66f3055f-abbd-6df4-d6a8-4fab00000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "4명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 1,
+        "playCount": 2,
+        "reviews": 0,
+        "rating": 0,
+        "author": "소하",
+        "publisher": "소하",
+        "popularityScore": 7
+      },
+      "submission": {
+        "name": "저승으로부터의 편지",
+        "aliases": [],
+        "minPlayers": 4,
+        "maxPlayers": 4,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/66f3055f-abbd-6df4-d6a8-4fab00000000"
+        ]
+      }
+    },
+    {
+      "selectionRank": 86,
+      "scenarioId": "67001cc7-6131-9fa6-2f5b-dbad00000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/67001cc7-6131-9fa6-2f5b-dbad00000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "5명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 1,
+        "playCount": 2,
+        "reviews": 0,
+        "rating": 0,
+        "author": "DO, YOU",
+        "publisher": "두유게임즈.",
+        "popularityScore": 7
+      },
+      "submission": {
+        "name": "불꽃놀이",
+        "aliases": [],
+        "minPlayers": 5,
+        "maxPlayers": 5,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/67001cc7-6131-9fa6-2f5b-dbad00000000"
+        ]
+      }
+    },
+    {
+      "selectionRank": 87,
+      "scenarioId": "66fa7f83-e195-6ae6-7883-6ff000000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/66fa7f83-e195-6ae6-7883-6ff000000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "6명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 1,
+        "playCount": 2,
+        "reviews": 0,
+        "rating": 0,
+        "author": "Toshin Kagami",
+        "publisher": "언더독 게임즈",
+        "popularityScore": 7
+      },
+      "submission": {
+        "name": "탐정 시드 업다이크: 리썰 캐시",
+        "aliases": [],
+        "minPlayers": 6,
+        "maxPlayers": 6,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/66fa7f83-e195-6ae6-7883-6ff000000000"
+        ]
+      }
+    },
+    {
+      "selectionRank": 88,
+      "scenarioId": "6960ff84-1b75-e40a-89fa-d4d900000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/6960ff84-1b75-e40a-89fa-d4d900000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "3명",
+        "playTimeText": "60분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 1,
+        "playCount": 1,
+        "reviews": 1,
+        "rating": 2.5,
+        "author": "미상",
+        "publisher": "탐정 아틀리에",
+        "popularityScore": 6,
+        "difficulty": 0.5,
+        "difficultyVotes": 1
+      },
+      "submission": {
+        "name": "저승으로의 심판",
+        "aliases": [],
+        "minPlayers": 3,
+        "maxPlayers": 3,
+        "minPlayMinutes": 60,
+        "maxPlayMinutes": 60,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/6960ff84-1b75-e40a-89fa-d4d900000000"
+        ],
+        "publicRating": 2.5,
+        "weight": 0.5
+      }
+    },
+    {
+      "selectionRank": 89,
+      "scenarioId": "691dcad1-9a89-7724-6353-22c100000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/691dcad1-9a89-7724-6353-22c100000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "6명",
+        "playTimeText": "180분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 0,
+        "playCount": 2,
+        "reviews": 0,
+        "rating": 0,
+        "author": "미상",
+        "publisher": "SNE Group",
+        "popularityScore": 6
+      },
+      "submission": {
+        "name": "귀면도시수사File",
+        "aliases": [],
+        "minPlayers": 6,
+        "maxPlayers": 6,
+        "minPlayMinutes": 180,
+        "maxPlayMinutes": 180,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/691dcad1-9a89-7724-6353-22c100000000"
+        ]
+      }
+    },
+    {
+      "selectionRank": 90,
+      "scenarioId": "673cc0aa-dbb2-ef66-0615-9f2900000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/673cc0aa-dbb2-ef66-0615-9f2900000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "4명",
+        "playTimeText": "60분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 0,
+        "playCount": 2,
+        "reviews": 0,
+        "rating": 0,
+        "author": "이작가",
+        "publisher": "이작가",
+        "popularityScore": 6
+      },
+      "submission": {
+        "name": "달마저 숨은 밤",
+        "aliases": [],
+        "minPlayers": 4,
+        "maxPlayers": 4,
+        "minPlayMinutes": 60,
+        "maxPlayMinutes": 60,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/673cc0aa-dbb2-ef66-0615-9f2900000000"
+        ]
+      }
+    },
+    {
+      "selectionRank": 91,
+      "scenarioId": "6759bee7-19ed-77da-51b0-d33200000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/6759bee7-19ed-77da-51b0-d33200000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "6명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 0,
+        "playCount": 2,
+        "reviews": 0,
+        "rating": 0,
+        "author": "RAMCLEAR",
+        "publisher": "RAMCLEAR",
+        "popularityScore": 6
+      },
+      "submission": {
+        "name": "탐정 시드 업다이크: Monostatic X",
+        "aliases": [],
+        "minPlayers": 6,
+        "maxPlayers": 6,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/6759bee7-19ed-77da-51b0-d33200000000"
+        ]
+      }
+    },
+    {
+      "selectionRank": 92,
+      "scenarioId": "6929bfff-02d2-8e5b-bbdb-f4d000000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/6929bfff-02d2-8e5b-bbdb-f4d000000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "5명",
+        "playTimeText": "100분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 1,
+        "playCount": 0,
+        "reviews": 2,
+        "rating": 0.8,
+        "author": "미상",
+        "publisher": "구사일",
+        "popularityScore": 5,
+        "difficulty": 0.8,
+        "difficultyVotes": 2
+      },
+      "submission": {
+        "name": "외계인이 내려와 하는 말",
+        "aliases": [],
+        "minPlayers": 5,
+        "maxPlayers": 5,
+        "minPlayMinutes": 100,
+        "maxPlayMinutes": 100,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/6929bfff-02d2-8e5b-bbdb-f4d000000000"
+        ],
+        "publicRating": 0.8,
+        "weight": 0.8
+      }
+    },
+    {
+      "selectionRank": 93,
+      "scenarioId": "66fa6b8e-e195-6ae6-7883-6f3900000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/66fa6b8e-e195-6ae6-7883-6f3900000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "4명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 0,
+        "playCount": 1,
+        "reviews": 1,
+        "rating": 4,
+        "author": "AUSPICIOUS",
+        "publisher": "AUSPICIOUS",
+        "popularityScore": 5,
+        "difficulty": 4,
+        "difficultyVotes": 1
+      },
+      "submission": {
+        "name": "웸블리타운의 친절한 이웃들: 웰시코기 살인사건",
+        "aliases": [],
+        "minPlayers": 4,
+        "maxPlayers": 4,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/66fa6b8e-e195-6ae6-7883-6f3900000000"
+        ],
+        "publicRating": 4.0,
+        "weight": 4.0
+      }
+    },
+    {
+      "selectionRank": 94,
+      "scenarioId": "67017893-daa8-95b4-7742-6c1f00000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/67017893-daa8-95b4-7742-6c1f00000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "6명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 0,
+        "playCount": 1,
+        "reviews": 1,
+        "rating": 2,
+        "author": "ちくわんこ",
+        "publisher": "82BG, 카드캐슬",
+        "popularityScore": 5,
+        "difficulty": 2,
+        "difficultyVotes": 1
+      },
+      "submission": {
+        "name": "마지막 문화제",
+        "aliases": [],
+        "minPlayers": 6,
+        "maxPlayers": 6,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/67017893-daa8-95b4-7742-6c1f00000000"
+        ],
+        "publicRating": 2.0,
+        "weight": 2.0
+      }
+    },
+    {
+      "selectionRank": 95,
+      "scenarioId": "670de093-9703-a1a4-c921-253d00000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/670de093-9703-a1a4-c921-253d00000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "7명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 2,
+        "playCount": 1,
+        "reviews": 0,
+        "rating": 0,
+        "author": "사건의 지평선",
+        "publisher": "사건의 지평선",
+        "popularityScore": 5
+      },
+      "submission": {
+        "name": "최후의 마을",
+        "aliases": [],
+        "minPlayers": 7,
+        "maxPlayers": 7,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/670de093-9703-a1a4-c921-253d00000000"
+        ]
+      }
+    },
+    {
+      "selectionRank": 96,
+      "scenarioId": "69b704d2-bafa-2be7-8e07-f67900000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/69b704d2-bafa-2be7-8e07-f67900000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "6명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 2,
+        "playCount": 0,
+        "reviews": 1,
+        "rating": 4,
+        "author": "미상",
+        "publisher": "프로젝트 슈크림",
+        "popularityScore": 4,
+        "difficulty": 2.5,
+        "difficultyVotes": 1
+      },
+      "submission": {
+        "name": "초신성",
+        "aliases": [],
+        "minPlayers": 6,
+        "maxPlayers": 6,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/69b704d2-bafa-2be7-8e07-f67900000000"
+        ],
+        "publicRating": 4.0,
+        "weight": 2.5
+      }
+    },
+    {
+      "selectionRank": 97,
+      "scenarioId": "68c6f7dc-ac30-29a7-d01a-8bd000000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/68c6f7dc-ac30-29a7-d01a-8bd000000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "4명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 1,
+        "playCount": 1,
+        "reviews": 0,
+        "rating": 0,
+        "author": "미상",
+        "publisher": "Project DullG",
+        "popularityScore": 4
+      },
+      "submission": {
+        "name": "뱀이 죽은 축제",
+        "aliases": [],
+        "minPlayers": 4,
+        "maxPlayers": 4,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/68c6f7dc-ac30-29a7-d01a-8bd000000000"
+        ]
+      }
+    },
+    {
+      "selectionRank": 98,
+      "scenarioId": "6702acd9-6e4f-1c18-b602-d26100000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/6702acd9-6e4f-1c18-b602-d26100000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "4명",
+        "playTimeText": "120분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 1,
+        "playCount": 1,
+        "reviews": 0,
+        "rating": 0,
+        "author": "골든 미스트",
+        "publisher": "골든 미스트",
+        "popularityScore": 4
+      },
+      "submission": {
+        "name": "바앤호텔 & 암흑과 흑막",
+        "aliases": [],
+        "minPlayers": 4,
+        "maxPlayers": 4,
+        "minPlayMinutes": 120,
+        "maxPlayMinutes": 120,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/6702acd9-6e4f-1c18-b602-d26100000000"
+        ]
+      }
+    },
+    {
+      "selectionRank": 99,
+      "scenarioId": "66f563b3-1089-785d-725f-95c300000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/66f563b3-1089-785d-725f-95c300000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "4명",
+        "playTimeText": "90분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 1,
+        "playCount": 1,
+        "reviews": 0,
+        "rating": 0,
+        "author": "후디드",
+        "publisher": "후디드",
+        "popularityScore": 4
+      },
+      "submission": {
+        "name": "죽음을 잇는 저택, 신전",
+        "aliases": [],
+        "minPlayers": 4,
+        "maxPlayers": 4,
+        "minPlayMinutes": 90,
+        "maxPlayMinutes": 90,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/66f563b3-1089-785d-725f-95c300000000"
+        ]
+      }
+    },
+    {
+      "selectionRank": 100,
+      "scenarioId": "66f563b3-1089-785d-725f-95c400000000",
+      "sourceEvidence": {
+        "officialScenarioUrl": "https://murmylab.com/scenarios/66f563b3-1089-785d-725f-95c400000000",
+        "capturedAt": "2026-09-29",
+        "playersText": "5명",
+        "playTimeText": "60분",
+        "category": "추천",
+        "isDomestic": true,
+        "playType": "오프라인",
+        "likes": 1,
+        "playCount": 1,
+        "reviews": 0,
+        "rating": 0,
+        "author": "프로젝트 고구마",
+        "publisher": "프로젝트 고구",
+        "popularityScore": 4
+      },
+      "submission": {
+        "name": "뻐꾸기 새X는 울지 않는다",
+        "aliases": [],
+        "minPlayers": 5,
+        "maxPlayers": 5,
+        "minPlayMinutes": 60,
+        "maxPlayMinutes": 60,
+        "tags": [
+          "DEDUCTION",
+          "MURDER_MYSTERY"
+        ],
+        "entryType": "BASE_GAME",
+        "sourceUrls": [
+          "https://murmylab.com/scenarios/66f563b3-1089-785d-725f-95c400000000"
+        ]
+      }
+    }
+  ]
+}
