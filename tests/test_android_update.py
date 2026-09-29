@@ -57,6 +57,9 @@ V0314_RELEASE_NOTES = [
     "달력 탭을 다시 누르면 오늘로 이동하고 오늘 날짜를 은은하게 표시",
     "사진 2장과 여러 게임 표지를 달력 칸에 빈틈없이 표시",
 ]
+V0315_RELEASE_NOTES = [
+    "달력에는 남아 있지만 미스터리 탭에서 빠졌던 과거 플레이 기록을 안전하게 복구",
+]
 
 
 def valid_manifest(apk_bytes: bytes = b"BoardLog v0.3.4 verified APK fixture\n"):
@@ -261,6 +264,7 @@ class AndroidUpdateManifestTest(unittest.TestCase):
             (14, "0.3.11", V0311_RELEASE_NOTES),
             (15, "0.3.12", V0312_RELEASE_NOTES),
             (17, "0.3.14", V0314_RELEASE_NOTES),
+            (18, "0.3.15", V0315_RELEASE_NOTES),
         )
         for version_code, version_name, expected_notes in fixtures:
             with self.subTest(version_name=version_name):
