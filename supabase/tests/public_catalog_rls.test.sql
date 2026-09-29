@@ -166,18 +166,14 @@ create temporary table test_submission_ids as
 select 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'::uuid as id;
 grant select on test_submission_ids to authenticated;
 
-create function pg_temp.test_submission_id()
-returns uuid
-language sql
-stable
-as $$
-  select id from test_submission_ids limit 1
-$$;
-
 set local role anon;
 select set_config('request.jwt.claims', '{"role":"anon"}', true);
 insert into tap_results select is(
-  (select count(*)::integer from public.public_unverified_catalog_metadata),
+  (
+    select count(*)::integer
+    from public.public_unverified_catalog_metadata
+    where origin_submission_id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
+  ),
   1,
   'anon can read public unverified metadata without private image paths'
 );
@@ -191,16 +187,20 @@ reset role;
 set local role authenticated;
 select set_config('request.jwt.claims', '{"sub":"11111111-1111-4111-8111-111111111111","role":"authenticated","is_anonymous":true}', true);
 insert into tap_results select is(
-  (select count(*)::integer from public.public_unverified_catalog_metadata),
+  (
+    select count(*)::integer
+    from public.public_unverified_catalog_metadata
+    where origin_submission_id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
+  ),
   1,
   'authenticated anonymous user can read public unverified metadata'
 );
 insert into tap_results select throws_ok(
-  $$select public.set_submission_visibility(test_submission_id(), 'HIDDEN', 'not admin')$$,
+  $$select public.set_submission_visibility('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'::uuid, 'HIDDEN', 'not admin')$$,
   '42501', 'admin access required', 'anonymous owner cannot hide public content'
 );
 insert into tap_results select lives_ok(
-  $$select public.request_submission_removal(test_submission_id())$$,
+  $$select public.request_submission_removal('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'::uuid)$$,
   'owner can request public removal without deleting the row'
 );
 
@@ -240,7 +240,7 @@ insert into tap_results select lives_ok(
 );
 insert into tap_results select is(
   (select revision from public.game_submission_status_signals),
-  3::bigint,
+  4::bigint,
   'withdrawal advances the owner status signal'
 );
 
@@ -357,7 +357,7 @@ insert into tap_results select throws_ok(
   'owner cannot request removal for a hidden submission'
 );
 insert into tap_results select throws_ok(
-  $$select public.request_submission_removal(test_submission_id())$$,
+  $$select public.request_submission_removal('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'::uuid)$$,
   '42501', 'owned public removable submission not found',
   'owner cannot repeat a removal request'
 );
@@ -378,7 +378,15 @@ insert into tap_results select is(
   0,
   'another user cannot read a cross-owner status signal'
 );
-insert into tap_results select is((select count(*)::integer from public.approved_catalog_games), 0, 'pending rows never enter the approved public view');
+insert into tap_results select is(
+  (
+    select count(*)::integer
+    from public.approved_catalog_games
+    where origin_submission_id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
+  ),
+  0,
+  'pending rows never enter the approved public view'
+);
 insert into tap_results select is((select count(*)::integer from public.admin_service_status), 0, 'non-admin cannot read admin usage status');
 insert into tap_results select is((select count(*)::integer from public.admin_moderation_events), 0, 'non-admin cannot read moderation audit events');
 
