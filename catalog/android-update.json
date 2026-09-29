@@ -1,19 +1,17 @@
 {
   "channel": "stable",
-  "downloadUrl": "https://github.com/jy2834/BoardLog-catalog/releases/download/android-v0.3.14/BoardLog-v0.3.14.apk",
+  "downloadUrl": "https://github.com/jy2834/BoardLog-catalog/releases/download/android-v0.3.15/BoardLog-v0.3.15.apk",
   "mandatory": false,
   "packageName": "com.boardlog.app",
-  "publishedAt": "2026-09-15T03:57:57Z",
+  "publishedAt": "2026-09-29T05:07:32Z",
   "releaseNotes": [
-    "머더미스터리 기록 수정 시 달력의 게임·사진·메모·지출을 그대로 보존",
-    "달력 탭을 다시 누르면 오늘로 이동하고 오늘 날짜를 은은하게 표시",
-    "사진 2장과 여러 게임 표지를 달력 칸에 빈틈없이 표시"
+    "달력에는 남아 있지만 미스터리 탭에서 빠졌던 과거 플레이 기록을 안전하게 복구"
   ],
-  "releasePageUrl": "https://github.com/jy2834/BoardLog-catalog/releases/tag/android-v0.3.14",
+  "releasePageUrl": "https://github.com/jy2834/BoardLog-catalog/releases/tag/android-v0.3.15",
   "schemaVersion": 1,
-  "sha256": "993674dc0a89e8990bd323ec5b2d58d4838dc7c433f4f60f8bfa7fac182d4bb4",
+  "sha256": "4b8e3a72b0a5e8b350b3023f0e0cde4dd04f56a8405af224362cac4bb8041189",
   "signingCertificateSha256": "1ACFD934FA432EDEDBB98800172924A34DE185BB17BF1BA503B7FFBDED078D51",
-  "sizeBytes": 42803253,
-  "versionCode": 17,
-  "versionName": "0.3.14"
+  "sizeBytes": 42836025,
+  "versionCode": 18,
+  "versionName": "0.3.15"
 }
