@@ -71,10 +71,43 @@ class ExportApprovedTest(unittest.TestCase):
         game["publishedAt"] = "2026-08-13T00:00:00Z"
         updated, _ = apply_approved_submissions(
             document(),
-            [ApprovedSubmission(ORIGIN_ONE, "APPROVED", game, None, "2026-08-13T03:04:05Z")],
+            [ApprovedSubmission(ORIGIN_ONE, "APPROVED", game, None, "2026-08-13T03:04:05.123456+00:00")],
             generated_at="2026-08-13T03:04:06Z",
         )
+        self.assertEqual("2026-08-13T03:04:05.123456Z", updated["games"][0]["publishedAt"])
+
+    def test_database_review_timestamp_offset_is_converted_to_utc(self):
+        updated, _ = apply_approved_submissions(
+            document(),
+            [
+                ApprovedSubmission(
+                    ORIGIN_ONE,
+                    "APPROVED",
+                    public_game("reviewed-game"),
+                    None,
+                    "2026-08-13T12:04:05+09:00",
+                )
+            ],
+            generated_at="2026-08-13T03:04:06Z",
+        )
+
         self.assertEqual("2026-08-13T03:04:05Z", updated["games"][0]["publishedAt"])
+
+    def test_database_review_timestamp_without_an_offset_is_rejected(self):
+        with self.assertRaisesRegex(ExportError, "review timestamp"):
+            apply_approved_submissions(
+                document(),
+                [
+                    ApprovedSubmission(
+                        ORIGIN_ONE,
+                        "APPROVED",
+                        public_game("reviewed-game"),
+                        None,
+                        "2026-08-13T03:04:05",
+                    )
+                ],
+                generated_at="2026-08-13T03:04:06Z",
+            )
 
     def test_replay_is_idempotent_and_does_not_increment_revision(self):
         existing = public_game("same-game")

@@ -66,6 +66,19 @@ def canonical_catalog_bytes(document: Mapping[str, Any]) -> bytes:
     return (json.dumps(document, ensure_ascii=False, indent=2, sort_keys=True) + "\n").encode("utf-8")
 
 
+def _canonical_utc_timestamp(value: str) -> str:
+    if not isinstance(value, str) or value != value.strip() or "T" not in value:
+        raise ExportError("Database review timestamp must include a UTC offset")
+    iso_value = value[:-1] + "+00:00" if value.endswith("Z") else value
+    try:
+        parsed = datetime.fromisoformat(iso_value)
+    except ValueError as error:
+        raise ExportError("Database review timestamp must be valid ISO 8601") from error
+    if parsed.tzinfo is None or parsed.utcoffset() is None:
+        raise ExportError("Database review timestamp must include a UTC offset")
+    return parsed.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+
+
 def _read_json(path: Path) -> Any:
     try:
         return json.loads(path.read_text(encoding="utf-8"))
@@ -105,6 +118,7 @@ def _normalized_submission(submission: ApprovedSubmission) -> dict[str, Any]:
     except (ValueError, AttributeError, TypeError) as error:
         raise ExportError("Invalid submission identity") from error
     image_object_path = _validated_image_object_path(submission)
+    published_at = _canonical_utc_timestamp(submission.reviewed_at)
     game = copy.deepcopy(dict(submission.public_game))
     if submission.status == "APPROVED":
         if game.get("originSubmissionId") != submission.submission_id:
@@ -119,7 +133,6 @@ def _normalized_submission(submission: ApprovedSubmission) -> dict[str, Any]:
         game["updateTargetKey"] = target
         game["catalogSource"] = "COMMUNITY"
         game["originSubmissionId"] = submission.submission_id
-        game["publishedAt"] = submission.reviewed_at
     else:
         raise ExportError("Only approved or merged submissions can be exported")
     if not isinstance(game.get("key"), str) or not STABLE_KEY.fullmatch(game["key"]):
@@ -131,7 +144,7 @@ def _normalized_submission(submission: ApprovedSubmission) -> dict[str, Any]:
         raise ExportError("Merged submission has an invalid target key")
     game["catalogSource"] = "COMMUNITY"
     game["originSubmissionId"] = submission.submission_id
-    game["publishedAt"] = submission.reviewed_at
+    game["publishedAt"] = published_at
     if image_object_path:
         game["imageUrl"] = PAGES_IMAGE_PREFIX + f"{game['key']}.webp"
     elif submission.status == "APPROVED":
