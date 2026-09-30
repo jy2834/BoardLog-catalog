@@ -60,6 +60,11 @@ V0314_RELEASE_NOTES = [
 V0315_RELEASE_NOTES = [
     "달력에는 남아 있지만 미스터리 탭에서 빠졌던 과거 플레이 기록을 안전하게 복구",
 ]
+V0316_RELEASE_NOTES = [
+    "머더미스터리를 보드게임 안의 하위 화면으로 정리하고 독립 타이머 제거",
+    "달력 기록에서 플레이 횟수·최근 플레이 날짜·검거 성공 요약 표시",
+    "관심 시나리오를 하트로 저장하고 위시리스트에서 모아보기",
+]
 
 
 def valid_manifest(apk_bytes: bytes = b"BoardLog v0.3.4 verified APK fixture\n"):
@@ -265,6 +270,7 @@ class AndroidUpdateManifestTest(unittest.TestCase):
             (15, "0.3.12", V0312_RELEASE_NOTES),
             (17, "0.3.14", V0314_RELEASE_NOTES),
             (18, "0.3.15", V0315_RELEASE_NOTES),
+            (19, "0.3.16", V0316_RELEASE_NOTES),
         )
         for version_code, version_name, expected_notes in fixtures:
             with self.subTest(version_name=version_name):
