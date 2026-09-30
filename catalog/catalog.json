@@ -1,6 +1,35 @@
 {
-  "schemaVersion": 2,
-  "revision": 1,
-  "generatedAt": "2026-08-12T00:00:00Z",
-  "games": []
+  "games": [
+    {
+      "aliases": [],
+      "bggId": null,
+      "catalogSource": "COMMUNITY",
+      "englishName": "",
+      "entryType": "BASE_GAME",
+      "imageUrl": "https://jy2834.github.io/BoardLog-catalog/catalog/images/no-cover.svg",
+      "key": "community-7e2555de8f8249059d4226f66e7a6dcf",
+      "koreanEditionYear": null,
+      "listPriceWon": null,
+      "maxPlayMinutes": 150,
+      "maxPlayers": 5,
+      "minPlayMinutes": 120,
+      "minPlayers": 4,
+      "name": "웬디, 어른이 되렴",
+      "originSubmissionId": "7e2555de-8f82-4905-9d42-26f66e7a6dcf",
+      "priceKind": "UNAVAILABLE",
+      "publicRating": null,
+      "publishedAt": "2026-09-16T00:34:34.733446Z",
+      "sourceUrls": [
+        "https://boardlife.co.kr/game/16070"
+      ],
+      "tags": [
+        "MURDER_MYSTERY"
+      ],
+      "weight": null,
+      "yearPublished": null
+    }
+  ],
+  "generatedAt": "2026-09-30T00:20:22Z",
+  "revision": 2,
+  "schemaVersion": 2
 }
